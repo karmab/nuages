@@ -42,10 +42,10 @@ Requisites
 ------------
 
     a DB (postgresql is what i used)
-    apache server  with mod_wsgi
     ovirt-engine-sdk package (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
+    optionnally apache server  with mod_wsgi
 
 VMware VI (vSphere) Java API Instalation
 ------------
@@ -67,26 +67,75 @@ VMware VI (vSphere) Java API Instalation
         sudo cp vijava$version.jar $JAVA_HOME/lib/ext
 
 
+Basic Postgresql setup
+---------
+    
+    note: you could also use sqlite out of the box 
+	install postgresql-server for your distribution For instance, on rhel6.4, from epel
+
+    yum -y install postgresql-server
+    
+    basic postgresql setup (initializing and starting DB, and creating a user called nuages with a db called nuages)
+        
+    service postgresql initdb ; /etc/init.d/postgresql start  ; su - postgres ; createuser nuages -P -d -R -S ; createdb -O nuages nuages
+
+    allow DB TCP connections. edit /var/lib/pgsql/data/pg_hba.conf so that it contains for instance
+    local   all         all                               ident
+    host   all         all     127.0.0.1/32                md5
+
+    service postgresql restart
+
+
 Installation 
 ---------
      
-     uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages ). I ll call that NUAGES_PATH from now on 
-	
-     edit $NUAGES_PATH/django.wsgi to reflect correct location  (replace /var/www/nuages if necessary)                                                       
+    clone the repo ( or get an archive):
+    
+    git clone https://github.com/karmab/nuages.git
 
-     create a virtual host conf for apache. you can use the nuages.conf.apache 
+	install django and south for your distribution. For instance, on rhel6.4, from epel
 
-     create user and database, and needed tables for instance
-        su - postgres
-        createuser nuages -P -d -R -S
-        createdb -O nuages nuages
-        psql -U nuages -d nuages -f nuages.sql
+    yum -y install Django14 Django-south 
 
-     create an initial admin user, for instance if DB is running locally
-       psql -h 127.0.0.1 -WU nuages nuages -c  "insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;"
+    edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information
+
+    create django tables
+
+    python manage.py syncdb 
+
+    python manage.py convert_to_south portal
+
+    launch integrated web server 
+
+    python manage.py runserver YOUR_IP:YOUR_PORT
+
+
+Postgresql Integration
+----------
+
+    if you want to run apache+mod_wsgi+postgresql and nothing of this django stuff
+
+    create needed tables for instance
+    
+    psql -U nuages -d nuages -f nuages.sql
+    
+    create an initial admin user, for instance if DB is running locally
+    psql -h 127.0.0.1 -WU nuages nuages -c  "insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;"
+
+
+    
+Apache Integration 
+----------    
+    install apache and mod_wsgi
+    
+    uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages ). I ll call that NUAGES_PATH from now on 
     
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB credentials
-
+    
+    edit $NUAGES_PATH/django.wsgi to reflect correct location  (replace /var/www/nuages if necessary)                                                       
+    
+    create a virtual host conf for apache. you can use the nuages.conf.apache  sample provided
+	
     restart apache
 
  
