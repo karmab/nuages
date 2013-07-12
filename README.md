@@ -108,7 +108,7 @@ Usage
  
 Screenshots
 ---------
-![ScreenShot](https://raw.github.com/i-saumitra/Voice-controlled-MP3-Player/master/screenshot.jpg)
+![ScreenShot](https://raw.github.com/karmab/nuages/branch/screenshots/nuages1.png)
 
 
 
