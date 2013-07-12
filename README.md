@@ -1,8 +1,5 @@
-                        README
-                        ======
-
-            nuages repository
-            ------------------------------
+nuages repository
+------------------------------
 
 This web portal running on django allows you to provide self-service  on top  of your virtualproviders(rhev/ovirt/vsphere), physical(ilo) plus foreman and cobbler/satellite
 VMs can be created,stopped,started,deleted and their console access (ovirt/rhev only)
