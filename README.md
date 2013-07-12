@@ -11,6 +11,11 @@ nuages repository
     -VMS get created based on predefined profiles ( with a given virtualprovider and optional foremanprovider and cobblerprovider, and vm details such as disksize ( 2 disks supported), net interfaces ( 4 nets supported ) ,...)
     -Authentication can use remote ldap providers
 
+What s that name?
+------------
+    well it s a django project with a feel of cloud, and django reinhart most famous song is "nuages", which means cloud in french...Get it :) ?
+
+
 Profile
 ------------
     A profile is a combination of :
