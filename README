@@ -1,0 +1,65 @@
+                        README
+                        ======
+
+            nuages repository
+            ------------------------------
+
+This web portal running on django allows you to do several cloudy things on top  of your virtualproviders(rhev/ovirt/vsphere), physical(ilo) plus foreman and cobbler/satellite
+VMs can be created,stopped,started, and their console access (ovirt/rhev only)
+VMS get created based on predefined profiles ( with a given virtualprovider and optional foremanprovider and cobblerprovider, and vm details such as disksize ( 2 disks supported), net interfaces ( 4 nets supported ) ,...)
+
+
+Requisites
+------------
+
+-a DB (postgresql is what i used)
+-apache server  with mod_wsgi
+-ovirt-engine-sdk package to interact with ovirt/rhev
+-jython and vsphere api libraries
+-optionnaly
+
+
+Contents
+--------
+
+    README                           this file
+    nuages                           directory containing the app
+                                                            
+
+Installation 
+---------
+     
+     uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages ). I ll call that NUAGES_PATH from now on 
+
+     edit $NUAGES_PATH/django.wsgi to reflect correct location  (replace /var/www/nuages if necessary)                                                       
+
+     create a virtual host conf for apache. you can use the nuages.conf.apache 
+
+     
+Usage
+---------
+
+     access the /admin page to :
+                *create local users
+                *create ldap user providers 
+                *create virtualproviders
+                *create physicalproviders
+                *create foremanproviders
+                *create cobblerproviders
+                *create default
+                *create profiles
+
+     access the /nuages page to :
+                *access the storage tab and browse your virtualproviders so storage information gets automatically created
+     
+     you can then begin creating vms or manage existing ones from the allvms tabs
+
+                                                                                                                                                                               
+Problems?                                                                                                                                                                      
+---------
+
+Send me a mail at karimboumedhel@gmail.com !
+
+Mac Fly!!!
+
+karmab
