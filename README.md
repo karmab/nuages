@@ -41,17 +41,17 @@ Type
 Requisites
 ------------
 
-    a DB (postgresql is what i used)
+    a DB (postgresql is what i used but sqlite3 is another simpler option)
     ovirt-engine-sdk package (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
     paramiko ( to connect to ILO through ssh)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
-    optionnally apache server  with mod_wsgi
+    optionally apache server  with mod_wsgi
 
 Ovirt SDK
 --------
 
-    from epel
+    from epel:
     yum -y install ovirt-engine-sdk
 
 
@@ -75,7 +75,7 @@ VMware VI (vSphere) Java API Instalation
         sudo cp vijava$version.jar $JAVA_HOME/lib/ext
 
 
-Basic Postgresql setup
+Basic Postgresql setup(Optional)
 ---------
     
     note: you can skip that  if you plan to use sqlite
@@ -83,7 +83,7 @@ Basic Postgresql setup
 
     yum -y install postgresql-server python-psycopg2
     
-    basic postgresql setup (initializing and starting DB, and creating a user called nuages with a db called nuages)
+    initialize and start DB, creating a user called nuages with a db called nuages)
         
     service postgresql initdb ; /etc/init.d/postgresql start  ; su - postgres ; createuser nuages -P -d -R -S ; createdb -O nuages nuages
 
@@ -94,7 +94,7 @@ Basic Postgresql setup
     service postgresql restart
 
 
-Installation 
+App Installation 
 ---------
      
     clone the repo ( or get an archive):
@@ -105,7 +105,7 @@ Installation
 
     yum -y install Django14 Django-south python-paramiko
 
-    edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information.You can either use postgresql as i do or simply set sqlite3 ( in that case, change name of the sqlite file, for instance to nuages.sqlite
+    edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information.You can either use postgresql as i do or simply set sqlite3 ( in that case, change name of the sqlite file, for instance to nuages.sqlite)
 
     create django tables.create superuser when asked for:
 
@@ -123,7 +123,7 @@ Installation
 
 
 Postgresql Integration
-----------
+---------------------
 
     if you want to run apache+mod_wsgi+postgresql and nothing of this django stuff
 
@@ -134,10 +134,9 @@ Postgresql Integration
     create an initial admin user, for instance if DB is running locally
     psql -h 127.0.0.1 -WU nuages nuages -c  "insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;"
 
-
     
 Apache Integration 
-----------    
+-----------------    
     install apache and mod_wsgi
     
     uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages ). I ll call that NUAGES_PATH from now on 
