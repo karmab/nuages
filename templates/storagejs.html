@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages Storage information{% endblock %}
+
+{% block content %}
+
+{% if storage %}
+My Storage is {{ storage }}
+{% endif %}
+
+<script>
+	$( document ).ready(function() {
+		var myQuote = $('#surprise');
+                myQuote.hide();
+                $('#voila').click(function(){
+                    myQuote.show(300);
+                });
+            });
+	</script>
+	Clique pour la surprise!!!
+<div id="voila"><input type="submit"></div>
+<div id="surprise"> voila la partie magique et secrete!!!</div>
+
+
+
+
+
+
+{% endblock content %}

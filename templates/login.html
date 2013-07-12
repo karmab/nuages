@@ -1,0 +1,37 @@
+<html>
+  <head>
+    <title>{% block title %}Nuages{% endblock %}</title>
+      <link rel="stylesheet" type="text/css" media="all" href="/static/css/login.css" /> 
+  </head>
+  <body>
+   <script src="/static/js/jquery.js"></script>
+   <script src="/static/js/wheel.js"></script>
+
+<fieldset class="module aligned">
+<form method="post" action="/login/">
+{% csrf_token %}
+<table cellspacing="0" cellpadding="0">
+<tr>
+    <td>{{ form.username.label_tag }}</td>
+    <td>{{ form.username }}</td>
+</tr>
+<tr>
+    <td>{{ form.password.label_tag }}</td>
+    <td>{{ form.password }}</td>
+</tr>
+<tr>
+    <td><input type="hidden" name="next" value="{{ next }}" /></td>
+    <td><input type="submit" value="login" /></td>
+</tr>
+{% if form.errors %}
+<tr>
+    <td></td>
+    <td><font color="red"><p>Incorrect username or password!!!</p></font></td>
+</tr>
+{% endif %}
+</table>
+</form>
+
+</fieldset>
+<a href="http://www.djangoproject.com/"><img src="/static/img/djangopowered.gif" border="0" alt="Powered by Django." title="Powered by Django." /></a>
+</body></html>

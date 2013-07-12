@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages Profiles information{% endblock %}
+
+{% block content %}
+<script src="/static/js/profiles.js"></script>
+<select name="profile" id="id_profile">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}
+</select></p>
+<div id="voila2"><input name="voila2" type="submit" value="Enter" onclick="getprofile();"/></div>
+<fieldset class="module aligned">
+<p id="profileinfo"></p>
+</fieldset>
+{% endblock content %}

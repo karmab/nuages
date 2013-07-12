@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages All VMS Information{% endblock %}
+
+{% block content %}
+<script src="/static/js/allvms.js"></script>
+<script src="/static/js/actions.js"></script>
+
+<div id="wheel2"></div>
+<fieldset class="module aligned">
+
+<select name="virtualprovider" id="id_virtualprovider">
+{% for vprovider in vproviders|dictsort:"name" %}
+<option value="{{vprovider.name }}" >{{vprovider.name }}</option>
+{% endfor %}
+</select></p>
+
+<div id="voila2"><input name="voila2" type="submit" value="Enter" onclick="getvms();"/></div>
+<p id="allvms"></p>
+</fieldset>
+
+{% endblock content %}               

@@ -1,0 +1,72 @@
+@import url('forms.css');
+
+body {
+    font: 100% verdana, arial, sans-serif;
+    background-color: #fff;
+    margin: 50px;
+    background-image:url('/static/img/nuages.jpg');
+    background-repeat:no-repeat;
+    background-size: 100% auto;
+}
+
+ul#tabnav {
+    font: bold 11px verdana, arial, sans-serif;
+    list-style-type: none;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #6c6;
+    margin: 0;
+}
+
+ul#tabnav li {
+    float: left;
+    height: 21px;
+    background-color: #cfc;
+    margin: 2px 2px 0 2px;
+    border: 1px solid #6c6;
+}
+
+ul#tabnav li.active {
+    border-bottom: 1px solid #fff;
+    background-color: #fff;
+}
+
+ul#tabnav li.active a {
+    color: #000;
+}
+
+#tabnav a {
+    float: left;
+    display: block;
+    color: #666;
+    text-decoration: none;
+    padding: 4px;
+}
+
+#tabnav a:hover {
+    background: #fff;
+}
+
+#wheel
+{
+       background:#fff url('/static/img/wheel.gif') no-repeat center center;
+       height: 150px;
+       width:  150px;
+       position: fixed;
+       z-index: 1000;
+       left: 50%;
+       top: 20%;
+       margin: -25px 0 0 -25px;
+}
+
+#wheel2
+{
+       background:#fff url('/static/img/wheel.gif') no-repeat center center;
+       height: 150px;
+       width:  150px;
+       position: fixed;
+       z-index: 1000;
+       left: 50%;
+       top: 20%;
+       margin: -25px 0 0 -25px;
+       display:none;
+}

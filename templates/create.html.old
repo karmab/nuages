@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages VM creation{% endblock %}
+
+{% block content %}
+<script src="/static/js/create.js"></script>
+
+<fieldset class="module aligned">
+<div id="wheel2"></div>
+<p id="result"></p>
+<input type="submit" value="Enter" onclick="createvm();"/><p>
+<label >NumVms</label><select id="numvms">
+  <option value="1" selected="selected">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>
+</select> 
+{{ vmform.as_p }}
+{{ credentials.info }}
+
+{% endblock content %}
+</fieldset><p>
+
+{% block extracontent %}
+{% if apacheform or oracleform%}
+<fieldset id="extracontent" class="module aligned">
+<div id="apache">{{ apacheform.as_p }}</div>
+<div id="oracle">{{ oracleform.as_p }}</div>
+<div id="custom"></div>
+</fieldset><p>
+{% endif %}
+{% endblock extracontent %}
+
+{% block extravms %}
+<fieldset>
+<p><p>
+<label style="display: none;" id="id_name_2">Name_2:</label> <input style="display: none;" id="id_name_2" name="name_2" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_2">Ip1_2:</label> <input style="display: none;" id="id_ip1_2" name="ip1_2" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_2">Mac1_2:</label> <input style="display: none;" id="id_mac1_2" name="mac1_2" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_2">Ip2_2:</label> <input style="display: none;" id="id_ip2_2" name="ip2_2" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_2">Ip3_2:</label> <input style="display: none;" id="id_ip3_2" name="ip3_2" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_3">Name_3:</label> <input style="display: none;" id="id_name_3" name="name_3" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_3">Ip1_3:</label> <input style="display: none;" id="id_ip1_3" name="ip1_2" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_3">Mac1_3:</label> <input style="display: none;" id="id_mac1_3" name="mac1_3" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_3">Ip2_3:</label> <input style="display: none;" id="id_ip2_3" name="ip2_3" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_3">Ip3_3:</label> <input style="display: none;" id="id_ip3_3" name="ip3_3" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_4">Name_4:</label> <input style="display: none;" id="id_name_4" name="name_4" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_4">Ip1_4:</label> <input style="display: none;" id="id_ip1_4" name="ip1_4" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_4">Mac1_4:</label> <input style="display: none;" id="id_mac1_4" name="mac1_4" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_4">Ip2_4:</label> <input style="display: none;" id="id_ip2_4" name="ip2_4" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_4">Ip3_4:</label> <input style="display: none;" id="id_ip3_4" name="ip3_4" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_5">Name_5:</label> <input style="display: none;" id="id_name_5" name="name_5" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_5">Ip1_5:</label> <input style="display: none;" id="id_ip1_5" name="ip1_5" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_5">Mac1_5:</label> <input style="display: none;" id="id_mac1_5" name="mac1_5" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_5">Ip2_5:</label> <input style="display: none;" id="id_ip2_5" name="ip2_5" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_5">Ip3_5:</label> <input style="display: none;" id="id_ip3_5" name="ip3_5" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_6">Name_6:</label> <input style="display: none;" id="id_name_6" name="name_6" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_6">Ip1_6:</label> <input style="display: none;" id="id_ip1_6" name="ip1_6" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_6">Mac1_6:</label> <input style="display: none;" id="id_mac1_6" name="mac1_6" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_6">Ip2_6:</label> <input style="display: none;" id="id_ip2_6" name="ip2_6" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_6">Ip3_6:</label> <input style="display: none;" id="id_ip3_6" name="ip3_6" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_7">Name_7:</label> <input style="display: none;" id="id_name_7" name="name_7" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_7">Ip1_7:</label> <input style="display: none;" id="id_ip1_7" name="ip1_7" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_7">Mac1_7:</label> <input style="display: none;" id="id_mac1_7" name="mac1_7" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_7">Ip2_7:</label> <input style="display: none;" id="id_ip2_7" name="ip2_7" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_7">Ip3_7:</label> <input style="display: none;" id="id_ip3_7" name="ip3_7" maxlength="20" type="text"></p>
+
+<p><p>
+<label style="display: none;" id="id_name_8">Name_8:</label> <input style="display: none;" id="id_name_8" name="name_8" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_8">Ip1_8:</label> <input style="display: none;" id="id_ip1_8" name="ip1_8" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_8">Mac1_8:</label> <input style="display: none;" id="id_mac1_8" name="mac1_8" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_8">Ip2_8:</label> <input style="display: none;" id="id_ip2_8" name="ip2_8" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_8">Ip3_8:</label> <input style="display: none;" id="id_ip3_8" name="ip3_8" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_9">Name_9:</label> <input style="display: none;" id="id_name_9" name="name_9" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_9">Ip1_9:</label> <input style="display: none;" id="id_ip1_9" name="ip1_9" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_9">Mac1_9:</label> <input style="display: none;" id="id_mac1_9" name="mac1_9" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_9">Ip2_9:</label> <input style="display: none;" id="id_ip2_9" name="ip2_9" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel3_9">Ip3_9:</label> <input style="display: none;" id="id_ip3_9" name="ip3_9" maxlength="20" type="text"></p>
+
+
+<p><p>
+<label style="display: none;" id="id_name_10">Name_10:</label> <input style="display: none;" id="id_name_10" name="name_10" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel1_10">Ip1_10:</label> <input style="display: none;" id="id_ip1_10" name="ip1_10" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_maclabel1_10">Mac1_10:</label> <input style="display: none;" id="id_mac1_10" name="mac1_10" maxlength="20" type="text"></p>
+<label style="display: none;" id="id_iplabel2_10">Ip2_10:</label> <input style="display: none;" id="id_ip2_10" name="ip2_10" maxlength="20" type="text"></p>
+</fieldset>
+{% endblock extravms %}

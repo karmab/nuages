@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <title>{% block title %}Nuages{% endblock %}</title>
+    	<link rel="stylesheet" type="text/css" media="all" href="/static/css/design.css" />
+  </head>
+  <body>
+   <script src="/static/js/jquery.js"></script>
+   <script src="/static/js/wheel.js"></script>
+   <script src="/static/js/highcharts.js"></script>
+   <script src="/static/js/exporting.js"></script>
+   {% if spice %}
+        <script src="/static/spice/spicearraybuffer.js"></script> 
+        <script src="/static/spice/enums.js"></script> 
+        <script src="/static/spice/atKeynames.js"></script> 
+        <script src="/static/spice/utils.js"></script> 
+        <script src="/static/spice/png.js"></script> 
+        <script src="/static/spice/lz.js"></script> 
+        <script src="/static/spice/quic.js"></script> 
+        <script src="/static/spice/bitmap.js"></script> 
+        <script src="/static/spice/spicedataview.js"></script> 
+        <script src="/static/spice/spicetype.js"></script> 
+        <script src="/static/spice/spicemsg.js"></script> 
+        <script src="/static/spice/wire.js"></script> 
+        <script src="/static/spice/spiceconn.js"></script> 
+        <script src="/static/spice/display.js"></script> 
+        <script src="/static/spice/main.js"></script> 
+        <script src="/static/spice/inputs.js"></script> 
+        <script src="/static/spice/simulatecursor.js"></script>
+        <script src="/static/spice/cursor.js"></script> 
+        <script src="/static/spice/thirdparty/jsbn.js"></script>
+        <script src="/static/spice/thirdparty/rsa.js"></script>
+        <script src="/static/spice/thirdparty/prng4.js"></script>
+        <script src="/static/spice/thirdparty/rng.js"></script>
+        <script src="/static/spice/thirdparty/sha1.js"></script>
+        <script src="/static/spice/ticket.js"></script>
+        <script src="/static/js/spice.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/spice/spice.css" />
+    {% endif %}
+
+
+ <ul id="tabnav"> 
+     <li class="active"><a href="/nuages/vms/">Create</a></li>
+     <li><a href="/nuages/storage/">Storage</a></li>
+     <li><a href="/nuages/profiles/">Profiles</a></li>
+     <li><a href="/nuages/yourvms/">Your VMS</a></li>
+     {% if username.is_staff  %}
+     <li><a href="/nuages/allvms/">All VMS</a></li>
+     {% endif %}
+     <li><a href="/logout/">Logout {{ username.username  }}</a></li>
+</ul>
+
+{% block content %}
+{% endblock content %}
+<p>
+{% block extracontent %}
+{% endblock extracontent %}
+
+<p>
+{% block extravms %}
+{% endblock extravms %}
+<!--<a href="http://www.djangoproject.com/"><img src="/static/img/djangopowered.gif" border="0" alt="Powered by Django." title="Powered by Django." /></a> -->
+</body></html>

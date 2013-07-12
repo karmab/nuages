@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages Storage Information{% endblock %}
+
+{% block content %}
+<script src="/static/js/storage.js"></script>
+
+<div id="wheel2"></div>
+<fieldset class="module aligned">
+
+<select name="virtualprovider" id="id_virtualprovider">
+{% for vprovider in vproviders %}
+<option value="{{vprovider.name }}" >{{vprovider.name }}</option>
+{% endfor %}
+</select></p>
+
+<div id="voila2"><input name="voila2" type="submit" value="Enter" onclick="getstorage();"/></div>
+<p id="error"></p>
+<p id="storageinfo"></p>
+<p id="storageinfo0"></p>
+<p id="storageinfo1"></p>
+<p id="storageinfo2"></p>
+<p id="storageinfo3"></p>
+<p id="storageinfo4"></p>
+<p id="storageinfo5"></p>
+<p id="storageinfo6"></p>
+<p id="storageinfo7"></p>
+<p id="storageinfo8"></p>
+<p id="storageinfo9"></p>
+<p id="storageinfo10"></p>
+<p id="storageinfo11"></p>
+<p id="storageinfo12"></p>
+<p id="storageinfo13"></p>
+<p id="storageinfo14"></p>
+<p id="storageinfo15"></p>
+<p id="storageinfo16"></p>
+<p id="storageinfo17"></p>
+<p id="storageinfo18"></p>
+<p id="storageinfo19"></p>
+<p id="storageinfo20"></p>
+
+</fieldset>
+
+{% endblock content %}               
