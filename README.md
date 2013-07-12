@@ -13,7 +13,7 @@ nuages repository
 
 What s that name?
 ------------
-    well it s a django project with a feel of cloud, and django reinhart most famous song is "nuages", which means cloud in french...Get it :) ?
+    well it s a django project with a feel of cloud, and django reinhardt most famous song is "nuages", which means cloud in french...Get it :) ?
 
 
 Profile
