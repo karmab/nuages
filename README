@@ -105,6 +105,8 @@ Usage
 		*create default
 		*create profiles
 	
+     drop the CA certificates of your rhev/ovirt virtualproviders and ldapproviders in the nuages dir
+
      access the /nuages page to :
      		*access the storage tab and browse your virtualproviders so storage information gets automatically created
      
