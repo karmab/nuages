@@ -62,15 +62,6 @@ VMware VI (vSphere) Java API Instalation
         sudo cp vijava$version.jar $JAVA_HOME/lib/ext
 
 
-
-
-Contents
---------
-
-    README                           this file
-    nuages                           directory containing the app
-                                                            
-
 Installation 
 ---------
      
