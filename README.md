@@ -1,14 +1,15 @@
 nuages repository
-------------------------------
+================
+
 
 This web portal running on django allows you to provide self-service  on top  of your :
-    virtualproviders(rhev/ovirt/vsphere)
-    physical(ilo)
-    foreman
-    cobbler/satellite
-VMs can be created,stopped,started,deleted and their console access (ovirt/rhev only)
-VMS get created based on predefined profiles ( with a given virtualprovider and optional foremanprovider and cobblerprovider, and vm details such as disksize ( 2 disks supported), net interfaces ( 4 nets supported ) ,...)
-Authentication can use remote ldap providers
+-virtualproviders(rhev/ovirt/vsphere)
+-physical(ilo)
+-foreman
+-cobbler/satellite
+-VMs can be created,stopped,started,deleted and their console access (ovirt/rhev only)
+-VMS get created based on predefined profiles ( with a given virtualprovider and optional foremanprovider and cobblerprovider, and vm details such as disksize ( 2 disks supported), net interfaces ( 4 nets supported ) ,...)
+-Authentication can use remote ldap providers
 
 Profile
 ------------
