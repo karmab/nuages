@@ -82,10 +82,8 @@ Installation
         createdb -O nuages nuages
         psql -U nuages -d nuages -f nuages.sql
 
-     create an initial admin user
-       TODO...ENCRYPT AN admin password
-       psql -U nuages nuages
-       insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;
+     create an initial admin user, for instance if DB is running locally
+       psql -h 127.0.0.1 -WU nuages nuages -c  "insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;"
     
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB credentials
 
