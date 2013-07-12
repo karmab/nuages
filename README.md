@@ -108,9 +108,10 @@ Usage
  
 Screenshots
 ---------
-![ScreenShot](https://raw.github.com/karmab/nuages/branch/screenshots/nuages1.png)
-
-
+![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages1.png)
+![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages2.png)
+![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages3.png)
+![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages4.png)
 
 Problems?                                                                                                                                                                      
 ---------
