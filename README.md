@@ -78,7 +78,7 @@ VMware VI (vSphere) Java API Instalation
 Basic Postgresql setup
 ---------
     
-    note: you could also use sqlite out of the box 
+    note: you can skip that  if you plan to use sqlite
 	install postgresql-server for your distribution For instance, on rhel6.4, from epel
 
     yum -y install postgresql-server python-psycopg2
@@ -105,9 +105,9 @@ Installation
 
     yum -y install Django14 Django-south python-paramiko
 
-    edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information
+    edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information.You can either use postgresql as i do or simply set sqlite3 ( in that case, change name of the sqlite file, for instance to nuages.sqlite
 
-    create django tables.create superuser when asked for
+    create django tables.create superuser when asked for:
 
     python manage.py syncdb 
 
@@ -162,7 +162,7 @@ Usage
 		*create physicalproviders
 		*create foremanproviders
 		*create cobblerproviders
-		*create default
+		*create default ( important . otherwise the yourvms console wont work...)
 		*create profiles
 	
      drop the CA certificates of your rhev/ovirt virtualproviders and ldapproviders in the nuages dir
