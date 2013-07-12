@@ -105,7 +105,13 @@ Usage
      
      you can then begin creating vms or manage existing ones from the allvms tabs
 
-                                                                                                                                                                               
+ 
+Screenshots
+---------
+![ScreenShot](https://raw.github.com/i-saumitra/Voice-controlled-MP3-Player/master/screenshot.jpg)
+
+
+
 Problems?                                                                                                                                                                      
 ---------
 
