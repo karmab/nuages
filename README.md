@@ -85,7 +85,7 @@ Installation
      create an initial admin user
        TODO...ENCRYPT AN admin password
        psql -U nuages nuages
-       insert into auth_user values(DEFAULT,'admin','','','','','t','t','t',now(),now()) ;
+       insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;
     
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB credentials
 
@@ -95,6 +95,7 @@ Installation
 Usage
 ---------
 	
+     default user is admin/admin
      access the /admin page to :
 		*create local users
     		*create ldap user providers 
