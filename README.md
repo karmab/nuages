@@ -83,7 +83,9 @@ Installation
         psql -U nuages -d nuages -f nuages.sql
 
      create an initial admin user
-       TODO...
+       TODO...ENCRYPT AN admin password
+       psql -U nuages nuages
+       insert into auth_user values(DEFAULT,'admin','','','','','t','t','t',now(),now()) ;
     
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB credentials
 
