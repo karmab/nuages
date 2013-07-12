@@ -44,8 +44,16 @@ Requisites
     a DB (postgresql is what i used)
     ovirt-engine-sdk package (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
+    paramiko ( to connect to ILO through ssh)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
     optionnally apache server  with mod_wsgi
+
+Ovirt SDK
+--------
+
+    from epel
+    yum -y install ovirt-engine-sdk
+
 
 VMware VI (vSphere) Java API Instalation
 ------------
@@ -73,7 +81,7 @@ Basic Postgresql setup
     note: you could also use sqlite out of the box 
 	install postgresql-server for your distribution For instance, on rhel6.4, from epel
 
-    yum -y install postgresql-server
+    yum -y install postgresql-server python-psycopg2
     
     basic postgresql setup (initializing and starting DB, and creating a user called nuages with a db called nuages)
         
@@ -93,13 +101,13 @@ Installation
     
     git clone https://github.com/karmab/nuages.git
 
-	install django and south for your distribution. For instance, on rhel6.4, from epel
+	install django and south for your distribution (and paramiko). For instance, on rhel6.4, from epel
 
-    yum -y install Django14 Django-south 
+    yum -y install Django14 Django-south python-paramiko
 
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information
 
-    create django tables
+    create django tables.create superuser when asked for
 
     python manage.py syncdb 
 
@@ -142,7 +150,7 @@ Apache Integration
 Usage
 ---------
 	
-     default user is admin/admin
+     default user is admin/admin if you used SQL sentences. if you re running django, use the superuser you created as part of the django deployment...
      access the /admin page to :
 		*create local users
     		*create ldap user providers 
