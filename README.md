@@ -111,7 +111,11 @@ Installation
 
     python manage.py syncdb 
 
-    python manage.py convert_to_south portal
+    create south stuff 
+
+    python manage.py schemamigration portal --initial
+
+    python manage.py migrate portal --fake
 
     launch integrated web server 
 
