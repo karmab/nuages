@@ -371,9 +371,9 @@ class VM(models.Model):
 
 class Default(models.Model):
 	name              = models.CharField(max_length=20)
-	virtualprovider   = models.ForeignKey(VirtualProvider)
-	cobblerprovider   = models.ForeignKey(CobblerProvider)
-	foremanprovider   = models.ForeignKey(ForemanProvider)
+	virtualprovider   = models.ForeignKey(VirtualProvider,blank=True,null=True)
+	cobblerprovider   = models.ForeignKey(CobblerProvider,blank=True,null=True)
+	foremanprovider   = models.ForeignKey(ForemanProvider,blank=True,null=True)
 	consoleip         = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
 	def __unicode__(self):
 		return self.name
