@@ -48,14 +48,14 @@ Requisites
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
     optionally apache server  with mod_wsgi
 
-Ovirt SDK
+Ovirt SDK Installation
 --------
 
     from epel:
     yum -y install ovirt-engine-sdk
 
 
-VMware VI (vSphere) Java API Instalation
+VMware VI (vSphere) Java API Installation
 ------------
 
         1. Download latest version of  http://vijava.sourceforge.net/
