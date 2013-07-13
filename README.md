@@ -122,21 +122,8 @@ App Installation
     python manage.py runserver YOUR_IP:YOUR_PORT
 
 
-Postgresql Integration
----------------------
-
-    if you want to run apache+mod_wsgi+postgresql and nothing of this django stuff
-
-    create needed tables for instance
-    
-    psql -U nuages -d nuages -f nuages.sql
-    
-    create an initial admin user, for instance if DB is running locally
-    psql -h 127.0.0.1 -WU nuages nuages -c  "insert into auth_user values(DEFAULT,'admin','','','','pbkdf2_sha256$10000$Bbg5dMY87CQJ$XBE9c/FKDHnHB1AgJqhxRZ9138oWu8ZI3vA2owzA5zs=','t','t','t',now(),now()) ;"
-
-    
 Apache Integration 
------------------    
+------------------    
     install apache and mod_wsgi
     
     uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages ). I ll call that NUAGES_PATH from now on 
@@ -153,7 +140,7 @@ Apache Integration
 Usage
 ---------
 	
-     default user is admin/admin if you used SQL sentences. if you re running django, use the superuser you created as part of the django deployment...
+     use the superuser you created as part of the django deployment...
      access the /admin page to :
 		*create local users
     		*create ldap user providers 
