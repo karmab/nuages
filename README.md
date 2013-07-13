@@ -75,7 +75,7 @@ VMware VI (vSphere) Java API Installation
         sudo cp vijava$version.jar $JAVA_HOME/lib/ext
 
 
-Basic Postgresql setup(Optional)
+Basic Postgresql setup (Optional)
 ---------
     
     note: you can skip that  if you plan to use sqlite
@@ -117,7 +117,7 @@ App Installation
 
     python manage.py migrate portal --fake
 
-    launch integrated web server 
+    launch integrated web server:
 
     python manage.py runserver YOUR_IP:YOUR_PORT
 
@@ -126,7 +126,7 @@ Apache Integration
 ------------------    
     install apache and mod_wsgi
     
-    uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages ). I ll call that NUAGES_PATH from now on 
+    uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages )
     
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB credentials
     
@@ -143,12 +143,12 @@ Usage
      use the superuser you created as part of the django deployment...
      access the /admin page to :
 		*create local users
-    		*create ldap user providers 
+    	*create ldap user providers 
 		*create virtualproviders
 		*create physicalproviders
 		*create foremanproviders
 		*create cobblerproviders
-		*create default ( important . otherwise the yourvms console wont work...)
+		*create default ( otherwise the yourvms console tab wont work! )
 		*create profiles
 	
      drop the CA certificates of your rhev/ovirt virtualproviders and ldapproviders in the nuages dir
