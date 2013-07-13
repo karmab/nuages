@@ -198,7 +198,8 @@ def create(request):
 		sapform          = SapForm()
 		weblogicform     = WeblogicForm()
 		partitioningform = PartitioningForm()
-		vmform = VMForm()
+		#vmform = VMForm()
+		vmform =  VMForm(request.user)
 		return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'apacheform': apacheform, 'oracleform': oracleform , 'racform' : racform, 'sapform' : sapform , 'weblogicform' : weblogicform , 'partitioningform' : partitioningform } )
 
 
@@ -218,21 +219,21 @@ def profiles(request):
 	    	cobblerprofile=profile.cobblerprofile
             return HttpResponse("Cobbler: %s<p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
         else:
-#	    usergroups=[]
-#	    for g in groups.values():
-#		usergroups.append(g['name'])
-#            profiles=[]
-#	    allprofiles=Profile.objects.all()
-#	    for p in allprofiles:
-#		found = False
-#		profilegroup=p.groups.values()
-#		if len(profilegroup) == 0:
-#			profiles.append(p)
-#		else:
-#			for g in profilegroup:
-#				if g['name'] in usergroups:
-#					profiles.append(p)
-	    profiles=Profile.objects.all()
+	    usergroups=[]
+	    for g in groups.values():
+		usergroups.append(g['name'])
+            profiles=[]
+	    allprofiles=Profile.objects.all()
+	    for p in allprofiles:
+		found = False
+		profilegroup=p.groups.values()
+		if len(profilegroup) == 0:
+			profiles.append(p)
+		else:
+			for g in profilegroup:
+				if g['name'] in usergroups:
+					profiles.append(p)
+	    #profiles=Profile.objects.all()
 	    return render(request, 'profiles.html', { 'profiles': profiles, 'username': username } )
 
 #@login_required
