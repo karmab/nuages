@@ -226,11 +226,12 @@ def profiles(request):
 	    for g in groups.values():
 		usergroups.append(g['id'])
 	    if len(usergroups) == 0:
-	    	query=Profile.objects.filter(Q(groups=None))
+	    	query = Q(groups=None)
 	    else:
-	    	query=Profile.objects.filter(Q(groups=None)|Q(groups=usergroups[0]))
+	    	query = Q(groups=None)|Q(groups=usergroups[0])
 	    	for group in usergroups[1:]:
-			query=query.filter(groups=group)
+			query=query|Q(groups=group)
+	    query=Profile.objects.filter(query)
 	    return render(request, 'profiles.html', { 'profiles': query , 'username': username } )
 
 #@login_required
@@ -279,11 +280,12 @@ def storage(request):
 	    		for g in groups.values():
 				usergroups.append(g['id'])
 	    		if len(usergroups) == 0:
-	    			query = Profile.objects.filter(Q(groups=None))
+	    			query = Q(groups=None)
 	    		else:
-	    			query = Profile.objects.filter(Q(groups=None)|Q(groups=usergroups[0]))
+	    			query = Q(groups=None)|Q(groups=usergroups[0])
 	    			for group in usergroups[1:]:
-					query = query.filter(groups=group)
+					query = query|Q(groups=group)
+	    		query = Profile.objects.filter(query)
 			vproviderslist = []
 			for profile in query:
 				if profile.virtualprovider and profile.virtualprovider.name not in vproviderslist:

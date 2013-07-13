@@ -16,11 +16,12 @@ class VMForm(ModelForm):
 	    	for g in groups.values():
 			usergroups.append(g['id'])
 		if len(usergroups) == 0:
-                	query=Profile.objects.filter(Q(groups=None))
+                	query=Q(groups=None)
             	else:
-                	query=Profile.objects.filter(Q(groups=None)|Q(groups=usergroups[0]))
+                	query=Q(groups=None)|Q(groups=usergroups[0])
                 	for group in usergroups[1:]:
-                        	query=query.filter(groups=group)
+                        	query=query|Q(groups=group)
+                query=Profile.objects.filter(query)
         	self.fields['profile'].queryset = query
 	class Meta:
 		model = VM
