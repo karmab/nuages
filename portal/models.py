@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 import ast
 import os
 from django.http import HttpResponse
@@ -185,7 +185,7 @@ class Profile(models.Model):
 	iso               = models.BooleanField(default=False)
 	hide              = models.BooleanField(default=True)
 	console           = models.BooleanField(default=False)
-	requireip         = models.BooleanField(default=False)
+	groups            = models.ManyToManyField(Group,blank=True,null=True)
 	def __unicode__(self):
 		return self.name
 	def clean(self):

@@ -15,7 +15,7 @@ from random import choice
 import json
 from django.contrib.auth.decorators import login_required
 from portal.models import Apache, Oracle, Rac
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Group
 import logging
 import random
 from portal.ilo import Ilo
@@ -207,6 +207,7 @@ def profiles(request):
 	logging.debug("prout")
 	username	  = request.user.username
 	username	  = User.objects.filter(username=username)[0]
+	groups		  = username.groups
 	profiles=Profile.objects.all()
         if request.method == 'POST' and request.is_ajax():
             profile = request.POST['profile']
@@ -217,6 +218,20 @@ def profiles(request):
 	    	cobblerprofile=profile.cobblerprofile
             return HttpResponse("Cobbler: %s<p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
         else:
+#	    usergroups=[]
+#	    for g in groups.values():
+#		usergroups.append(g['name'])
+#            profiles=[]
+#	    allprofiles=Profile.objects.all()
+#	    for p in allprofiles:
+#		found = False
+#		profilegroup=p.groups.values()
+#		if len(profilegroup) == 0:
+#			profiles.append(p)
+#		else:
+#			for g in profilegroup:
+#				if g['name'] in usergroups:
+#					profiles.append(p)
 	    profiles=Profile.objects.all()
 	    return render(request, 'profiles.html', { 'profiles': profiles, 'username': username } )
 
