@@ -25,6 +25,7 @@
 {% else  %}
 <td>{{vm.virtualprovider }}</td>
 {% endif %}
+<td>{{vm.profile}}</td>
 <td><img src="/static/img/{{vm.status}}.png">{{vm.status}}</td>
 <td>
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />

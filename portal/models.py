@@ -185,6 +185,7 @@ class Profile(models.Model):
 	iso               = models.BooleanField(default=False)
 	hide              = models.BooleanField(default=True)
 	console           = models.BooleanField(default=False)
+	requireip         = models.BooleanField(default=False)
 	groups            = models.ManyToManyField(Group,blank=True,null=True)
 	def __unicode__(self):
 		return self.name
