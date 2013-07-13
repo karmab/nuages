@@ -218,23 +218,20 @@ def profiles(request):
 	    if profile.cobblerprofile:
 	    	cobblerprofile=profile.cobblerprofile
             return HttpResponse("Cobbler: %s<p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
-        else:
+        elif username.is_staff:
+	    profiles = Profile.objects.all()
+	    return render(request, 'profiles.html', { 'profiles': profiles , 'username': username } )
+	else:
 	    usergroups=[]
 	    for g in groups.values():
-		usergroups.append(g['name'])
-            profiles=[]
-	    allprofiles=Profile.objects.all()
-	    for p in allprofiles:
-		found = False
-		profilegroup=p.groups.values()
-		if len(profilegroup) == 0:
-			profiles.append(p)
-		else:
-			for g in profilegroup:
-				if g['name'] in usergroups:
-					profiles.append(p)
-	    #profiles=Profile.objects.all()
-	    return render(request, 'profiles.html', { 'profiles': profiles, 'username': username } )
+		usergroups.append(g['id'])
+	    if len(usergroups) == 0:
+	    	query=Profile.objects.filter(Q(groups=None))
+	    else:
+	    	query=Profile.objects.filter(Q(groups=None)|Q(groups=usergroups[0]))
+	    	for group in usergroups[1:]:
+			query=query.filter(groups=group)
+	    return render(request, 'profiles.html', { 'profiles': query , 'username': username } )
 
 #@login_required
 def storage(request):
@@ -274,7 +271,28 @@ def storage(request):
 			storageinfo = json.dumps(storageinfo)
        			return HttpResponse(storageinfo,mimetype='application/json')
         else:
-		vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
+		if username.is_staff:
+			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
+		else:
+			usergroups = []
+			groups		  = username.groups
+	    		for g in groups.values():
+				usergroups.append(g['id'])
+	    		if len(usergroups) == 0:
+	    			query = Profile.objects.filter(Q(groups=None))
+	    		else:
+	    			query = Profile.objects.filter(Q(groups=None)|Q(groups=usergroups[0]))
+	    			for group in usergroups[1:]:
+					query = query.filter(groups=group)
+			vproviderslist = []
+			for profile in query:
+				if profile.virtualprovider and profile.virtualprovider.name not in vproviderslist:
+					vproviderslist.append(profile.virtualprovider.name)
+			vquery = Q(name=vproviderslist[0])
+			for provider in vproviderslist:
+				vquery = vquery|Q(name=provider)
+			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
+			vproviders=vproviders.filter(vquery)
 		form = StorageForm()
 		return render(request, 'storage.html', { 'vproviders' : vproviders ,'username': username } )
 
