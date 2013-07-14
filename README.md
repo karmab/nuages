@@ -105,6 +105,11 @@ App Installation
 
     yum -y install Django14 Django-south python-paramiko
 
+    if you ll use a postgresql DB
+     
+    yum -y install python-psycopg2 
+
+
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information.You can either use postgresql as i do or simply set sqlite3 ( in that case, change name of the sqlite file, for instance to nuages.sqlite)
 
     create django tables.create superuser when asked for:
