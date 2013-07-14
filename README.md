@@ -103,28 +103,28 @@ App Installation
 
 	install django and south for your distribution (and paramiko). For instance, on rhel6.4, from epel
 
-    yum -y install Django14 Django-south python-paramiko
+        yum -y install Django14 Django-south python-paramiko python-ldap
 
-    if you ll use a postgresql DB
+    if you ll use a postgresql DB:
      
-    yum -y install python-psycopg2 
-
+        yum -y install python-psycopg2 
+        su - postgres ; createuser nuages -P -d -R -S ; createdb -O nuages nuages
 
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB information.You can either use postgresql as i do or simply set sqlite3 ( in that case, change name of the sqlite file, for instance to nuages.sqlite)
 
     create django tables.create superuser when asked for:
 
-    python manage.py syncdb 
+        python manage.py syncdb 
 
-    create south stuff 
+    create south stuff:
 
-    python manage.py schemamigration portal --initial
+        python manage.py schemamigration portal --initial
 
-    python manage.py migrate portal --fake
+        python manage.py migrate portal --fake
 
     launch integrated web server:
 
-    python manage.py runserver YOUR_IP:YOUR_PORT
+        python manage.py runserver YOUR_IP:YOUR_PORT
 
 
 Apache Integration 
