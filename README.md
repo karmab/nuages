@@ -103,7 +103,7 @@ App Installation
 
 	install django and south for your distribution (and paramiko). For instance, on rhel6.4, from epel
 
-        yum -y install Django14 Django-south python-paramiko python-ldap
+        yum -y install Django14 Django-south python-paramiko python-ldap python-websockify
 
     if you ll use a postgresql DB:
      
