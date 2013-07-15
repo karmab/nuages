@@ -426,7 +426,13 @@ def yourvms(request):
 			if g in u.groups.all():
 				query=query|Q(createdby=u)
 	vms = VM.objects.filter(query)		
-	default = Default.objects.all()[0]
+	defaults = Default.objects.all()
+	if not defaults:
+		ip = socket.gethostbyname(socket.gethostname())
+		default = Default(name='default',consoleip=ip)
+		default.save()
+	else:
+		default = Default.objects.all()[0]
 	resultvms=[]
 	removed=[]
 	for vm in vms:
@@ -521,7 +527,7 @@ def console(request):
 			profilegroups = profile.groups
 			commongroup = False
 			for group in profilegroups.all():
-				if group in usergroups:
+				if group in usergroups.all():
 					commongroup = True
 					break
 			if not commongroup:
