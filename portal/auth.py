@@ -9,6 +9,7 @@ import socket
 
 class LdapBackend(object):
 	def authenticate(self, username=None, password=None):
+		logging.debug("prout")
 		logging.info()
 		ldap.set_option(ldap.OPT_NETWORK_TIMEOUT , 10 )
 		ldap.set_option ( ldap.OPT_REFERRALS , 0 )

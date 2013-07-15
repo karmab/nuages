@@ -515,24 +515,21 @@ def allvms(request):
 @login_required
 def console(request):
 	username	  = request.user.username
-	username	  = User.objects.filter(username=username)[0]
+	username	  = User.objects.get(username=username)
 	usergroups        = username.groups
-	if request.method == 'GET'and request.GET.has_key('vm'):
-		vmname = request.GET.get('vm')
-		if request.GET.has_key('virtualprovider'):
-			virtualprovidername=request.GET.get('virtualprovider')
-		else:
-			vm = VM.objects.get(name=vmname)
-			profile = vm.profile
-			profilegroups = profile.groups
-			commongroup = False
-			for group in profilegroups.all():
-				if group in usergroups.all():
-					commongroup = True
-					break
-			if not commongroup:
-				return redirect('portal.views.yourvms')
-			virtualprovidername = vm.virtualprovider
+	if request.method == 'GET'and request.GET.has_key('id'):
+		vmid = request.GET.get('id')
+		vm = VM.objects.get(id=vmid)
+		vmname = vm.name
+		vmgroups = vm.createdby.groups
+		commongroup = False
+		for group in vmgroups.all():
+			if group in usergroups.all():
+				commongroup = True
+				break
+		if not commongroup:
+			return redirect('portal.views.yourvms')
+		virtualprovidername = vm.virtualprovider
 	    	virtualprovider = VirtualProvider.objects.filter(name=virtualprovidername)[0]
 		default = Default.objects.all()[0]
                 if virtualprovider.type == 'ovirt':

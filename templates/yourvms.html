@@ -32,7 +32,7 @@
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
 <img src="/static/img/down.png"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% if vm.status != 'down' and not vm.physical %}
-<a href="/nuages/vms/console/?vm={{ vm.name }}"><img src="/static/img/console.png"></a>
+<a href="/nuages/vms/console/?id={{ vm.id }}"><img src="/static/img/console.png"></a>
 {% elif vm.ipilo  %}
 <a href="https://{{ default.consoleip }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png"></a>
 {% else  %}
