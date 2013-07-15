@@ -301,6 +301,8 @@ class Ovirt:
 	if api.vms.get(name).status.state=="up" or api.vms.get(name).status.state=="powering_up" or api.vms.get(name).status.state=="reboot_in_progress":
    		api.vms.get(name).stop()
    		print "VM %s stopped" % name
+ 	while api.vms.get(name).status.state !="down":
+  		time.sleep(4) 
   	api.vms.get(name).delete()
 	print "VM %s killed" % name
 	return True
