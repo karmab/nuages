@@ -25,7 +25,7 @@ class VMForm(ModelForm):
         	self.fields['profile'].queryset = query
 	class Meta:
 		model = VM
-		fields = ['name', 'physical', 'ip1','mac1', 'ipilo', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'virtualprovider', 'cobblerprovider', 'foremanprovider', 'hostgroup' , 'profile', 'type', 'puppetclasses','puppetparameters', 'cobblerparameters']
+		fields = ['name', 'physical', 'ipilo', 'ip1','mac1', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'virtualprovider', 'cobblerprovider', 'foremanprovider', 'hostgroup' , 'profile', 'type', 'puppetclasses','puppetparameters', 'cobblerparameters']
 		
 
 

@@ -385,6 +385,7 @@ $( document ).ready(function() {
     if ( index == 3 ) {
 	switch (profiletype){
 	case 'ilo':
+		if ( parameter != "" ) {
 		$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
 		$.each(parameter, function(index, value){
 			macname = value.split('=')[0];
@@ -394,12 +395,14 @@ $( document ).ready(function() {
 		});
         	$('#id_mac1').html(macslist);
         	$('#id_mac1').append('</select><p>');
+		}
 		ipilo.val( ipiloval );
         	ipilolabel.show(400) ;
         	ipilo.show(400) ;
 		ip1.val('');
         	mac1label.show(400) ;
-        	mac1.show(400) ;
+        	//mac1.show(400) ;
+        	$('#id_mac1').show(400);
 		break;	
 	case 'iso':
 		$('#id_iso').replaceWith('<select name="iso" id="id_iso">');	
@@ -445,33 +448,42 @@ $( document ).ready(function() {
  	ip2label.show(400);
  	ip2.show(400);
 	if ( profiletype == 'ilo' ) {
-	$('#id_mac2').replaceWith('<select name="mac2" id="id_mac2">');	
-        $('#id_mac2').html(macslist);
-        $('#id_mac2').append('</select><p>');
+	if ( macslist != "" ) {
+		$('#id_mac2').replaceWith('<select name="mac2" id="id_mac2">');	
+        	$('#id_mac2').html(macslist);
+        	$('#id_mac2').append('</select><p>');
+			      }
  	mac2label.show(400);
- 	mac2.show(400);
+ 	//mac2.show(400);
+        $('#id_mac2').show(400);
 	}
 	}
 	if ( parameter >= 3 ) {
  	ip3label.show(400);
  	ip3.show(400);
 	if ( profiletype == 'ilo' ) {
+	if ( macslist != "" ) {
 	$('#id_mac3').replaceWith('<select name="mac3" id="id_mac3">');	
         $('#id_mac3').html(macslist);
         $('#id_mac3').append('</select><p>');
+	}
  	mac3label.show(400);
  	mac3.show(400);
+        $('#id_mac3').show(400);
 	}
 	}
 	if ( parameter >= 4 ) {
  	ip4label.show(400);
  	ip4.show(400);
 	if ( profiletype == 'ilo' ) {
+	if ( macslist != "" ) {
 	$('#id_mac4').replaceWith('<select name="mac4" id="id_mac4">');	
         $('#id_mac4').html(macslist);
         $('#id_mac4').append('</select><p>');
+	}
  	mac4label.show(400);
- 	mac4.show(400);
+ 	//mac4.show(400);
+        $('#id_mac4').show(400);
 	}
  	}
  	var numvms = $('#numvms').val();
