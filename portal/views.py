@@ -89,8 +89,6 @@ def create(request):
                 ipilo             = request.POST.get('ipilo')
                 numvms            = int(request.POST.get('numvms'))
                 hostgroup         = request.POST.get('hostgroup')
-		username	  = request.user.username
-		username	  = User.objects.filter(username=username)[0]
 		if physical == 'false':
 			physical = False
 		else:
@@ -143,8 +141,8 @@ def create(request):
 		#CHECK SECTION
 		if not physical and virtualprovider.type =='vsphere' and disksize2:
 			return HttpResponse("Multiple disks arent supported at the moment for vsphere...")
-		#MAKE SURE VM DOESNT ALLREADY EXISTS IN DB
-		vms = VM.objects.filter(name=name)
+		#MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
+		vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
 		if len(vms) > 0:
 			return HttpResponse("<font color='red'>VM %s allready exists<p></font>" % name)
 		if not physical:
@@ -152,7 +150,7 @@ def create(request):
 			if storageresult != 'OK':
 				return HttpResponse("<font color='red'>%s<p></font>" % storageresult)
 		#VM CREATION IN DB
-		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,puppetparameters=puppetparameters, cobblerparameters=cobblerparameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
+		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,puppetparameters=puppetparameters, cobblerparameters=cobblerparameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
 		success = newvm.save()
 		if success != 'OK':
 				return HttpResponse("<font color='red'>%s<p></font>" % success)
@@ -417,8 +415,17 @@ def virtualprovidertype(request):
 @login_required
 def yourvms(request):
 	username	  = request.user.username
-	username	  = User.objects.filter(username=username)[0]
-	vms = VM.objects.filter(createdby=username)
+	username	  = User.objects.get(username=username)
+	usergroups        = username.groups
+	query		  = Q(createdby=username)
+	allusers	  = User.objects.all()
+	for g in usergroups.all():
+		for u in allusers:
+			if u.username == username.username:
+				continue
+			if g in u.groups.all():
+				query=query|Q(createdby=u)
+	vms = VM.objects.filter(query)		
 	default = Default.objects.all()[0]
 	resultvms=[]
 	removed=[]
@@ -503,12 +510,22 @@ def allvms(request):
 def console(request):
 	username	  = request.user.username
 	username	  = User.objects.filter(username=username)[0]
+	usergroups        = username.groups
 	if request.method == 'GET'and request.GET.has_key('vm'):
 		vmname = request.GET.get('vm')
 		if request.GET.has_key('virtualprovider'):
 			virtualprovidername=request.GET.get('virtualprovider')
 		else:
-			vm = VM.objects.filter(name=vmname)[0]
+			vm = VM.objects.get(name=vmname)
+			profile = vm.profile
+			profilegroups = profile.groups
+			commongroup = False
+			for group in profilegroups.all():
+				if group in usergroups:
+					commongroup = True
+					break
+			if not commongroup:
+				return redirect('portal.views.yourvms')
 			virtualprovidername = vm.virtualprovider
 	    	virtualprovider = VirtualProvider.objects.filter(name=virtualprovidername)[0]
 		default = Default.objects.all()[0]

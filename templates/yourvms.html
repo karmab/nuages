@@ -20,7 +20,7 @@
 {% for vm in vms|dictsort:"name" %}
 <tr>
 <td>{{ vm.name}}</td>
-<td>{{ username }}</td>
+<td>{{ vm.createdby }}</td>
 {% if vm.physical %}
 <td>Physical</td>
 {% else  %}
