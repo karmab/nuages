@@ -9,12 +9,11 @@ import socket
 
 class LdapBackend(object):
 	def authenticate(self, username=None, password=None):
-		logging.debug("prout")
-		logging.info()
+		success = False
+		#logging.debug("prout")
 		ldap.set_option(ldap.OPT_NETWORK_TIMEOUT , 10 )
 		ldap.set_option ( ldap.OPT_REFERRALS , 0 )
 		ldapproviders=LdapProvider.objects.all()
-		success = False
 		for provider in ldapproviders:
 			port = 389
 			host,basedn,binddn,bindpassword,secure,userfield,filter,certname=provider.host,provider.basedn,provider.binddn,provider.bindpassword,provider.secure,provider.userfield,provider.filter,provider.certname
@@ -37,10 +36,13 @@ class LdapBackend(object):
 			if filter:
 				userfilter="(&(%s)(%s))" % (userfilter,filter)
 			attrs = [str(userfield)]
-			c = ldap.initialize(ldapuri)
-			c.simple_bind_s(binddn,bindpassword)
-			res=c.search_s( basedn, ldap.SCOPE_SUBTREE, userfilter, attrs)
-			c.unbind()
+			try:
+				c = ldap.initialize(ldapuri)
+				c.simple_bind_s(binddn,bindpassword)
+				res=c.search_s( basedn, ldap.SCOPE_SUBTREE, userfilter, attrs)
+				c.unbind()
+			except:	
+				continue
 			if res[0]:
 				usercn=res[0][0]
 				try:
