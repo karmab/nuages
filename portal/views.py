@@ -517,20 +517,24 @@ def console(request):
 	username	  = request.user.username
 	username	  = User.objects.get(username=username)
 	usergroups        = username.groups
-	if request.method == 'GET'and request.GET.has_key('id'):
-		vmid = request.GET.get('id')
-		vm = VM.objects.get(id=vmid)
-		vmname = vm.name
-		vmgroups = vm.createdby.groups
-		commongroup = False
-		for group in vmgroups.all():
-			if group in usergroups.all():
-				commongroup = True
-				break
-		if not commongroup:
-			return redirect('portal.views.yourvms')
-		virtualprovidername = vm.virtualprovider
-	    	virtualprovider = VirtualProvider.objects.filter(name=virtualprovidername)[0]
+	if request.method == 'GET':
+		if request.GET.has_key('id'):
+			vmid = request.GET.get('id')
+			vm = VM.objects.get(id=vmid)
+			vmname = vm.name
+			virtualprovidername = vm.virtualprovider
+			vmgroups = vm.createdby.groups
+			commongroup = False
+			for group in vmgroups.all():
+				if group in usergroups.all():
+					commongroup = True
+					break
+			if not commongroup:
+				return redirect('portal.views.yourvms')
+		if request.GET.has_key('name') and request.GET.has_key('virtualprovider') and username.is_staff:
+			vmname = request.GET.get('name')
+			virtualprovidername = request.GET.get('virtualprovider')
+	    	virtualprovider = VirtualProvider.objects.get(name=virtualprovidername)
 		default = Default.objects.all()[0]
                 if virtualprovider.type == 'ovirt':
                         ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)

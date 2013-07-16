@@ -14,7 +14,7 @@
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
 <img src="/static/img/down.png" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
 {% if console and vm.status != 'down' %}
-<a href="/nuages/vms/console/?vm={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="/static/img/console.png"></a>
+<a href="/nuages/vms/console/?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="/static/img/console.png"></a>
 {% endif %}
 </td>
 </tr>
