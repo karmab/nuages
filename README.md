@@ -42,8 +42,10 @@ Requisites
 ------------
 
     a DB (postgresql is what i used but sqlite3 is another simpler option)
-    ovirt-engine-sdk package (only if you will connect to ovirt/rhev)
+    python-ldap for ldap auth
+    ovirt-engine-sdk package from epel (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
+    python websockify from epel
     paramiko ( to connect to ILO through ssh)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
     optionally apache server  with mod_wsgi
