@@ -212,7 +212,11 @@ def profiles(request):
             return HttpResponse("Cobbler: %s<p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
         elif username.is_staff:
 	    profiles = Profile.objects.all()
-	    return render(request, 'profiles.html', { 'profiles': profiles , 'username': username } )
+	    if not profiles:
+        	information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
+        	return render(request, 'information.html', { 'information' : information } )
+	    else:
+	    	return render(request, 'profiles.html', { 'profiles': profiles , 'username': username } )
 	else:
 	    usergroups=[]
 	    for g in groups.values():
@@ -224,11 +228,11 @@ def profiles(request):
 	    	for group in usergroups[1:]:
 			query=query|Q(groups=group)
 	    query=Profile.objects.filter(query)
-        return HttpResponse(query)
-        #    information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
-        #    return render(request, 'information.html', { 'information' : information } )
-        #else:
-	    #    return render(request, 'profiles.html', { 'profiles': query , 'username': username } )
+            if not query:
+        	information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
+        	return render(request, 'information.html', { 'information' : information } )
+            else:
+	        return render(request, 'profiles.html', { 'profiles': query , 'username': username } )
 
 #@login_required
 def storage(request):
@@ -282,6 +286,9 @@ def storage(request):
 	    			for group in usergroups[1:]:
 					query = query|Q(groups=group)
 	    		query = Profile.objects.filter(query)
+            		if not query:
+        			information = { 'title':'Missing elements' , 'details':'Create Profiles first...' }
+        			return render(request, 'information.html', { 'information' : information } )
 			vproviderslist = []
 			for profile in query:
 				if profile.virtualprovider and profile.virtualprovider.name not in vproviderslist:
@@ -291,8 +298,12 @@ def storage(request):
 				vquery = vquery|Q(name=provider)
 			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
 			vproviders=vproviders.filter(vquery)
-		form = StorageForm()
-		return render(request, 'storage.html', { 'vproviders' : vproviders ,'username': username } )
+            	if not vproviders:
+        		information = { 'title':'Missing elements' , 'details':'Create Virtual providers first...' }
+        		return render(request, 'information.html', { 'information' : information } )
+		else:
+			form = StorageForm()
+			return render(request, 'storage.html', { 'vproviders' : vproviders ,'username': username } )
 
 
 @login_required
