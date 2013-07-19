@@ -151,6 +151,11 @@ Usage
      access the /admin page to :
 		*create local users
     	*create ldap user providers 
+            note that you can create filter to restrict ldap users who can connect.examples of filters you could use:
+                MemberOf=CN=linux,OU=blabla,DC=karma,DC=corp
+                or for several groups:
+                |(MemberOf=CN=linux,OU=blabla,DC=karma,DC=corp)(MemberOf=CN=boss,OU=blabla,DC=karma,DC=corp)
+        *optionnally create groups and assign them to users, as they get created upon first correct login ( their password isnt stored in DB, btw)
 		*create virtualproviders
 		*create physicalproviders
 		*create foremanproviders
