@@ -3,23 +3,17 @@ import ast
 import os
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
-from portal.models import VM,Profile,PhysicalProvider,VirtualProvider,CobblerProvider,ForemanProvider,IpamProvider,Type,Storage,Default,Partitioning
-import time
+from portal.models import VM,Profile,PhysicalProvider,VirtualProvider,CobblerProvider,ForemanProvider,Type,Storage,Default
 from portal.ovirt import Ovirt
 from portal.cobbler import Cobbler
 from portal.foreman import Foreman
 import django.utils.simplejson as json
 from portal.forms import VMForm,StorageForm,OracleForm,ApacheForm,RacForm,SapForm,WeblogicForm,PartitioningForm
-import time,datetime
-from random import choice
-import json
 from django.contrib.auth.decorators import login_required
-from portal.models import Apache, Oracle, Rac
-from django.contrib.auth.models import User,Group
+from django.contrib.auth.models import User
 import logging
 import random
 from portal.ilo import Ilo
-from portal.auth import LdapBackend
 import socket
 from django.db.models import Q
 
@@ -230,7 +224,11 @@ def profiles(request):
 	    	for group in usergroups[1:]:
 			query=query|Q(groups=group)
 	    query=Profile.objects.filter(query)
-	    return render(request, 'profiles.html', { 'profiles': query , 'username': username } )
+        return HttpResponse(query)
+        #    information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
+        #    return render(request, 'information.html', { 'information' : information } )
+        #else:
+	    #    return render(request, 'profiles.html', { 'profiles': query , 'username': username } )
 
 #@login_required
 def storage(request):
