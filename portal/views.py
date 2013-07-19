@@ -486,7 +486,8 @@ def allvms(request):
 	username	  = request.user.username
 	username          = User.objects.filter(username=username)[0]
 	if not username.is_staff:
-		return render(request, 'restricted.html' )
+		information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
+		return render(request, 'information.html', { 'information' : information } )
 	if request.method == 'POST' or request.is_ajax():
 		resultvms=[]
 		virtualprovidername = request.POST.get('virtualprovider')
