@@ -1,0 +1,7 @@
+/* set the background-color to red */
+.navbar-inner
+{
+    background-color: #green;
+    /* background-image: none; */
+    color: black;
+}   
