@@ -4,7 +4,7 @@ body {
     font: 100% verdana, arial, sans-serif;
     background-color: #fff;
     margin: 50px;
-    background-image:url('/static/img/nuages.jpg');
+    /* background-image:url('/static/img/nuages.jpg'); */
     background-repeat:no-repeat;
     background-size: 100% auto;
 }

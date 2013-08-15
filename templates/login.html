@@ -3,12 +3,17 @@
     <title>{% block title %}Nuages{% endblock %}</title>
       <link rel="stylesheet" type="text/css" media="all" href="/static/css/login.css" /> 
       <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      <link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
   </head>
   <body>
    <script src="/static/js/jquery.js"></script>
    <script src="/static/js/wheel.js"></script>
    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 
+<div class="navbar"><div class="navbar-inner"/>
+<ul class="nav">
+<li><a href="https://github.com/karmab/nuages"><img src="/static/img/nuages.jpg"/></a></li>
+</ul></div></div><p>
 <fieldset class="module aligned">
 <form method="post" action="/login/">
 {% csrf_token %}
@@ -23,7 +28,7 @@
 </tr>
 <tr>
     <td><input type="hidden" name="next" value="{{ next }}" /></td>
-    <td><input type="submit" class="btn btn-success" value="login" /></td>
+    <td><input type="submit" class="btn btn-info" value="login" data-disable-with="logging..." /></td>
 </tr>
 {% if form.errors %}
 <tr>
@@ -33,7 +38,6 @@
 {% endif %}
 </table>
 </form>
-
 </fieldset>
 <a href="http://www.djangoproject.com/"><img src="/static/img/djangopowered.gif" border="0" alt="Powered by Django." title="Powered by Django." /></a>
 </body></html>
