@@ -27,7 +27,10 @@
 <html>
     <head>
 	<link rel="stylesheet" type="text/css" media="all" href="/static/css/design.css" />
+	<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
         <title>Nuages console</title>
+	<script src="/static/bootstrap/js/bootstrap.min.js"></script>
         <script src="/static/spice/spicearraybuffer.js"></script> 
         <script src="/static/spice/enums.js"></script> 
         <script src="/static/spice/atKeynames.js"></script> 
@@ -138,16 +141,27 @@
     </head>
 
     <body>
+<div class="navbar"><div class="navbar-inner">
+<ul class="nav">
+<li><a href="https://github.com/karmab/nuages"><img src="/static/img/nuages.jpg"/></a></li>
+<li class="active"><a href="/nuages/vms/">Create</a></li>
+<li><a href="/nuages/storage/">Storage</a></li>
+<li><a href="/nuages/profiles/">Profiles</a></li>
+<li><a href="/nuages/yourvms/">Your VMS</a></li>
+{% if username.is_staff  %}
+<li><a href="/nuages/allvms/">All VMS</a></li>
+{% endif %}
+<li><a href="/logout/">Logout {{ username.username  }}</a></li>
+</ul>
+</div></div>
 
-       <!-- <div id="spice-area"> -->
-            <div id="spice-screen" class="spice-screen"></div>
-      <!--  </div> -->
 <div>
-<table align="left" border="1" >
+<table align="left" border="1" class='alert alert-info' >
 <tr>
 <td>Vm Name</td>
 <td>Provider</td>
-<td>Action</td>
+<td>State</td>
+<td>Actions</td>
 </tr>
 <tr>
 <td>{{ vm.name}}</td>
@@ -159,7 +173,8 @@
 </td>
 </tr>
 </table>
-</div>
+</div><p>
+<div id="spice-screen" class="spice-screen" style="background-color:white"></div>
 
-    </body>
+</body>
 </html>

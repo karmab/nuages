@@ -207,13 +207,13 @@ $( document ).ready(function() {
   	var physical = $('#id_physical');
   	if ( ( physical.prop('checked') == true ) && ( numvms > 1 ) ) {
   	$("#result").hide();
-	$("#result").html("<font color='red'>Physical machines can only be created from one to one!<p></font>");
+	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Physical machines can only be created from one to one!</div>");
 	$("#result").show(500);
 	return;
  	}
  	var profile = $('#id_profile').val();
 	if ( (profile =='' ) || ( virtualprovider == '' ) ) {
-		$("#result").html("<font color='red'>Set first profile!<p></font>");
+		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Set first profile!</div>");
 		$("#result").show(500);
 		return;
 	}
@@ -342,7 +342,7 @@ $( document ).ready(function() {
   hide    = false;
   if ( ( physical.prop('checked') == true ) && ( ipiloval == '' ) ) {
   	$("#result").hide();
-	$("#result").html("<font color='red'>Ip1 is required to be set to Ilo ip if physical is checked!<p></font>");
+	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 is required to be set to Ilo ip if physical is checked!</div>");
 	$("#result").show(500);
 	return;
   }
@@ -360,7 +360,7 @@ $( document ).ready(function() {
 	profiletype = parameter ;
 	if ( profiletype == 'noilo' ) {
   		$("#result").hide();
-		$("#result").html("<font color='red'>Profile without physical provider associated.report to administrator!<p></font>");
+		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Profile without physical provider associated.report to administrator!</div>");
 		$("#result").show(500);
 		return false;
 	}
@@ -773,7 +773,7 @@ function createvm(){
   //CHECK VALUES ARE THERE
   if ( ( name == "" ) || ( profile == "" ) || ( hostgroup == "" )  ) {
 	$("#result").hide();
-	$("#result").html("<font color='red'>Name/Profile/Hostgroup  cant be blank!<p></font>");
+	$("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Name/Profile/Hostgroup  cant be blank!</div>");
 	$("#result").show(500);
 	return ;
   }
@@ -783,7 +783,7 @@ function createvm(){
 			var additionalip = $('#id_ip_'+String(numvm)).val();
   			if  ( additionalname == "" )   {
 				$("#result").hide();
-				$("#result").html("<font color='red'>Additional Name cant be blank!<p></font>");
+				$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Additional Name cant be blank!</div>");
 				$("#result").show(500);
 				return ;
   				}

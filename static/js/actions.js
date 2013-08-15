@@ -8,6 +8,7 @@ function start(vm,provider){
         data: data,
         success: function(data) {
             $("#results").hide();
+            $("#results").addClass("alert alert-success");
             $("#results").html(data);
             $("#results").show(200);
             $("#wheel2").hide();
@@ -25,6 +26,7 @@ function stop(vm,provider){
         data: data,
         success: function(data) {
             $("#results").hide();
+            $("#results").addClass("alert alert-success");
             $("#results").html(data);
             $("#results").show(200);
             $("#wheel2").hide();
@@ -60,6 +62,7 @@ if (sure) {
   success: function(data) {
 	    $("#wheel2").hide();
             $("#results").hide();
+            $("#results").addClass("alert alert-success");
             $("#results").html(data);
             $("#results").show(200);
 		}

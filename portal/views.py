@@ -92,17 +92,17 @@ def create(request):
 		tags=None
 		profile=Profile.objects.filter(id=profile)[0]
 		if storagedomain == '' and not physical:
-			return HttpResponse("<font color='red'>Storage Domain is needed<p></font>")
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>") 
 		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,requireip=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.requireip
 		ipamprovider = profile.ipamprovider
 		if requireip and not ipamprovider and not ip1:
-			return HttpResponse("<font color='red'>Ip1 needed <p></font>")
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 needed <p><p</div>")
 		if requireip and not ipamprovider and not numinterfaces > 1 and not ip2:
-			return HttpResponse("<font color='red'>Ip2 needed <p></font>")
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip2 needed <p><p</div>")
 		if requireip and not ipamprovider and numinterfaces > 2 and not ip3:
-			return HttpResponse("<font color='red'>Ip3 needed <p></font>")
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip3 needed <p><p</div>")
 		if requireip and not ipamprovider and numinterfaces > 3 and not ip4:
-			return HttpResponse("<font color='red'>Ip4 needed <p></font>")
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip4 needed <p><p</div>")
 		if profile.partitioning:	
 			partitioninglist = cobblerparameters.split(' ')
 			totalsize=0
@@ -111,7 +111,7 @@ def create(request):
 				if element[0].endswith('size'):
 					totalsize = totalsize+int(element[1])
 			if int(disksize1)*1024 < totalsize:
-				return HttpResponse("<font color='red'>Not enough space in disk1 according to your partitioning scheme. %d Mb needed <p></font>" % totalsize)
+				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Not enough space in disk1 according to your partitioning scheme. %d Mb needed<p><p</div>" % totalsize)
 		if physical:
 			physicalprovider = PhysicalProvider.objects.filter(id=physicalprovider)[0]
 			virtualprovider = None
@@ -134,20 +134,20 @@ def create(request):
 		
 		#CHECK SECTION
 		if not physical and virtualprovider.type =='vsphere' and disksize2:
-			return HttpResponse("Multiple disks arent supported at the moment for vsphere...")
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Multiple disks arent supported at the moment for vsphere...<p><p</div>")
 		#MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
 		vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
 		if len(vms) > 0:
-			return HttpResponse("<font color='red'>VM %s allready exists<p></font>" % name)
+			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM %s allready exists</div>" % name)
 		if not physical:
 			storageresult=checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain)
 			if storageresult != 'OK':
-				return HttpResponse("<font color='red'>%s<p></font>" % storageresult)
+				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
 		#VM CREATION IN DB
 		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,puppetparameters=puppetparameters, cobblerparameters=cobblerparameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
 		success = newvm.save()
 		if success != 'OK':
-				return HttpResponse("<font color='red'>%s<p></font>" % success)
+				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
 		if numvms > 1:
 			successes={ name : "Machine %s successfully created!!!" % name }
 			for num in range(2,numvms+1):
@@ -158,16 +158,16 @@ def create(request):
 				newip3=request.POST.get("ip3_%s" % num)
 				newip4=request.POST.get("ip4_%s" % num)
 				if requireip and not ipamprovider and not newip1:
-					successes[newname]="<font color='red'>Ip1 needed for %s<p></font>" % newname
+					successes[newname]="Ip1 needed for %s" % newname
 					continue
 				if requireip and not ipamprovider and not numinterfaces > 1 and not newip2:
-					successes[newname]="<font color='red'>Ip2 needed for %s<p></font>" % newname
+					successes[newname]="Ip2 needed for %s" % newname
 					continue
 				if requireip and not ipamprovider and numinterfaces > 2 and not newip3:
-					successes[newname]="<font color='red'>Ip3 needed for %s<p></font>" % newname
+					successes[newname]="Ip3 needed for %s" % newname
 					continue
 				if requireip and not ipamprovider and numinterfaces > 3 and not newip4:
-					successes[newname]="<font color='red'>Ip4 needed for %s<p></font>" % newname
+					successes[newname]="Ip4 needed for %s" % newname
 					continue
 				newvm=VM(name=newname,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=newip1,mac1=newmac1,ip2=newip2,mac2=mac2,ip3=newip3,mac3=mac3,ip4=newip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,puppetparameters=puppetparameters, cobblerparameters=cobblerparameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
 				success = newvm.save()
@@ -177,9 +177,9 @@ def create(request):
 					successes[newname]=success
 		if request.is_ajax():
 			if numvms ==1:
-				return HttpResponse("Machine %s successfully created!!!" % name)
+				return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!</div>" % name )
 			else:
-				return HttpResponse( " ".join(successes.values()))
+				return HttpResponse("<div class='alert alert-info' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % " ".join(successes.values()) )
 				
 		else:
 			return render(request, 'create.html', { 'created': True,'name': name, 'username': username } )
@@ -209,7 +209,7 @@ def profiles(request):
 	    providers = ""
 	    if profile.cobblerprofile:
 	    	cobblerprofile=profile.cobblerprofile
-            return HttpResponse("Cobbler: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
+            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p></div>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
         elif username.is_staff:
 	    profiles = Profile.objects.all()
 	    if not profiles:
@@ -566,7 +566,7 @@ def console(request):
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 		else:
-			return HttpResponse("Console not only implemented for %s" % virtualprovider.type )
+			return HttpResponse("Console not implemented for %s" % virtualprovider.type )
 	else:
 			return redirect('portal.views.yourvms')
 		

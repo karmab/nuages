@@ -13,7 +13,9 @@
     -->
     <title>Nuages Console</title>
         <link rel="stylesheet" type="text/css" media="all" href="/static/css/design.css" />
-
+        <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
+        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <meta charset="utf-8">
 
     <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
@@ -43,7 +45,38 @@
 </head>
 
 <body style="margin: 0px;">
-    <div id="noVNC_screen">
+    <div class="navbar"><div class="navbar-inner">
+<ul class="nav">
+     <li><a href="https://github.com/karmab/nuages"><img src="/static/img/nuages.jpg"/></a></li>
+     <li class="active"><a href="/nuages/vms/">Create</a></li>
+     <li><a href="/nuages/storage/">Storage</a></li>
+     <li><a href="/nuages/profiles/">Profiles</a></li>
+     <li><a href="/nuages/yourvms/">Your VMS</a></li>
+     {% if username.is_staff  %}
+     <li><a href="/nuages/allvms/">All VMS</a></li>
+     {% endif %}
+     <li><a href="/logout/">Logout {{ username.username  }}</a></li>
+</ul>
+</div></div>
+<div>
+<table align="left" border="1" class="table table-bordered" >
+<tr>
+<td>Vm Name</td>
+<td>Provider</td>
+<td>Action</td>
+</tr>
+<tr>
+<td>{{ vm.name}}</td>
+<td>{{vm.virtualprovider }}</td>
+<td>
+<img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
+<img src="/static/img/down.png" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
+</td>
+</tr>
+</table>
+</div>
+
+<div id="noVNC_screen">
             <div id="noVNC_status_bar" class="noVNC_status_bar" style="margin-top: 0px;">
                 <table border=0 width="100%"><tr>
                     <td><div id="noVNC_status">Loading</div></td>
@@ -163,23 +196,5 @@
         };
         </script>
 
-<div>
-<table align="left" border="1" >
-<tr>
-<td>Vm Name</td>
-<td>Provider</td>
-<td>Action</td>
-</tr>
-<tr>
-<td>{{ vm.name}}</td>
-<td>{{vm.virtualprovider }}</td>
-<td>
-<img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
-<img src="/static/img/down.png" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
-</td>
-
-</tr>
-</table>
-</div>
-    </body>
+</body>
 </html>
