@@ -595,7 +595,7 @@ def stop(request):
 	if request.method == 'POST':
 		vmname = request.POST.get('name')
 		virtualprovider=request.POST.get('virtualprovider')
-	    	virtualprovider = VirtualProvider.objects.filter(name=virtualprovider)[0]
+	    	virtualprovider = VirtualProvider.objects.get(name=virtualprovider)
                 if virtualprovider.type == 'ovirt':
                         ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 			results= ovirt.stop(vmname)
@@ -611,10 +611,12 @@ def stop(request):
 
 @login_required
 def kill(request):
+	logging.debug("prout")
 	if request.method == 'POST':
-		name = request.POST.get('name')
-	    	vm = VM.objects.filter(name=name)[0]
-		virtualprovider=vm.virtualprovider
+		name     = request.POST.get('name')
+		provider = request.POST.get('provider')
+		virtualprovider= VirtualProvider.objects.get(name=provider)
+	    	vm = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
 		cobblerprovider=vm.cobblerprovider
 		foremanprovider=vm.foremanprovider
 		results=[]

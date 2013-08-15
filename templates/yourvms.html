@@ -38,7 +38,7 @@
 {% else  %}
 <img src="/static/img/blank.png"/>
 {% endif %}
-<img src="/static/img/kill.png" onclick="kill('{{vm.name}}');" />
+<img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 </td>
 </tr>
 {% endfor %}

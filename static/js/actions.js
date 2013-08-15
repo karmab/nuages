@@ -50,11 +50,11 @@ function console(){
         });
 }
 
-function kill(vm){
+function kill(vm,provider){
 var sure = confirm(vm+" will be killed.Sure?");
 if (sure) {
  $("#wheel2").show();
- data = { 'name': vm } ;
+ data = { 'name': vm , 'provider' : provider } ;
  $.ajax({  
   type: "POST",
   url: '/nuages/vms/kill',
