@@ -32,9 +32,15 @@
 </tr>
 {% if form.errors %}
 <tr>
-    <td></td>
-    <td><font color="red"><p>Incorrect username or password!!!</p></font></td>
+<td></td>
+<td>
+<p class='alert alert-error'>
+<button type='button' class='close' data-dismiss='alert'>&times;</button>
+Incorrect username or password!
+</p>
+</td>
 </tr>
+
 {% endif %}
 </table>
 </form>
