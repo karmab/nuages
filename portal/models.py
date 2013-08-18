@@ -256,7 +256,7 @@ class VM(models.Model):
 	iso	          = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	hostgroup	  = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	type	          = models.ForeignKey(Type,blank=True,null=True)
-	puppetclasses     = models.TextField(blank=True)
+	puppetclasses     = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	puppetparameters  = models.TextField(blank=True)
 	cobblerparameters = models.TextField(blank=True)
 	createdby	  = models.ForeignKey(User,default=1,blank=True)

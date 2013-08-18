@@ -96,110 +96,6 @@ $( document ).ready(function() {
  foremanprovider.hide();
  foremanproviderlabel.hide();
 
- $('#id_virtualprovider').change(function(){
- $('#id_mac1').replaceWith('<input style="display: none;" id="id_mac1" name="mac1" maxlength="20" type="text"><p>');
- $('#id_iso').replaceWith('<select style="display: none;" name="iso" id="id_iso">');
- var ip1 = $('#id_ip1');
- var mac1 = $('#id_mac1');
- var mac1label = $('label[for="id_mac1"]');
- var ipilo = $('#id_ipilo');
- var ipilolabel = $('label[for="id_ipilo"]');
- var iso = $('#id_iso');
- var isolabel = $('label[for="id_iso"]');
- var profile = $('#id_profile').val();
- mac1.hide(300);
- mac1label.hide(300);
- ipilo.hide(300);
- ipilolabel.hide(300);
- iso.hide(300);
- isolabel.hide(300);
- var virtualprovider = $('#id_virtualprovider').val();
- if ( virtualprovider == '' ) {
- return ;
- }
- var ipiloval = $('#id_ip1').val();
- var isoslist = '';
- var macslist = '';
-  $.ajax({  
-   type: 'POST',
-   url: '/nuages/virtualprovidertype/',
-   data: { 'virtualprovider' : virtualprovider , 'ipilo' : ipiloval, 'profile': profile } ,
-   success: function(data) {
-   ilo = 0 ;
-   iiso = 0 ;
-   $.each(data, function(index, parameter) {
-   if ( index == 0 ) {
-	if ( parameter == 'ilo' ) {
-	ilo = 1 ;
-	$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
-	}
-	if ( parameter == 'iso' ) {
-	iiso = 1 ;
-	$('#id_iso').replaceWith('<select name="iso" id="id_iso">');	
-	}
-	}
-   if ( index > 0 ) {
-	if ( ilo == 1 ) {
-	macname = parameter.split('=')[0];
-	mac= parameter.split('=')[1];
-	mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
-        macslist = macslist+mac;
-	}
-	if ( iiso == 1 ) {
-	newiso = '<option value="' + parameter +'">'+parameter+'</option>';
-        isoslist = isoslist+newiso;
-	}
-	}
-	});
-   if ( ( ilo == 1 ) && ( ipiloval != "" ) ) {
-        $('#id_mac1').html(macslist);
-        $('#id_mac1').append('</select><p>');
-	ipilo.val( ipiloval );
-        ipilolabel.show(400) ;
-        ipilo.show(400) ;
-	ip1.val('');
-        mac1label.show(400) ;
-        mac1.show(400) ;
-	}
-   if ( iiso == 1 ) {
-        $('#id_iso').html(isoslist);
-        $('#id_iso').append('</select><p>');
-        isolabel.show(400) ;
-        iso.show(400) ;
-	}
-   	} 
-   });
-   });
-
-
- $('#id_foremanprovider').change(function(){
- var hostgroup = $('#id_hostgroup');
- var hostgrouplabel = $('label[for="id_hostgroup"]');
- hostgroup.hide();
- hostgrouplabel.hide();
- var foremanprovider = $('#id_foremanprovider').val();
- if ( foremanprovider == '' ) {
- return ;
- }
- $('#id_hostgroup').replaceWith('<select name="hostgroup" id="id_hostgroup">');
- var hostgroupslist = '';
-  $.ajax({  
-   type: 'POST',
-   url: '/nuages/hostgroups/',
-   data: { 'foremanprovider' : foremanprovider } ,
-   success: function(data) {
-   $.each(data, function(index, parameter) {
-	hostgroup = '<option value="' + parameter +'">'+parameter+'</option>';
-        hostgroupslist = hostgroupslist+hostgroup;
-	});
-        $('#id_hostgroup').html(hostgroupslist);
-        $('#id_hostgroup').append('</select><p>');
-        $('#id_hostgroup').show(400) ;
-        $('label[for="id_hostgroup"]').show(400) ;
-   	} 
-   });
-   });
-
  $('#numvms').change(function(){
 	$("#result").hide();
 	var numinterfaces ;
@@ -288,6 +184,8 @@ $( document ).ready(function() {
   var foremanproviderlabel = $('label[for="id_foremanprovider"]');
   var hostgroup = $('#id_hostgroup');
   var hostgrouplabel = $('label[for="id_hostgroup"]');
+  var puppetclasseslabel = $('label[for="id_puppetclasses"]');
+  var puppetclasses = $('#id_puppetclasses');
   hostgroup.hide();
   hostgrouplabel.hide();
   mac1.hide(300);
@@ -401,7 +299,6 @@ $( document ).ready(function() {
         	ipilo.show(400) ;
 		ip1.val('');
         	mac1label.show(400) ;
-        	//mac1.show(400) ;
         	$('#id_mac1').show(400);
 		break;	
 	case 'iso':
@@ -419,8 +316,7 @@ $( document ).ready(function() {
 	}
     if ( ( index == 4 )  && ( parameter == true ) ) {
 	foreman = true;
-	puppetclasseslabel.show(400) ;
-	puppetparameterslabel.show(400) ;
+ 	puppetparameterslabel.show() ;
         }
     if ( ( index == 5 )  && ( parameter == true ) ) {
 	cobbler = true;
@@ -454,7 +350,6 @@ $( document ).ready(function() {
         	$('#id_mac2').append('</select><p>');
 			      }
  	mac2label.show(400);
- 	//mac2.show(400);
         $('#id_mac2').show(400);
 	}
 	}
@@ -482,7 +377,6 @@ $( document ).ready(function() {
         $('#id_mac4').append('</select><p>');
 	}
  	mac4label.show(400);
- 	//mac4.show(400);
         $('#id_mac4').show(400);
 	}
  	}
@@ -560,6 +454,20 @@ $( document ).ready(function() {
         $('#id_hostgroup').show(400) ;
         $('label[for="id_hostgroup"]').show(400) ;
 	}
+
+    if ( ( index == 12 ) && ( foreman == true ) )  {	
+ 	$('#id_puppetclasses').replaceWith('<select name="puppetclasses" id="id_puppetclasses" multiple>');
+ 	var puppetclasseslist = '';
+   	$.each(parameter, function(index, value) {
+	classe = '<option value="' + value +'">'+value+'</option>';
+        puppetclasseslist = puppetclasseslist+classe;
+	});
+        $('#id_puppetclasses').html(puppetclasseslist);
+        $('#id_puppetclasses').append('</select><p>');
+        $('#id_puppetclasses').show(400) ;
+        $('label[for="id_puppetclasses"]').show(400) ;
+	}
+
 	});
 	}
 	});

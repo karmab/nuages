@@ -385,8 +385,10 @@ def profileinfo(request):
 			if available:
 				foremanhost, foremanport, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password , foremanprovider.envid
 				foreman= Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
-				hostgroups= foreman.hostgroups(foremanenv)
+				hostgroups = foreman.hostgroups(foremanenv)
 				results.append(hostgroups)
+				classes = foreman.classes(foremanenv)
+				results.append(classes)
 			else:
 				results.append([''])
 		else:

@@ -188,10 +188,6 @@ class Foreman:
 		results=[]
 		for  classe in res.keys():
 			results.append(classe)
- 			#info=r.values()[0]
- 			#name=info["name"]
- 			#del info["name"]
- 			#results[name]=info
  		return sorted(results)
 
         def exists(self,name):
