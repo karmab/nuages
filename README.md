@@ -42,6 +42,7 @@ Requisites
 ------------
 
     a DB (postgresql is what i used but sqlite3 is another simpler option)
+    python-request if you will connect to foreman
     python-ldap for ldap auth
     ovirt-engine-sdk package from epel (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)

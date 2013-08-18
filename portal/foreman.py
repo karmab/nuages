@@ -1,47 +1,32 @@
 import datetime
-import pycurl
+import json
 import os
+import requests
 import simplejson
 import sys
 import time
-import StringIO
 
 hostname=os.environ["HOSTNAME"]
-pwd = os.environ["PWD"]
-#log = open("%s/nuages.log" % pwd,"a")
 
 def foremando(url, actiontype=None, postdata=None, v2=False, user=None, password=None):
- if postdata:
-     postdata="%s" % str(postdata).replace("'",'"')
- c = pycurl.Curl()
- b = StringIO.StringIO()
- c.setopt(pycurl.URL, url)
-# if v2:
-#  c.setopt(pycurl.HTTPHEADER, [ "Content-type: application/json","Accept: application/json,version=2"])
-# else:
-#  c.setopt(pycurl.HTTPHEADER, [ "Content-type: application/json","Accept: application/json"])
- c.setopt(pycurl.HTTPHEADER, [ "Content-type: application/json","Accept: application/json,version=2"])
- c.setopt(pycurl.HTTPAUTH, pycurl.HTTPAUTH_BASIC)
+ headers = {'content-type': 'application/json', 'Accept': 'application/json,version=2' }
+ #get environments
+ envs={}
  if user and password:
-     #c.setopt(pycurl.USERPWD, "%s:%s" % (user,password))
-     c.setopt(pycurl.USERPWD, ("%s:%s" % (user,password)).encode("ascii"))
- c.setopt(pycurl.SSL_VERIFYPEER, False)
- c.setopt(pycurl.SSL_VERIFYHOST, False)
+  user     = user.encode('ascii')
+  password = password.encode('ascii')
+ #c.setopt(pycurl.SSL_VERIFYPEER, False)
+ #c.setopt(pycurl.SSL_VERIFYHOST, False)
  if actiontype=="POST":
-  c.setopt( pycurl.POST, 1 )
-  c.setopt(pycurl.POSTFIELDS,postdata)
+ 	r = requests.post(url,headers=headers,auth=(user,password),data=json.dumps(postdata))
  elif actiontype=="DELETE":
-  c.setopt(pycurl.CUSTOMREQUEST, 'DELETE')
+ 	r = requests.delete(url,headers=headers,auth=(user,password),data=postdata)
  elif actiontype=="PUT":
-  c.setopt( pycurl.CUSTOMREQUEST, "PUT" )
-  c.setopt(pycurl.POSTFIELDS, postdata)
- #else:
- c.setopt(pycurl.WRITEFUNCTION, b.write)
- c.perform()
- #if not actiontype in ["POST","PUT","DELETE"]:
+ 	r = requests.put(url,headers=headers,auth=(user,password),data=postdata)
+ else:
+ 	r = requests.get(url,headers=headers,auth=(user,password))
  try:
-  result = b.getvalue()
-  result = simplejson.loads(result)
+  result = r.json()
   result = eval(str(result))
   return result
  except:
@@ -100,7 +85,6 @@ def foremancreate(host, user, password, name, dns, osid=None, envid=None, archid
  if ptableid:
   ptableid = foremangetid(host,user,password, "ptables", ptableid)
   postdata["host"]["ptable_id"] = hostgroupid
- postdata = "%s" % str(postdata).replace("'",'"')
  result = foremando(url=url, actiontype="POST", postdata=postdata, user=user, password=password)
  if not result.has_key('errors'):
   	now    = datetime.datetime.now()
@@ -111,7 +95,6 @@ def foremancreate(host, user, password, name, dns, osid=None, envid=None, archid
  	header = "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
   	print header+"%s not created in Foreman because %s\n" % (name, result["errors"][0])
  
-
 def foremandelete(host,user,password, name, dns=None):
  if dns:
      name = "%s.%s" % (name, dns)
@@ -131,12 +114,10 @@ def foremandelete(host,user,password, name, dns=None):
 def foremanaddpuppetclass(host,user,password, name, puppetclasses):
  puppetclasses = puppetclasses.split(",")
  for puppetclass in puppetclasses:
-  puppetclassid = foremangetid(host, "puppetclasses", puppetclass) 
-  #nameid = foremangetid(host, "hosts", name)
+  puppetclassid = foremangetid(host,user,password, "puppetclasses", puppetclass) 
   url = "http://%s/api/hosts/%s/puppetclass_ids" % (host,name)
   postdata = {"puppetclass_id": puppetclassid}
   foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
-
 
 def foremanaddparameter(host,user,password,name, puppetparameters):
  puppetparameters = puppetparameters.split(",")
