@@ -355,7 +355,8 @@ class VM(models.Model):
 
                 if foreman and foremanprovider:
                         foremanhost, foremanport, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
-                        Foreman(host=foremanhost, user=foremanuser, password=foremanpassword, name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
+                        f=Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
+                        f.create(name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
 		super(VM, self).save(*args, **kwargs)
                 if physical:
                         ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)

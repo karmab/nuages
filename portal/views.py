@@ -383,9 +383,9 @@ def profileinfo(request):
 			except socket.error:
 				available=False
 			if available:
-				foremanhost, foremanport, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password
+				foremanhost, foremanport, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password , foremanprovider.envid
 				foreman= Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
-				hostgroups= foreman.hostgroups()
+				hostgroups= foreman.hostgroups(foremanenv)
 				results.append(hostgroups)
 			else:
 				results.append([''])
