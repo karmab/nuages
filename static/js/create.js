@@ -31,10 +31,8 @@ $( document ).ready(function() {
  var weblogic = $('#weblogic');
  var puppetclasseslabel = $('label[for="id_puppetclasses"]');
  var puppetclasses = $('#id_puppetclasses');
- var puppetparameterslabel = $('label[for="id_puppetparameters"]');
- var puppetparameters = $('#id_puppetparameters');
- var cobblerparameterslabel = $('label[for="id_cobblerparameters"]');
- var cobblerparameters = $('#id_cobblerparameters');
+ var parameterslabel = $('label[for="id_parameters"]');
+ var parameters      = $('#id_parameters');
  var ipilo = $('#id_ipilo');
  var ipilolabel = $('label[for="id_ipilo"]');
  var hostgroup = $('#id_hostgroup');
@@ -66,10 +64,8 @@ $( document ).ready(function() {
  extracontent.hide();
  puppetclasseslabel.hide() ;
  puppetclasses.hide() ;
- puppetparameterslabel.hide() ;
- puppetparameters.hide() ;
- cobblerparameterslabel.hide() ;
- cobblerparameters.hide() ;
+ parameterslabel.hide() ;
+ parameters.hide() ;
  ipilo.hide();
  ipilolabel.hide();
  hostgroup.hide();
@@ -196,10 +192,8 @@ $( document ).ready(function() {
   isolabel.hide(300);
   puppetclasseslabel.hide(300) ;
   puppetclasses.hide(300) ;
-  puppetparameterslabel.hide(300) ;
-  puppetparameters.hide(300) ;
-  cobblerparameterslabel.hide(300) ;
-  cobblerparameters.hide(300) ;
+  parameterslabel.hide(300) ;
+  parameters.hide(300) ;
   cobblerprovider.hide(300) ;
   cobblerproviderlabel.hide(300) ;
   foremanprovider.hide(300) ;
@@ -316,11 +310,11 @@ $( document ).ready(function() {
 	}
     if ( ( index == 4 )  && ( parameter == true ) ) {
 	foreman = true;
- 	puppetparameterslabel.show() ;
+ 	parameterslabel.show() ;
         }
     if ( ( index == 5 )  && ( parameter == true ) ) {
 	cobbler = true;
-	cobblerparameterslabel.show(400) ;
+	parameterslabel.show(400) ;
          }
     if ( ( index == 6 )  && ( parameter == true ) ) {
   	partitioningfieldset.show(400);
@@ -564,23 +558,13 @@ $( document ).ready(function() {
  }
  });
 
- puppetparameters.hide();
- puppetparameterslabel.click(function(){
- if ( puppetparameters.is(':visible') )  {
- puppetparameters.hide(300);
+ parameters.hide();
+ parameterslabel.click(function(){
+ if ( parameters.is(':visible') )  {
+ parameters.hide(300);
  }
  else {
- puppetparameters.show(300);
- }
- });
-
- cobblerparameters.hide();
- cobblerparameterslabel.click(function(){
- if ( cobblerparameters.is(':visible') )  {
- cobblerparameters.hide(300);
- }
- else {
- cobblerparameters.show(300);
+ parameters.show(300);
  }
  });
 
@@ -605,7 +589,7 @@ function createvm(){
   var ip4               = $('#id_ip4').val();
   var iso               = $('#id_iso').val();
   var puppetclasses     = $('#id_puppetclasses').val();
-  var puppetparameters  = $('#id_puppetparameters').val();
+  var parameters  	= $('#id_parameters').val();
   var ipilo             = $('#id_ipilo').val();
   var numvms            = $('#numvms').val();
   var name_2            = $('#id_name_2').val();
@@ -665,10 +649,10 @@ function createvm(){
   var custom = custom.split(' ');
   $.each(custom, function(index, parameter) {
     var value  = $("#id_"+parameter).val();
-    if ( cobblerparameters == "" ) {
-    cobblerparameters = parameter +"="+ value;
+    if ( parameters == "" ) {
+    parameters = parameter +"="+ value;
     }else {
-    cobblerparameters = cobblerparameters + " "+ parameter +"="+ value;
+    parameters = parameters + " "+ parameter +"="+ value;
 	  }
     });
     }
@@ -676,7 +660,7 @@ function createvm(){
    //handle partitioning
   if ( partitioning != '' ) {
   partitioning = " rootvg="+rootvg+" rootsize="+rootsize+" varsize="+varsize+" homesize="+homesize+" tmpsize="+tmpsize+" swapsize="+swapsize+" ";
-  cobblerparameters = cobblerparameters +partitioning ;
+  parameters = parameters +partitioning ;
 	}
   //CHECK VALUES ARE THERE
   if ( ( name == "" ) || ( profile == "" ) || ( hostgroup == "" )  ) {
@@ -697,7 +681,7 @@ function createvm(){
   				}
 	}
  }	
-  var details = { 'name' : name , 'physicalprovider' : virtualprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'type' : type, 'puppetclasses' : puppetclasses , 'puppetparameters' : puppetparameters , 'cobblerparameters' : cobblerparameters , 'ipilo' : ipilo , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain };
+  var details = { 'name' : name , 'physicalprovider' : virtualprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'type' : type, 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain };
   	$.ajax({  
 		type: 'POST',
 		url: '/nuages/vms/',

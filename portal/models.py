@@ -180,7 +180,9 @@ class Profile(models.Model):
 	dns               = models.CharField(max_length=20,blank=True,null=True)
 	autostorage       = models.BooleanField(default=False)
 	foreman           = models.BooleanField(default=True)
+	foremanparameters = models.BooleanField(default=True)
 	cobbler           = models.BooleanField(default=True)
+	cobblerparameters = models.BooleanField(default=True)
 	partitioning      = models.BooleanField(default=False)
 	iso               = models.BooleanField(default=False)
 	hide              = models.BooleanField(default=True)
@@ -202,8 +204,12 @@ class Profile(models.Model):
         		raise ValidationError("Foreman requires a DNS domain to be set")
     		if self.foreman and not self.foremanprovider:
         		raise ValidationError("Foreman requires a ForemanProvider to be set")
+    		if self.foremanparameters and not self.foreman:
+        		raise ValidationError("Foreman Parameters requires foreman to be set")
     		if self.cobbler and not self.cobblerprovider:
         		raise ValidationError("Cobbler requires a CobblerProvider to be set")
+    		if self.cobblerparameters and not self.cobbler:
+        		raise ValidationError("Cobbler Parameters requires Cobbler to be set")
     		if not self.physicalprovider and not self.virtualprovider:
         		raise ValidationError("You need to assign at least one physical or virtual provider")
     		if self.cobbler and self.cobblerprovider:
@@ -256,9 +262,8 @@ class VM(models.Model):
 	iso	          = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	hostgroup	  = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	type	          = models.ForeignKey(Type,blank=True,null=True)
-	puppetclasses     = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
-	puppetparameters  = models.TextField(blank=True)
-	cobblerparameters = models.TextField(blank=True)
+	puppetclasses     = models.CharField(max_length=30, null=True,default='',choices=( ('xx', '') , ('yy' , '') ))
+	parameters        = models.TextField(blank=True)
 	createdby	  = models.ForeignKey(User,default=1,blank=True)
 	status  	  = models.CharField(max_length=20, default='N/A')
 	def __unicode__(self):
@@ -267,8 +272,8 @@ class VM(models.Model):
 		else:
 			return "physical:%s" % (self.name)
 	def save(self, *args, **kwargs):
-		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,type,puppetclasses,puppetparameters,cobblerparameters,createdby,iso,ipilo,hostgroup = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.type,self.puppetclasses,self.puppetparameters,self.cobblerparameters,self.createdby,self.iso,self.ipilo,self.hostgroup
-		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler
+		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,type,puppetclasses,parameters,createdby,iso,ipilo,hostgroup = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.type,self.puppetclasses,self.parameters,self.createdby,self.iso,self.ipilo,self.hostgroup
+		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,foremanparameters,cobblerparameters=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.foremanparameters,profile.cobblerparameters
 		if profile.ipamprovider:
 			ipamprovider=profile.ipamprovider
 			connection=checkconn(ipamprovider.host,ipamprovider.port)
@@ -296,8 +301,8 @@ class VM(models.Model):
 			connection = checkconn(foremanprovider.host, foremanprovider.port)
 			if not connection:
 				return "Connectivity issue with %s!" % foremanprovider.host
-                        foremanhost, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.user, foremanprovider.password
-                        foreman=Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
+                        foremanhost, foremanport,foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.user, foremanprovider.password
+                        foreman=Foreman(host=foremanhost,port=foremanport, user=foremanuser, password=foremanpassword)
 			foremanfound = foreman.exists("%s.%s" %  (name,dns) )
 			if foremanfound:
 				return "Machine %s.%s allready exists within foreman!" % (name,dns)
@@ -348,6 +353,8 @@ class VM(models.Model):
                                 cobblerprofile=profile.cobblerprofile
                         cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
                         cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
+			if cobblerparameters:	
+				cobblerparameters=parameters
                         if ip1:
                                 cobbler.create(name=name,profile=cobblerprofile,numinterfaces=numinterfaces,dns=dns, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline)
                         else:
@@ -355,8 +362,10 @@ class VM(models.Model):
 
                 if foreman and foremanprovider:
                         foremanhost, foremanport, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
-                        f=Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
+                        f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword)
                         f.create(name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
+			if foremanparameters and parameters:
+                        	f.addparameters(name=name,dns=dns,parameters=parameters)
 		super(VM, self).save(*args, **kwargs)
                 if physical:
                         ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)

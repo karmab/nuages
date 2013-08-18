@@ -33,13 +33,13 @@ def foremando(url, actiontype=None, postdata=None, v2=False, user=None, password
  except:
   return None
 
-def foremangetid(host,user,password, searchtype, searchname):
+def foremangetid(host,port,user,password, searchtype, searchname):
  if searchtype=="puppet":
-  url = "http://%s/api/smart_proxies?type=%s"  % (host, searchtype)
+  url = "http://%s:%s/api/smart_proxies?type=%s"  % (host, port,searchtype)
   result = foremando(url)
   return result[0]["smart_proxy"]["id"]
  else:
-  url = "http://%s/api/%s/%s" % (host, searchtype, searchname)
+  url = "http://%s:%s/api/%s/%s" % (host, port,searchtype, searchname)
   result = foremando(url=url, user=user, password=password)
  if searchtype.endswith("es"):
   shortname = searchtype[:-2]
@@ -49,11 +49,13 @@ def foremangetid(host,user,password, searchtype, searchname):
 
 #VM CREATION IN FOREMAN
 class Foreman:
-	def __init__(self,host, user, password):
+	def __init__(self,host, port,user, password):
 		host=host.encode('ascii')
+		port=str(port).encode('ascii')
 		user=user.encode('ascii')
 		password=password.encode('ascii')
 		self.host=host
+		self.port=port
 		self.user=user
 		self.password=password
 	def delete(self, name, dns=None):
@@ -73,7 +75,7 @@ class Foreman:
   			header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
   			print header+"Nothing to do in foreman\n"
 	def create(self,name, dns, ip, mac=None,osid=None, envid=None, archid=None, puppetid=None, ptableid=None, powerup=None, memory=None, core=None, computeid=None, hostgroup=None):
-		host, user , password = self.host,self.user, self.password
+		host, port, user , password = self.host,self.port,self.user, self.password
 		name=name.encode('ascii')
 		dns=dns.encode('ascii')
 		if ip:
@@ -100,19 +102,19 @@ class Foreman:
 			computeid=computeid.encode('ascii')
 		if hostgroup:
 			hostgroup=hostgroup.encode('ascii')
- 		url = "http://%s/hosts" % (host)
+ 		url = "http://%s:%s/hosts" % (host,port)
  		if dns:
      			name = "%s.%s" % (name, dns)
  		if osid:
-     			osid = foremangetid(host,user,password,"operatingsystems", osid)
+     			osid = foremangetid(host,port,user,password,"operatingsystems", osid)
  		if not envid:
      			envid = "production"
  		if envid:
-     			envid = foremangetid(host,user,password, "environments", envid)
+     			envid = foremangetid(host,port,user,password, "environments", envid)
  		if archid:
-     			archid = foremangetid(host,user,password, "architectures", archid)
+     			archid = foremangetid(host,port,user,password, "architectures", archid)
  		if puppetid:
-     			puppetid = foremangetid(host,user,password, "puppet", puppetid)
+     			puppetid = foremangetid(host,port,user,password, "puppet", puppetid)
  		postdata = {}
  		postdata["host"] = {"name":name}
  		if osid:
@@ -130,13 +132,13 @@ class Foreman:
  		if mac:
      			postdata["host"]["mac"] = mac
  		if computeid:
-  			computeid = foremangetid(host,user,password, "compute_resources", computeid)
+  			computeid = foremangetid(host,port,user,password, "compute_resources", computeid)
   			postdata["host"]["compute_resource_id"] = computeid
  		if hostgroup:
-  			hostgroupid = foremangetid(host,user,password, "hostgroups", hostgroup)
+  			hostgroupid = foremangetid(host,port,user,password, "hostgroups", hostgroup)
   			postdata["host"]["hostgroup_id"] = hostgroupid
  		if ptableid:
-  			ptableid = foremangetid(host,user,password, "ptables", ptableid)
+  			ptableid = foremangetid(host,port,user,password, "ptables", ptableid)
   			postdata["host"]["ptable_id"] = hostgroupid
  		result = foremando(url=url, actiontype="POST", postdata=postdata, user=user, password=password)
  		if not result.has_key('errors'):
@@ -148,30 +150,35 @@ class Foreman:
  			header = "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
   			print header+"%s not created in Foreman because %s\n" % (name, result["errors"][0])
 
-	def addclasses(self,name,classes):
+	def addclasses(self,name,dns,classes):
+		return "prout"
+		name=name.encode('ascii')
+		dns=dns.encode('ascii')
 		#should be a reflection of
 		#curl -X POST -d "{\"puppetclass_id\":2}" -H "Content-Type:application/json" -H "Accept:application/json,version=2" http://192.168.8.8/api/hosts/10/puppetclass_ids
-		host, user , password = self.host,self.user, self.password
+		host, port, user , password = self.host,self.port,self.user, self.password
  		classes = classes.split(",")
  		for classe in classes:
   			classid = foremangetid(host,user,password, "puppetclasses", classe) 
-  			url = "http://%s/api/hosts/%s/puppetclass_ids" % (host,name)
+  			url = "http://%s:%s/api/hosts/%s/puppetclass_ids" % (host,port,name)
   			postdata = {"puppetclass_id": classid}
   			foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
 
-	def addparameters(host,user,password,name, parameters):
-		host, user , password = self.host,self.user, self.password
- 		parameters = parameters.split(",")
+	def addparameters(self,name,dns,parameters):
+		return "prout"
+		host, port, user , password = self.host,self.port,self.user, self.password
+		name=name.encode('ascii')
+		dns=dns.encode('ascii')
+ 		parameters = parameters.split(" ")
  		for parameter in parameters:
   			parameter,value = parameter.split("=")
   			parameterid = foremangetid(foreman, "parameters", parameter)
-  			url = "http://%s/api/hosts/%s/parameter_ids" % (host, name)
+  			url = "http://%s:%s/api/hosts/%s/parameter_ids" % (host,port, name)
   			postdata = {"parameter_id": parameterid}
   			foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
 	def hostgroups(self,environment):
-		host, user , password = self.host,self.user, self.password
-		#url="http://%s/api/hostgroups"  % (host)
-                url="http://%s/api/hostgroups?search=environment+=+%s" % (host,environment)
+		host, port, user , password = self.host,self.port,self.user, self.password
+                url="http://%s:%s/api/hostgroups?search=environment+=+%s" % (host,port,environment)
 		res= foremando(url=url, user=user, password=password)
 		results={}
 		for  r in res:
@@ -182,8 +189,8 @@ class Foreman:
  		return sorted(results)
 
 	def classes(self,environment):
-		host, user , password = self.host,self.user, self.password
-                url="http://%s/api/puppetclasses?search=environment+=+%s" % (host,environment)
+		host, port, user , password = self.host,self.port,self.user, self.password
+                url="http://%s:%s/api/puppetclasses?search=environment+=+%s" % (host,port,environment)
 		res= foremando(url=url, user=user, password=password)
 		results=[]
 		for  classe in res.keys():
@@ -191,8 +198,8 @@ class Foreman:
  		return sorted(results)
 
         def exists(self,name):
-		host, user , password = self.host,self.user, self.password
-                url="http://%s/api/hosts"  % (host)
+		host, port, user , password = self.host,self.port,self.user, self.password
+                url="http://%s:%s/api/hosts"  % (host,port)
                 res= foremando(url=url, user=user, password=password)
                 results={}
                 for  r in res:

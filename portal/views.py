@@ -78,8 +78,7 @@ def create(request):
                 iso               = request.POST.get('iso')
                 type              = request.POST.get('type')
                 puppetclasses     = request.POST.get('puppetclasses')
-                puppetparameters  = request.POST.get('puppetparameters')
-                cobblerparameters = request.POST.get('cobblerparameters')
+                parameters        = request.POST.get('parameters')
                 ipilo             = request.POST.get('ipilo')
                 numvms            = int(request.POST.get('numvms'))
                 hostgroup         = request.POST.get('hostgroup')
@@ -104,7 +103,7 @@ def create(request):
 		if requireip and not ipamprovider and numinterfaces > 3 and not ip4:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip4 needed <p><p</div>")
 		if profile.partitioning:	
-			partitioninglist = cobblerparameters.split(' ')
+			partitioninglist = parameters.split(' ')
 			totalsize=0
 			for element in partitioninglist:
 				element=element.split('=')
@@ -128,7 +127,7 @@ def create(request):
 			foremanprovider=None
 		if type:
 			type2=Type.objects.filter(id=type)[0]
-			cobblerparameters = "type=%s %s" % (type2.name, cobblerparameters)
+			parameters = "type=%s %s" % (type2.name, parameters)
 		else:
 			type2=None
 		
@@ -144,7 +143,7 @@ def create(request):
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
 		#VM CREATION IN DB
-		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,puppetparameters=puppetparameters, cobblerparameters=cobblerparameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
+		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
 		success = newvm.save()
 		if success != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
@@ -169,7 +168,7 @@ def create(request):
 				if requireip and not ipamprovider and numinterfaces > 3 and not newip4:
 					successes[newname]="Ip4 needed for %s" % newname
 					continue
-				newvm=VM(name=newname,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=newip1,mac1=newmac1,ip2=newip2,mac2=mac2,ip3=newip3,mac3=mac3,ip4=newip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,puppetparameters=puppetparameters, cobblerparameters=cobblerparameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
+				newvm=VM(name=newname,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=newip1,mac1=newmac1,ip2=newip2,mac2=mac2,ip3=newip3,mac3=mac3,ip4=newip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
 				success = newvm.save()
 				if success == 'OK':
 					successes[newname]="Machine %s successfully created!!!" % newname
@@ -384,7 +383,7 @@ def profileinfo(request):
 				available=False
 			if available:
 				foremanhost, foremanport, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password , foremanprovider.envid
-				foreman= Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
+				foreman= Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword)
 				hostgroups = foreman.hostgroups(foremanenv)
 				results.append(hostgroups)
 				classes = foreman.classes(foremanenv)
@@ -628,8 +627,8 @@ def kill(request):
 			r=cobbler.remove(name)
 		if foremanprovider:
 			dns = vm.profile.dns
-                        foremanhost, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.user, foremanprovider.password
-                        foreman=Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
+                        foremanhost, foremanport, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.user, foremanprovider.password
+                        foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword)
 			r=foreman.delete(name=name,dns=dns)
                 if virtualprovider and virtualprovider.type == 'ovirt':
                         ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
