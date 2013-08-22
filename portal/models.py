@@ -18,6 +18,8 @@ import logging
 import random
 from portal.ilo import Ilo
 import socket
+from django.forms import ModelForm
+
 
 #default values
 DISKSIZE = '10'
@@ -47,7 +49,6 @@ def checkconn(host,port):
 		return True
         except socket.error:
                 return False
-
 
 class IpamProvider(models.Model):
 	name                = models.CharField(max_length=20)
@@ -132,13 +133,6 @@ class CobblerProvider(models.Model):
 	def clean(self):
     		if not self.host:
         		raise ValidationError("Host cant be blank")
-
-
-class Type(models.Model):
-	name       = models.CharField(max_length=20)
-	parameters = models.TextField(blank=True)
-	def __unicode__(self):
-		return self.name
 
 class Storage(models.Model):
 	name              = models.CharField(max_length=50)
@@ -261,7 +255,7 @@ class VM(models.Model):
 	ipilo             = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
 	iso	          = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	hostgroup	  = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
-	type	          = models.ForeignKey(Type,blank=True,null=True)
+	#type		  = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	puppetclasses     = models.CharField(max_length=30, null=True,default='',choices=( ('xx', '') , ('yy' , '') ))
 	parameters        = models.TextField(blank=True)
 	createdby	  = models.ForeignKey(User,default=1,blank=True)
@@ -272,7 +266,7 @@ class VM(models.Model):
 		else:
 			return "physical:%s" % (self.name)
 	def save(self, *args, **kwargs):
-		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,type,puppetclasses,parameters,createdby,iso,ipilo,hostgroup = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.type,self.puppetclasses,self.parameters,self.createdby,self.iso,self.ipilo,self.hostgroup
+		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,puppetclasses,parameters,createdby,iso,ipilo,hostgroup = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.puppetclasses,self.parameters,self.createdby,self.iso,self.ipilo,self.hostgroup
 		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,foremanparameters,cobblerparameters=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.foremanparameters,profile.cobblerparameters
 		if profile.ipamprovider:
 			ipamprovider=profile.ipamprovider
@@ -392,35 +386,6 @@ class Default(models.Model):
     		model = self.__class__
     		if (model.objects.count() > 0 and self.id != model.objects.get().id):
         		raise ValidationError("Can only create 1 %s instance" % model.__name__)
-
-#SPECIFIC 
-
-class Apache(models.Model):
-	webenvironment   = models.CharField(max_length=20, default='intranet', choices=( ('intranet', 'intranet'),('internet', 'internet') ) )
-
-#Size of /apli (MB)
-#SGA size total instances (MB)
-class Oracle(models.Model):
-	sga         	  = models.CharField(max_length=20, default=1024)
-	apli_size         = models.CharField(max_length=20,default=20480)
-
-class Rac(models.Model):
-	racvip            = models.GenericIPAddressField(protocol="IPv4")
-	racversion        = models.CharField(max_length=4)
-	racnodes          = models.IntegerField()
-	racasm            = models.CharField(max_length=2,default='NO')
-
-
-class Sap(models.Model):
-	sapsid          = models.IntegerField()
-	saptier         = models.CharField(max_length=3)
-
-
-class Weblogic(models.Model):
-	wlversion          = models.CharField(max_length=5,default=1036)
-	wlsizeapli         = models.CharField(max_length=5,default=5120)
-	wlsizeapp          = models.CharField(max_length=5,default=2048)
-	wlsizelog          = models.CharField(max_length=5,default=2048)
 
 class Partitioning(models.Model):
 	rootvg         = models.CharField(max_length=15,default='rootvg')

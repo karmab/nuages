@@ -467,7 +467,7 @@ $( document ).ready(function() {
 	});
 	});
 
- $('#id_type').change(function(){
+  $('#id_type').change(function(){
   var type = $('#id_type option:selected').html(); 
   var newparms = '' ;
   $.ajax({  
@@ -477,6 +477,11 @@ $( document ).ready(function() {
    success: function(data) {
    $.each(data, function(index, parameter) {
     if ( index == 0 ) {
+   	$.each(parameter, function(index, element) {
+ 	$('#'+element).hide();
+	});
+	}
+    else if ( index == 1 ) {
     	newparms = parameter ;
 	}
     else {
@@ -488,51 +493,9 @@ $( document ).ready(function() {
      }
      });
   extracontent.show();
-  var type = $('#id_type option:selected').html();
-  switch (type) {
- 	case('apache'):
- 	 oracle.hide();
- 	 rac.hide();
- 	 sap.hide();
- 	 weblogic.hide();
-  	 apache.show(400);
-         break;
- 	case('oracle'):
- 	 apache.hide();
- 	 rac.hide();
- 	 sap.hide();
- 	 weblogic.hide();
-  	 oracle.show(400);
-         break;
- 	case('rac'):
- 	 apache.hide();
- 	 oracle.hide();
- 	 weblogic.hide();
-  	 rac.show(400);
-         break;
- 	case('sap'):
- 	 apache.hide();
- 	 oracle.hide();
- 	 rac.hide();
- 	 weblogic.hide();
-  	 sap.show(400);
-         break;
- 	case('weblogic'):
- 	 apache.hide();
- 	 oracle.hide();
- 	 rac.hide();
- 	 sap.hide();
-  	 weblogic.show(400);
-         break;
-	default:
- 	 apache.hide();
- 	 oracle.hide();
- 	 rac.hide();
- 	 sap.hide();
- 	 weblogic.hide();
-         break;
-
-		   }
+  if ( type != 'default' ) {
+   $("#"+type).show(400);
+	}
   });
 
  ip2.hide();

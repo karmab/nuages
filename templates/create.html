@@ -24,21 +24,26 @@
 </select> 
 {{ vmform.as_p }}
 {{ credentials.info }}
-
-{% endblock content %}
 </fieldset><p>
+
+<fieldset class="module aligned">
+<label for="id_type">Type:</label> <select name="type" id="id_type">
+<option value="" selected="selected">---------</option>
+{% for customform in customforms|dictsort:"name" %}
+<option value="{{ customform.name }}">{{ customform.name }}</option>
+{% endfor %}
+</select> 
+</fieldset><p>
+{% endblock content %}
 
 {% block extracontent %}
-{% if apacheform or oracleform or racform or sapform or weblogicform %}
 <fieldset id="extracontent" class="module aligned">
-<div id="apache">{{ apacheform.as_p }}</div>
-<div id="oracle">{{ oracleform.as_p }}</div>
-<div id="rac">{{ racform.as_p }}</div>
-<div id="sap">{{ sapform.as_p }}</div>
-<div id="weblogic">{{ weblogicform.as_p }}</div>
+{% for customform in customforms|dictsort:"name" %}
+<div id="{{ customform.name }}">{{ customform.form.as_p }}</div>
+{% endfor %}
 <div id="custom"></div>
 </fieldset><p>
-{% endif %}
+
 {% if partitioningform%}
 <fieldset id="id_partitioningfieldset" class="module aligned">
 {{ partitioningform.as_p }}

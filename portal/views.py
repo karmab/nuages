@@ -3,12 +3,13 @@ import ast
 import os
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
-from portal.models import VM,Profile,PhysicalProvider,VirtualProvider,CobblerProvider,ForemanProvider,Type,Storage,Default
+from portal.models import *
+from portal.customtypes import *
 from portal.ovirt import Ovirt
 from portal.cobbler import Cobbler
 from portal.foreman import Foreman
 import django.utils.simplejson as json
-from portal.forms import VMForm,StorageForm,OracleForm,ApacheForm,RacForm,SapForm,WeblogicForm,PartitioningForm
+from portal.forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import logging
@@ -126,10 +127,7 @@ def create(request):
 		else:
 			foremanprovider=None
 		if type:
-			type2=Type.objects.filter(id=type)[0]
-			parameters = "type=%s %s" % (type2.name, parameters)
-		else:
-			type2=None
+			parameters = "type=%s %s" % (type.name, parameters)
 		
 		#CHECK SECTION
 		if not physical and virtualprovider.type =='vsphere' and disksize2:
@@ -143,7 +141,7 @@ def create(request):
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
 		#VM CREATION IN DB
-		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
+		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
 		success = newvm.save()
 		if success != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
@@ -168,7 +166,7 @@ def create(request):
 				if requireip and not ipamprovider and numinterfaces > 3 and not newip4:
 					successes[newname]="Ip4 needed for %s" % newname
 					continue
-				newvm=VM(name=newname,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=newip1,mac1=newmac1,ip2=newip2,mac2=mac2,ip3=newip3,mac3=mac3,ip4=newip4,mac4=mac4,type=type2,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
+				newvm=VM(name=newname,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=newip1,mac1=newmac1,ip2=newip2,mac2=mac2,ip3=newip3,mac3=mac3,ip4=newip4,mac4=mac4,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
 				success = newvm.save()
 				if success == 'OK':
 					successes[newname]="Machine %s successfully created!!!" % newname
@@ -183,15 +181,15 @@ def create(request):
 		else:
 			return render(request, 'create.html', { 'created': True,'name': name, 'username': username } )
 	else:
-		apacheform       = ApacheForm()
-		oracleform       = OracleForm()
-		racform          = RacForm()
-		sapform          = SapForm()
-		weblogicform     = WeblogicForm()
+		customforms=[]
+		import customtypes
+		for element in dir(customtypes):
+			if not element.startswith("__") and element != "models" and element != "forms":
+				exec("customform=%s()" % element)
+				customforms.append({'name':element,'form':customform})
 		partitioningform = PartitioningForm()
-		#vmform = VMForm()
 		vmform =  VMForm(request.user)
-		return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'apacheform': apacheform, 'oracleform': oracleform , 'racform' : racform, 'sapform' : sapform , 'weblogicform' : weblogicform , 'partitioningform' : partitioningform } )
+		return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms } )
 
 
 @login_required
@@ -308,17 +306,21 @@ def storage(request):
 @login_required
 def type(request):
 	if request.method == 'POST' or request.is_ajax():
-		type= request.POST.get('type').capitalize()
-		if type=="Default":
-			attributes=[]
-			return HttpResponse(attributes,mimetype='application/json')
-		exec("type=%s()" % type)
-		attributes=[]
-		for attr in type.__dict__:
-			if not attr in  ['_state','id']: attributes.append(attr)
-		attributes = json.dumps(attributes)
-		return HttpResponse(attributes,mimetype='application/json')
-
+		results=[[]]
+		type= request.POST.get('type')
+		otherclasses=[]
+		import customtypes
+                for element in dir(customtypes):
+			if element == type:
+                                exec("type=%s()" % element)
+				for attr in type.__dict__:
+					if not attr in  ['_state','id']:
+						results.append(attr)
+                        elif not element.startswith('__') and not element.endswith("Form") and element != "models":
+				otherclasses.append(element)
+		results[0] = otherclasses
+		results = json.dumps(results)
+		return HttpResponse(results,mimetype='application/json')
 
 @login_required
 def profileinfo(request):
@@ -640,8 +642,6 @@ def kill(request):
 			remove = os.popen(removecommand).read()
 			removeinfo= ast.literal_eval(remove)	
 			r='VM killed in vsphere'
-			#removeinfo = json.dumps(removeinfo)
-       			#return HttpResponse(removeinfo,mimetype='application/json')
 		vm.delete()
 		return HttpResponse("VM %s killed" % name)
 

@@ -41,7 +41,7 @@ def foremangetid(host,port,user,password, searchtype, searchname):
  else:
   url = "http://%s:%s/api/%s/%s" % (host, port,searchtype, searchname)
   result = foremando(url=url, user=user, password=password)
- if searchtype.endswith("es"):
+ if searchtype.endswith("es") and searchtype != "architectures":
   shortname = searchtype[:-2]
  else:
   shortname = searchtype[:-1]
@@ -74,10 +74,12 @@ class Foreman:
   			now = datetime.datetime.now()
   			header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
   			print header+"Nothing to do in foreman\n"
-	def create(self,name, dns, ip, mac=None,osid=None, envid=None, archid=None, puppetid=None, ptableid=None, powerup=None, memory=None, core=None, computeid=None, hostgroup=None):
+	def create(self,name, dns, ip, mac=None,osid=None, envid=None, archid="x86_64", puppetid=None, ptableid=None, powerup=None, memory=None, core=None, computeid=None, hostgroup=None):
 		host, port, user , password = self.host,self.port,self.user, self.password
 		name=name.encode('ascii')
 		dns=dns.encode('ascii')
+ 		if not envid:
+     			envid = "production"
 		if ip:
 			ip=ip.encode('ascii')
 		if mac:
@@ -107,10 +109,7 @@ class Foreman:
      			name = "%s.%s" % (name, dns)
  		if osid:
      			osid = foremangetid(host,port,user,password,"operatingsystems", osid)
- 		if not envid:
-     			envid = "production"
- 		if envid:
-     			envid = foremangetid(host,port,user,password, "environments", envid)
+		envid = foremangetid(host,port,user,password, "environments", envid)
  		if archid:
      			archid = foremangetid(host,port,user,password, "architectures", archid)
  		if puppetid:

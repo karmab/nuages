@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 import os 
 from django.forms import ModelForm
-from portal.models import VM,Storage,Oracle,Apache,Rac,Sap,Weblogic,Partitioning,Profile
+from portal.models import *
 from django.contrib.auth.models import User,Group
 from django.db.models import Q
 
@@ -25,33 +25,13 @@ class VMForm(ModelForm):
         	self.fields['profile'].queryset = query
 	class Meta:
 		model = VM
-		fields = ['name', 'physical', 'ipilo', 'ip1','mac1', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'virtualprovider', 'cobblerprovider', 'foremanprovider', 'hostgroup' , 'profile', 'type', 'puppetclasses', 'parameters']
+		fields = ['name', 'physical', 'ipilo', 'ip1','mac1', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'virtualprovider', 'cobblerprovider', 'foremanprovider', 'hostgroup' , 'profile', 'puppetclasses', 'parameters']
 		
 
 class StorageForm(ModelForm):
 	class Meta:
 		model = Storage
 
-class ApacheForm(ModelForm):
-	class Meta:
-		model = Apache
-
-class OracleForm(ModelForm):
-	class Meta:
-		model = Oracle
-
-class RacForm(ModelForm):
-	class Meta:
-		model = Rac
-
-class SapForm(ModelForm):
-	class Meta:
-		model = Sap
-
-class WeblogicForm(ModelForm):
-	class Meta:
-		model = Weblogic
-
 class PartitioningForm(ModelForm):
-	class Meta:
-		model = Partitioning
+    class Meta:
+        model = Partitioning
