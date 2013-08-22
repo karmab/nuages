@@ -191,7 +191,6 @@ def create(request):
 		vmform =  VMForm(request.user)
 		return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms } )
 
-
 @login_required
 def profiles(request):
 	logging.debug("prout")
@@ -304,19 +303,18 @@ def storage(request):
 
 
 @login_required
-def type(request):
+def types(request):
 	if request.method == 'POST' or request.is_ajax():
 		results=[[]]
-		type= request.POST.get('type')
+		types= request.POST.get('types').split(',')
 		otherclasses=[]
 		import customtypes
                 for element in dir(customtypes):
-			if element == type:
+			if element in types:
                                 exec("type=%s()" % element)
-				for attr in type.__dict__:
-					if not attr in  ['_state','id']:
-						results.append(attr)
-                        elif not element.startswith('__') and not element.endswith("Form") and element != "models":
+				for attr in type.fields.keys():
+					results.append(attr)
+                        elif not element.startswith('__') and element != "forms":
 				otherclasses.append(element)
 		results[0] = otherclasses
 		results = json.dumps(results)
