@@ -184,7 +184,7 @@ def create(request):
 		customforms=[]
 		import customtypes
 		for element in dir(customtypes):
-			if not element.startswith("__") and element != "models" and element != "forms":
+			if not element.startswith("__") and element != "forms":
 				exec("customform=%s()" % element)
 				customforms.append({'name':element,'form':customform})
 		partitioningform = PartitioningForm()
