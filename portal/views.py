@@ -668,13 +668,13 @@ def customforms(request):
 		exec("type=%s()" % type)
 		for attr in type.fields:
 			if 'max_length' in type.fields[attr].__dict__:
-				fieldname='charfield'
+				fieldname='Char'
 				specific=type.fields[attr].initial
 			elif '_choices' in type.fields[attr].__dict__:
-				fieldname='choicefield'
+				fieldname='Choice'
 				specific=type.fields[attr].choices
 			elif 'max_value' in type.fields[attr].__dict__:
-				fieldname='intfield'
+				fieldname='Int'
 				specific=type.fields[attr].initial
 			attributes.append([attr,fieldname,type.fields[attr].required,specific])
 		attributes = json.dumps(attributes)
