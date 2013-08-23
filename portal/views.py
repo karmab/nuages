@@ -653,3 +653,36 @@ def hostgroups(request):
 		hostgroups= foreman.hostgroups()
 		hostgroups = json.dumps(hostgroups)
        		return HttpResponse(hostgroups,mimetype='application/json')
+
+@login_required
+def customforms(request):
+	logging.debug("prout")
+	username	  = request.user.username
+	username          = User.objects.filter(username=username)[0]
+	if not username.is_staff:
+		information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
+		return render(request, 'information.html', { 'information' : information } )
+	elif request.method == 'POST':
+		type= request.POST.get('type')
+		attributes=[]
+		exec("type=%s()" % type)
+		for attr in type.fields:
+			if 'max_length' in type.fields[attr].__dict__:
+				fieldname='charfield'
+				specific=type.fields[attr].initial
+			elif '_choices' in type.fields[attr].__dict__:
+				fieldname='choicefield'
+				specific=type.fields[attr].choices
+			elif 'max_value' in type.fields[attr].__dict__:
+				fieldname='intfield'
+				specific=type.fields[attr].initial
+			attributes.append([attr,fieldname,type.fields[attr].required,specific])
+		attributes = json.dumps(attributes)
+       		return HttpResponse(attributes,mimetype='application/json')
+	else:
+		types=[]
+		import customtypes
+                for element in dir(customtypes):
+                        if not element.startswith('__') and element != "forms":
+				types.append(element)
+		return render(request, 'customforms.html', { 'username': username , 'types': types } )
