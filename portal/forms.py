@@ -31,7 +31,3 @@ class VMForm(ModelForm):
 class StorageForm(ModelForm):
 	class Meta:
 		model = Storage
-
-class PartitioningForm(ModelForm):
-    class Meta:
-        model = Partitioning

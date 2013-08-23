@@ -30,6 +30,7 @@ urlpatterns = patterns('portal.views',
       url(r'^nuages/vms/stop', 'stop'),
       url(r'^nuages/vms/kill', 'kill'),
       url(r'^nuages/customforms', 'customforms'),
+      url(r'^nuages/customforminfo', 'customforminfo'),
       #url(r'^nuages/addform', 'addform'),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

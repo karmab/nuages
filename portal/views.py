@@ -103,15 +103,6 @@ def create(request):
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip3 needed <p><p</div>")
 		if requireip and not ipamprovider and numinterfaces > 3 and not ip4:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip4 needed <p><p</div>")
-		if profile.partitioning:	
-			partitioninglist = parameters.split(' ')
-			totalsize=0
-			for element in partitioninglist:
-				element=element.split('=')
-				if element[0].endswith('size'):
-					totalsize = totalsize+int(element[1])
-			if int(disksize1)*1024 < totalsize:
-				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Not enough space in disk1 according to your partitioning scheme. %d Mb needed<p><p</div>" % totalsize)
 		if physical:
 			physicalprovider = PhysicalProvider.objects.filter(id=physicalprovider)[0]
 			virtualprovider = None
@@ -187,7 +178,6 @@ def create(request):
 			if not element.startswith("__") and element != "forms":
 				exec("customform=%s()" % element)
 				customforms.append({'name':element,'form':customform})
-		partitioningform = PartitioningForm()
 		vmform =  VMForm(request.user)
 		return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms } )
 
@@ -363,7 +353,7 @@ def profileinfo(request):
 				isoslist=[]
 				for iso in isos: 
 					specific.append(iso)
-		results = [type,profile.hide ,provider,specific,profile.foreman, profile.cobbler,profile.partitioning,profile.numinterfaces,storages]
+		results = [type,profile.hide ,provider,specific,profile.foreman, profile.cobbler,profile.numinterfaces,storages]
 		if profile.cobbler:
 			cobblerprovider=profile.cobblerprovider
 			cobblerprovider = "%s,%s" % (cobblerprovider.id, cobblerprovider.name)
@@ -686,3 +676,24 @@ def customforms(request):
                         if not element.startswith('__') and element != "forms":
 				types.append(element)
 		return render(request, 'customforms.html', { 'username': username , 'types': types } )
+
+
+@login_required
+def customforminfo(request):
+        logging.debug("prout")
+        username          = request.user.username
+        username          = User.objects.filter(username=username)[0]
+        if not username.is_staff:
+                information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
+                return render(request, 'information.html', { 'information' : information } )
+        elif request.method == 'POST':
+                type= request.POST.get('type')
+                exec("type=%s()" % type)
+                return HttpResponse(type.as_table())
+        else:
+                types=[]
+                import customtypes
+                for element in dir(customtypes):
+                        if not element.startswith('__') and element != "forms":
+                                types.append(element)
+                return render(request, 'customforms.html', { 'username': username , 'types': types } )

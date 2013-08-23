@@ -37,19 +37,6 @@ $( document ).ready(function() {
  var ipilolabel = $('label[for="id_ipilo"]');
  var hostgroup = $('#id_hostgroup');
  var hostgrouplabel = $('label[for="id_hostgroup"]');
- var partitioningfieldset = $('#id_partitioningfieldset');
- var rootvg = $('#id_rootvg');
- var rootvglabel = $('label[for="id_rootvg"]');
- var rootsize = $('#id_rootsize');
- var rootsizelabel = $('label[for="id_rootsize"]');
- var varsize = $('#id_varsize');
- var varsizelabel = $('label[for="id_varsize"]');
- var homesize = $('#id_homesize');
- var homesizelabel = $('label[for="id_homesize"]');
- var tmpsize = $('#id_tmpsize');
- var tmpsizelabel = $('label[for="id_tmpsize"]');
- var swapsize = $('#id_swapsize');
- var swapsizelabel = $('label[for="id_swapsize"]');
  var storagedomain = $('#id_storagedomain');
  var storagedomainlabel = $('#id_storagedomainlabel');
  extravmsfieldset.hide();
@@ -70,19 +57,6 @@ $( document ).ready(function() {
  ipilolabel.hide();
  hostgroup.hide();
  hostgrouplabel.hide();
- partitioningfieldset.hide();
- rootvg.hide();
- rootvglabel.hide();
- rootsize.hide();
- rootsizelabel.hide();
- varsize.hide();
- varsizelabel.hide();
- tmpsize.hide();
- tmpsizelabel.hide();
- homesize.hide();
- homesizelabel.hide();
- swapsize.hide();
- swapsizelabel.hide();
  storagedomain.hide();
  storagedomainlabel.hide();
  virtualprovider.hide();
@@ -208,20 +182,7 @@ $( document ).ready(function() {
   ip4label.hide(300);
   iso.hide(300);
   isolabel.hide(300);
-  partitioningfieldset.hide();
   extravmsfieldset.hide();
-  rootvg.hide();
-  rootvglabel.hide();
-  rootsize.hide();
-  rootsizelabel.hide();
-  varsize.hide();
-  varsizelabel.hide();
-  tmpsize.hide();
-  tmpsizelabel.hide();
-  homesize.hide();
-  homesizelabel.hide();
-  swapsize.hide();
-  swapsizelabel.hide();
   storagedomain.hide();
   storagedomainlabel.hide();
   result.hide();
@@ -240,7 +201,6 @@ $( document ).ready(function() {
   }
   $('#id_mac1').replaceWith('<input style="display: none;" id="id_mac1" name="mac1" maxlength="20" type="text"><p>');
   $('#id_iso').replaceWith('<select style="display: none;" name="iso" id="id_iso">');
-  $('#id_partitioning').replaceWith('<div id="id_partitioning" value=""/>');
   $.ajax({  
    type: 'POST',
    url: '/nuages/profileinfo/',
@@ -316,24 +276,7 @@ $( document ).ready(function() {
 	cobbler = true;
 	parameterslabel.show(400) ;
          }
-    if ( ( index == 6 )  && ( parameter == true ) ) {
-  	partitioningfieldset.show(400);
- 	$('#id_partitioning').replaceWith('<div id="id_partitioning" value="true"/>');
- 	$('#id_partitioning').show();
- 	rootvg.show(400);
- 	rootvglabel.show(400);
- 	rootsize.show(400);
- 	rootsizelabel.show(400);
- 	varsize.show(400);
- 	varsizelabel.show(400);
- 	tmpsize.show(400);
- 	tmpsizelabel.show(400);
- 	homesize.show(400);
- 	homesizelabel.show(400);
- 	swapsize.show(400);
- 	swapsizelabel.show(400);
-         }
-    if ( index == 7 )  {
+    if ( index == 6 )  {
 	if ( parameter >= 2 ) {
  	ip2label.show(400);
  	ip2.show(400);
@@ -397,7 +340,7 @@ $( document ).ready(function() {
 			}
 	}}
 	}
-    if ( index == 8 )  {	
+    if ( index == 7 )  {	
   	storagedomain.html('<select id="id_storage"/>');
    	$.each(parameter, function(index, stor) {
   	var stor = '<option value="' + stor +'">'+stor+'</option>';
@@ -407,7 +350,7 @@ $( document ).ready(function() {
 	storagedomain.show(400) ;
 	storagedomainlabel.show(400) ;
 	}
-    if ( ( index == 9 ) && ( cobbler == true ) )  {	
+    if ( ( index == 8 ) && ( cobbler == true ) )  {	
 	$('#id_cobblerprovider').replaceWith('<select name="cobblerprovider" id="id_cobblerprovider">');
  	providerid = parameter.split(',')[0];
         providername= parameter.split(',')[1];
@@ -421,7 +364,7 @@ $( document ).ready(function() {
 		$('#id_cobblerprovider').hide();
 			    }
 	}
-    if ( ( index == 10 ) && ( foreman == true ) )  {	
+    if ( ( index == 9 ) && ( foreman == true ) )  {	
 	$('#id_foremanprovider').replaceWith('<select name="foremanprovider" id="id_foremanprovider">');
  	providerid = parameter.split(',')[0];
         providername= parameter.split(',')[1];
@@ -436,7 +379,7 @@ $( document ).ready(function() {
 			    }
 	}
 
-    if ( ( index == 11 ) && ( foreman == true ) )  {	
+    if ( ( index == 10 ) && ( foreman == true ) )  {	
  	$('#id_hostgroup').replaceWith('<select name="hostgroup" id="id_hostgroup">');
  	var hostgroupslist = '';
    	$.each(parameter, function(index, value) {
@@ -449,7 +392,7 @@ $( document ).ready(function() {
         $('label[for="id_hostgroup"]').show(400) ;
 	}
 
-    if ( ( index == 12 ) && ( foreman == true ) )  {	
+    if ( ( index == 11 ) && ( foreman == true ) )  {	
  	$('#id_puppetclasses').replaceWith('<select name="puppetclasses" id="id_puppetclasses" multiple>');
  	var puppetclasseslist = '';
    	$.each(parameter, function(index, value) {
@@ -602,14 +545,7 @@ function createvm(){
   var ip2_10            = $('#id_ip2_10').val();
   var ip3_10            = $('#id_ip3_10').val();
   var ip4_10            = $('#id_ip4_10').val();
-  var partitioning      = $('#id_partitioning').attr('value');
   custom 		=  $('#custom').html() ;
-  var rootvg = $('#id_rootvg').val();
-  var rootsize = $('#id_rootsize').val();
-  var varsize = $('#id_varsize').val();
-  var homesize = $('#id_homesize').val();
-  var tmpsize = $('#id_tmpsize').val();
-  var swapsize = $('#id_swapsize').val();
   if ( custom != '' ) {
   var custom = custom.split(' ');
   $.each(custom, function(index, parameter) {
@@ -622,11 +558,6 @@ function createvm(){
     });
     }
 
-   //handle partitioning
-  if ( partitioning != '' ) {
-  partitioning = " rootvg="+rootvg+" rootsize="+rootsize+" varsize="+varsize+" homesize="+homesize+" tmpsize="+tmpsize+" swapsize="+swapsize+" ";
-  parameters = parameters +partitioning ;
-	}
   //CHECK VALUES ARE THERE
   if ( ( name == "" ) || ( profile == "" ) || ( hostgroup == "" )  ) {
 	$("#result").hide();

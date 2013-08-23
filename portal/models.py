@@ -177,7 +177,7 @@ class Profile(models.Model):
 	foremanparameters = models.BooleanField(default=True)
 	cobbler           = models.BooleanField(default=True)
 	cobblerparameters = models.BooleanField(default=True)
-	partitioning      = models.BooleanField(default=False)
+	#partitioning      = models.BooleanField(default=False)
 	iso               = models.BooleanField(default=False)
 	hide              = models.BooleanField(default=True)
 	console           = models.BooleanField(default=False)
@@ -387,10 +387,10 @@ class Default(models.Model):
     		if (model.objects.count() > 0 and self.id != model.objects.get().id):
         		raise ValidationError("Can only create 1 %s instance" % model.__name__)
 
-class Partitioning(models.Model):
-	rootvg         = models.CharField(max_length=15,default='rootvg')
-	rootsize       = models.CharField(max_length=7,default=10000)
-	varsize        = models.CharField(max_length=7,default=4096)
-	homesize       = models.CharField(max_length=7,default=6144)
-	tmpsize        = models.CharField(max_length=7,default=2048)
-	swapsize       = models.CharField(max_length=7,default=2048)
+#class Partitioning(models.Model):
+#	rootvg         = models.CharField(max_length=15,default='rootvg')
+#	rootsize       = models.CharField(max_length=7,default=10000)
+#	varsize        = models.CharField(max_length=7,default=4096)
+#	homesize       = models.CharField(max_length=7,default=6144)
+#	tmpsize        = models.CharField(max_length=7,default=2048)
+#	swapsize       = models.CharField(max_length=7,default=2048)
