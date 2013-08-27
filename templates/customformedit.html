@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages CustomForms Information{% endblock %}
+
+{% block content %}
+<script src="/static/js/customforms.js"></script>
+
+<div id="wheel2"></div>
+<fieldset class="module aligned">
+<select name="type" id="id_type">
+<option value="" selected="selected">---------</option>
+{% for type in types %}
+<option value="{{type }}" >{{type }}</option>
+{% endfor %}
+</select></p>
+
+<input name="voila" type="submit" class="btn btn-info"  value="Enter" onclick="customformedit();"/>
+<input type="submit" class="btn btn-info"  value="New Type" onclick="customformcreate();"/>
+<p id="error"></p>
+<table><p id="forminfo"></p></table>
+<div id="validate" style="display: none;" align="center"><input type="submit" class="btn btn-info"  value="Update Form" onclick="customformupdate();"/></div>
+</fieldset>
+{% endblock content %}               
