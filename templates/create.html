@@ -39,7 +39,7 @@
 {% block extracontent %}
 <fieldset id="extracontent" class="module aligned">
 {% for customform in customforms|dictsort:"name" %}
-<div id="{{ customform.name }}">{{ customform.form.as_p }}</div>
+<div id="{{ customform.name }}">{{ customform.name }} Parameters:<p>{{ customform.form.as_p }}<hr></div>
 {% endfor %}
 <div id="custom"></div>
 </fieldset><p>

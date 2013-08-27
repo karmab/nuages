@@ -649,24 +649,21 @@ def customforms(request):
 	logging.debug("prout")
 	username	  = request.user.username
 	username          = User.objects.filter(username=username)[0]
-	if not username.is_staff:
-		information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
-		return render(request, 'information.html', { 'information' : information } )
-	elif request.method == 'POST':
+	if request.method == 'POST' and request.POST.has_key('type'):
 		type= request.POST.get('type')
 		attributes=[]
 		exec("type=%s()" % type)
 		for attr in type.fields:
 			if 'max_length' in type.fields[attr].__dict__:
-				fieldname='Char'
+				fieldname='Character'
 				specific=type.fields[attr].initial
 			elif '_choices' in type.fields[attr].__dict__:
 				fieldname='Choice'
 				specific=type.fields[attr].choices
 			elif 'max_value' in type.fields[attr].__dict__:
-				fieldname='Int'
+				fieldname='Integer'
 				specific=type.fields[attr].initial
-			attributes.append([attr,fieldname,type.fields[attr].required,specific])
+			attributes.append([attr,fieldname,specific,type.fields[attr].required])
 		attributes = json.dumps(attributes)
        		return HttpResponse(attributes,mimetype='application/json')
 	else:
@@ -683,10 +680,7 @@ def customforminfo(request):
         logging.debug("prout")
         username          = request.user.username
         username          = User.objects.filter(username=username)[0]
-        if not username.is_staff:
-                information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
-                return render(request, 'information.html', { 'information' : information } )
-        elif request.method == 'POST':
+        if request.method == 'POST':
                 type= request.POST.get('type')
                 exec("type=%s()" % type)
                 return HttpResponse(type.as_table())
@@ -697,3 +691,33 @@ def customforminfo(request):
                         if not element.startswith('__') and element != "forms":
                                 types.append(element)
                 return render(request, 'customforms.html', { 'username': username , 'types': types } )
+
+@login_required
+def customformedit(request):
+	logging.debug("prout")
+	username	  = request.user.username
+	username          = User.objects.filter(username=username)[0]
+	if request.method == 'POST' and request.POST.has_key('type'):
+		type= request.POST.get('type')
+		attributes=[]
+		exec("type=%s()" % type)
+		for attr in type.fields:
+			if 'max_length' in type.fields[attr].__dict__:
+				fieldname='Char'
+				specific=type.fields[attr].initial
+			elif '_choices' in type.fields[attr].__dict__:
+				fieldname='Choice'
+				specific=type.fields[attr].choices
+			elif 'max_value' in type.fields[attr].__dict__:
+				fieldname='Int'
+				specific=type.fields[attr].initial
+			attributes.append([attr,fieldname,specific,type.fields[attr].required])
+		attributes = json.dumps(attributes)
+       		return HttpResponse(attributes,mimetype='application/json')
+	else:
+		types=[]
+		import customtypes
+                for element in dir(customtypes):
+                        if not element.startswith('__') and element != "forms":
+				types.append(element)
+                return render(request, 'customformedit.html', { 'username': username , 'types': types } )
