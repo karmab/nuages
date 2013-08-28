@@ -8,21 +8,25 @@ function addparam() {
    if ( paramrequired == true ) {
     required = "checked" ;
     }
-   newattr = '<tr id="'+paramname+'"><td>'+paramname+'</td><td>'+paramtype+'</td><td><input type="text" value="'+paramdefault+'"></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="modify" onclick=modifyparam('+paramname+');"><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(' + paramname+ ');"></td></tr>';
+   newattr = '<tr id="'+paramname+'"><td>'+paramname+'</td><td>'+paramtype+'</td><td><input type="text" value="'+paramdefault+'"></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(\''+paramname+'\');"></td></tr>';
    $('#newparameter').replaceWith(newattr);
-   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Char</option><option value="ChoiceField">Choice</option><option value="IntegerField">Int</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="modify" onclick=modifyparam();"><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
+   $('#parameters').append(" "+paramname);
+   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Char</option><option value="ChoiceField">Choice</option><option value="IntegerField">Int</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
   }
   else if ( $('#newparameter-name').val() == "" ) {
    $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Name required for your new parameter!</div>");
    $("#results").show(200);
   }
   else {
-   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Char</option><option value="ChoiceField">Choice</option><option value="IntegerField">Int</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="modify" onclick=modifyparam();"><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
+   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Char</option><option value="ChoiceField">Choice</option><option value="IntegerField">Int</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
   }
 }
 
 function removeparam(element) {
-  $(element).hide();
+   $('#'+element).hide();
+   parameters = $('#parameters').html().replace(element,"");
+   $('#parameters').replaceWith('<div id="parameters">'+parameters+'</div>');
+   $('#parameters').show(400);
 }
 
 
@@ -89,7 +93,7 @@ function customformedit() {
 	if ( parameter[3] == true ) {
 	required = "checked" ;
 	}
-       newattr = '<tr id="'+parameter[0]+'"><td>'+parameter[0]+'</td><td>'+parameter[1]+'</td><td><input type="text" value="'+parameter[2]+'"></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="modify" onclick=modifyparam('+parameter[0]+');"><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(' + parameter[0]+ ');"></td></tr>';
+       newattr = '<tr id="'+parameter[0]+'"><td>'+parameter[0]+'</td><td>'+parameter[1]+'</td><td><input type="text" value="'+parameter[2]+'"></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(\''+parameter[0]+'\');"></td></tr>';
         attributesinfo = attributesinfo+newattr;
         });
         $('#forminfo').append(attributesinfo);
