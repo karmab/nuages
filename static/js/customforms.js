@@ -22,6 +22,15 @@ function addparam() {
   }
 }
 
+function customformcreate() {
+   $('#parameters').replaceWith('<div id="parameters"></div>');
+   $('#for_newtype').remove();
+   $('#newtype').remove();
+   $('#forminfo').replaceWith('<label id="for_newtype">New type name:</label><input type="text" id="newtype" ><table id="forminfo" border="1" class="alert alert-info"><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>');
+   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Char</option><option value="ChoiceField">Choice</option><option value="IntegerField">Int</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
+   $('#forminfo').append('<input type="submit"  class="btn btn-info" value="add parameter" onclick="addparam();"><input type="submit"  class="btn btn-info" value="update type" onclick="updatetype();"></table><p>');
+ }
+
 function removeparam(element) {
    $('#'+element).hide();
    parameters = $('#parameters').html().replace(element,"");
@@ -99,7 +108,6 @@ function customformedit() {
         $('#forminfo').append(attributesinfo);
         $('#forminfo').append('<input type="submit"  class="btn btn-info" value="add parameter" onclick="addparam();"><input type="submit"  class="btn btn-info" value="update type" onclick="updatetype();"></table><p>');
         $("#forminfo").show(500);
-        //$("#validate").show(500);
         $('#parameters').html(attributeslist);
         },
         error: function(jqXHR, textStatus, errorThrown) {
