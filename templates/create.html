@@ -26,6 +26,7 @@
 {{ credentials.info }}
 </fieldset><p>
 
+{% if customforms %}
 <fieldset class="module aligned">
 <label for="id_type">Type:</label> <select name="type" id="id_type" multiple>
 <option value="" selected="selected">---------</option>
@@ -34,7 +35,9 @@
 {% endfor %}
 </select> 
 </fieldset><p>
+{% endif %}
 {% endblock content %}
+
 
 {% block extracontent %}
 <fieldset id="extracontent" class="module aligned">

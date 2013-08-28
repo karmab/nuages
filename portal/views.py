@@ -4,7 +4,6 @@ import os
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from portal.models import *
-from portal.customtypes import *
 from portal.ovirt import Ovirt
 from portal.cobbler import Cobbler
 from portal.foreman import Foreman
@@ -17,6 +16,8 @@ import random
 from portal.ilo import Ilo
 import socket
 from django.db.models import Q
+if os.path.exists("portal/customtypes.py"):
+	from portal.customtypes import *
 
 def checkconn(host,port):
 	try:
@@ -172,14 +173,17 @@ def create(request):
 		else:
 			return render(request, 'create.html', { 'created': True,'name': name, 'username': username } )
 	else:
-		customforms=[]
-		import customtypes
-		for element in dir(customtypes):
-			if not element.startswith("__") and element != "forms":
-				exec("customform=%s()" % element)
-				customforms.append({'name':element,'form':customform})
 		vmform =  VMForm(request.user)
-		return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms } )
+		customforms=[]
+		if os.path.exists("portal/customtypes.py"):
+			import customtypes
+			for element in dir(customtypes):
+				if not element.startswith("__") and element != "forms":
+					exec("customform=%s()" % element)
+					customforms.append({'name':element,'form':customform})
+			return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms } )
+		else:
+			return render(request, 'create.html', { 'vmform': vmform, 'username': username } )
 
 @login_required
 def profiles(request):
@@ -659,7 +663,10 @@ def customforms(request):
 				specific=type.fields[attr].initial
 			elif '_choices' in type.fields[attr].__dict__:
 				fieldname='Choice'
-				specific=type.fields[attr].choices
+				#specific=type.fields[attr].choices
+				specific=[]
+				for element in type.fields[attr].choices:
+					specific.append(element[0])
 			elif 'max_value' in type.fields[attr].__dict__:
 				fieldname='Integer'
 				specific=type.fields[attr].initial
@@ -667,6 +674,9 @@ def customforms(request):
 		attributes = json.dumps(attributes)
        		return HttpResponse(attributes,mimetype='application/json')
 	else:
+		if not os.path.exists("portal/customtypes.py"):
+			information = { 'title':'No customforms' , 'details':'No customforms found.' }
+                	return render(request, 'information.html', { 'information' : information } )
 		types=[]
 		import customtypes
                 for element in dir(customtypes):
@@ -707,7 +717,10 @@ def customformedit(request):
 				specific=type.fields[attr].initial
 			elif '_choices' in type.fields[attr].__dict__:
 				fieldname='Choice'
-				specific=type.fields[attr].choices
+				#specific=type.fields[attr].choices
+				specific=[]
+				for element in type.fields[attr].choices:
+					specific.append(element[0])
 			elif 'max_value' in type.fields[attr].__dict__:
 				fieldname='Int'
 				specific=type.fields[attr].initial
@@ -715,6 +728,10 @@ def customformedit(request):
 		attributes = json.dumps(attributes)
        		return HttpResponse(attributes,mimetype='application/json')
 	else:
+		if not os.path.exists("portal/customtypes.py"):
+			#information = { 'title':'Missing customforms' , 'details':'Create customforms first!' }
+                	#return render(request, 'information.html', { 'information' : information } )
+                	return render(request, 'customformedit.html', { 'username': username  } )
 		types=[]
 		import customtypes
                 for element in dir(customtypes):
