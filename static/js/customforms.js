@@ -46,7 +46,7 @@ function customformedit() {
 	required = "checked" ;
 	}
         //newattr = '<tr><td>'+parameter[0]+'</td><td>'+parameter[1]+'</td><td><input type="text" value="'+parameter[2]+'"</></td><td><input type="checkbox" '+required+'></td></tr>';
-        newattr = '<tr><td>'+parameter[0]+'</td><td>'+parameter[1]+'</td><td><input type="text" value="'+parameter[2]+'"</></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit"  class="btn btn-info" value="update" onclick=updateparam('+parameter[0]+');"><input type="submit"  class="btn btn-info" value="remove" onclick=removeparam('+parameter[0]+');"></td></tr>';
+        newattr = '<tr id="'+parameter[0]+'"><td>'+parameter[0]+'</td><td>'+parameter[1]+'</td><td><input type="text" value="'+parameter[2]+'"></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="update" onclick=updateparam("'+parameter[0]+'");"><input type="submit" class="btn btn-info" value="remove" onclick=removeparam("'+parameter[0]+'");"></td></tr>';
         attributesinfo = attributesinfo+newattr;
         });
         $('#forminfo').append(attributesinfo);
@@ -58,4 +58,9 @@ function customformedit() {
                 alert(errorThrown);
         }
         });
+}
+
+function removeparam(parameter) {
+  alert(parameter);
+  $(parameter).hide();
 }
