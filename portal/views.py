@@ -659,16 +659,16 @@ def customforms(request):
 		exec("type=%s()" % type)
 		for attr in type.fields:
 			if 'max_length' in type.fields[attr].__dict__:
-				fieldname='Character'
+				fieldname='CharField'
 				specific=type.fields[attr].initial
 			elif '_choices' in type.fields[attr].__dict__:
-				fieldname='Choice'
+				fieldname='ChoiceField'
 				#specific=type.fields[attr].choices
 				specific=[]
 				for element in type.fields[attr].choices:
 					specific.append(element[0])
 			elif 'max_value' in type.fields[attr].__dict__:
-				fieldname='Integer'
+				fieldname='IntegerField'
 				specific=type.fields[attr].initial
 			attributes.append([attr,fieldname,specific,type.fields[attr].required])
 		attributes = json.dumps(attributes)
@@ -713,16 +713,16 @@ def customformedit(request):
 		exec("type=%s()" % type)
 		for attr in type.fields:
 			if 'max_length' in type.fields[attr].__dict__:
-				fieldname='Char'
+				fieldname='CharField'
 				specific=type.fields[attr].initial
 			elif '_choices' in type.fields[attr].__dict__:
-				fieldname='Choice'
+				fieldname='ChoiceField'
 				#specific=type.fields[attr].choices
 				specific=[]
 				for element in type.fields[attr].choices:
 					specific.append(element[0])
 			elif 'max_value' in type.fields[attr].__dict__:
-				fieldname='Int'
+				fieldname='IntegerField'
 				specific=type.fields[attr].initial
 			attributes.append([attr,fieldname,specific,type.fields[attr].required])
 		attributes = json.dumps(attributes)
