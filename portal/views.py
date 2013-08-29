@@ -1,5 +1,6 @@
 # Views here.
 import ast
+import fileinput
 import os
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
@@ -737,15 +738,25 @@ def customformedit(request):
                 for element in dir(customtypes):
                         if not element.startswith('__') and element != "forms":
 				types.append(element)
-                return render(request, 'customformedit.html', { 'username': username , 'types': types } )
+		if request.is_ajax():
+			types = json.dumps(types)
+        		return HttpResponse(types,mimetype='application/json')
+		else:
+                	return render(request, 'customformedit.html', { 'username': username , 'types': types } )
 
 @login_required
 def customformupdate(request):
+	logging.debug("prout")
 	if request.method == 'POST' and request.POST.has_key('parameters') and request.POST.has_key('type'):
-		type = request.POST['type']
+		type = request.POST['type'].capitalize()
 		parameters = request.POST['parameters']
+		if not os.path.exists("portal/customtypes.py") or not  open("portal/customtypes.py").readlines():
+			f=open("portal/customtypes.py","a")
+			f.write("from django import forms\n")
+			f.close()
 		if os.path.exists("portal/customtypes.py.lock"):
-			return HttpResponse("customtypes  currently edited by another user")
+			response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
+			return HttpResponse(response)
 		else:
 			#open lock file
 			open("portal/customtypes.py.lock", 'a').close()
@@ -756,37 +767,55 @@ def customformupdate(request):
 					types.append(element)
 			#it s an existing type, we must first remove  along with all of its attribute
 			if type in types:
-				print "prout"
 				attributes=[]
-				exec("type=%s()" % type)
-				for attr in type.fields:
-					attributes.append([attr]
+				exec("form=%s()" % type)
+				for attr in form.fields:
+					attributes.append(attr)
+				attributes.insert(0,type)
 				#NOW WE NEED TO PARSE THE FILE AND REMOVE ACCORDINGLY LINES!!!!
-			#if it s a new type, just add it at the end of  customtypes.py
-			else:
-				f=open("portal/customtypes.py", 'a')
-				f.write("class %s(forms.Form):" % type)
-				for parameter in parameters.split(';'):
-					name=parameter[0]
-					type=parameter[1]
-					default=parameter[2]
-					required=parameter[3]
-					if type == "IntegerField" and default != '':
-						f.write("\t%s\t= forms.%s(initial=\"%s\")" % (name,type,int(default) ) )
-					elif type == "CharacterField" and default != '':
-						f.write("\t%s\t= forms.%s(initial=\"%s\")" % (name,type,default ) )
-					elif type == "ChoiceField" and default != '':
-						choices=''
-						for choice in default.split(','):
-							if choices == '':
-								choices = "('%s', '%s')" % (choice,choice)
-							else:	
-								choices = choices+",('%s', '%s')" % (choice,choice)
-						f.write("\t%s\t= forms.%s(choices=(%s))" % (name,type,choices ) )
-					else:
-						f.write("\t%s\t= forms.%s()" % (name,type) )
-				f.close()
-
-			#it s an existing type, we must first remove 
+				for line in fileinput.input("portal/customtypes.py", inplace=True):
+					found = False
+					for attribute in attributes:
+						if attribute in line:
+							found = True
+							break
+					if not found:
+						print line,
+			#now add it at the end of  customtypes.py
+			#completefile = open("portal/customtypes.py").readlines()
+			parameters = parameters.split(' ')
+			#preliminary check for  uniqueness of parameters
+			#for parameter in parameters:
+			#	parameter=parameter.split(';')
+			#	name=parameter[0]
+			#	indices = [i for i, x in enumerate(completefile) if name in x ]
+			#	if len(indices) >1:
+			#		response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>parameter names need to be unique</div>"
+			#		return HttpResponse(response)
+			f = open("portal/customtypes.py", 'a')
+			f.write("class %s(forms.Form):\n" % type)
+			for parameter in parameters:
+				parameter=parameter.split(';')
+				name=parameter[0]
+				fieldtype=parameter[1]
+				default=parameter[2]
+				required=parameter[3]
+				if fieldtype == "IntegerField" and default != '':
+					f.write("\t%s\t= forms.%s(initial=%s)\n" % (name,fieldtype,int(default) ) )
+				elif fieldtype == "CharField" and default != '':
+					f.write("\t%s\t= forms.%s(initial=\"%s\")\n" % (name,fieldtype,default ) )
+				elif fieldtype == "ChoiceField" and default != '':
+					choices=''
+					for choice in default.split(','):
+						if choices == '':
+							choices = "('%s', '%s')" % (choice,choice)
+						else:	
+							choices = choices+",('%s', '%s')" % (choice,choice)
+					f.write("\t%s\t= forms.%s(choices=(%s))\n" % (name,fieldtype,choices ) )
+				else:
+					f.write("\t%s\t= forms.%s()\n" % (name,fieldtype) )
+			f.close()
 			#remove lock file
 			os.remove("portal/customtypes.py.lock")
+			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s updated</div>" % type
+			return HttpResponse(response)

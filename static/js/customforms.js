@@ -12,9 +12,11 @@ function addparam() {
    $('#newparameter').replaceWith(newattr);
    if ( $('#parameters').html() == "" ) {
    $('#parameters').append(paramname);
+   $('#parameters').hide();
    }
    else {
    $('#parameters').append(" "+paramname);
+   $('#parameters').hide();
    }
    $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">CharField</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
   }
@@ -25,6 +27,7 @@ function addparam() {
   else {
    $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">CharField</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
   }
+
 }
 
 function customformcreate() {
@@ -39,8 +42,8 @@ function customformcreate() {
 function removeparam(element) {
    $('#'+element).hide();
    parameters = $('#parameters').html().replace(element,"");
-   $('#parameters').replaceWith('<div id="parameters">'+parameters+'</div>');
-   $('#parameters').show(400);
+   $('#parameters').replaceWith('<div id="parameters" style="display: none;">'+parameters+'</div>');
+   $('#parameters').hide();
 }
 
 
@@ -121,6 +124,7 @@ function customformedit() {
         $('#forminfo').append('<input type="submit"  class="btn btn-info" value="add parameter" onclick="addparam();"></table><p>');
         $("#forminfo").show(500);
         $('#parameters').html(attributeslist);
+   	$('#parameters').hide();
         },
         error: function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
@@ -140,23 +144,35 @@ function customformupdate() {
  }
  parameters = $('#parameters').html();
  data = '';
+ missing = false;
  var parameters = parameters.split(' ');
  $.each(parameters, function(index, paramname) {
  paramtype=$('#'+paramname+"-type").html();
  paramdefault=$('#'+paramname+"-default").val();
  paramrequired=$('#'+paramname+"-required").prop("checked");
+ if ( ( paramtype  == undefined ) || ( paramdefault  == undefined ) || ( paramrequired  == undefined )  ) {
+  $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Missing parameters</div>");
+  $("#results").show(200);
+  missing = true ;
+  return;
+ }
  if ( index == 0 ) {
   data = paramname+";"+paramtype+";"+paramdefault+";"+paramrequired;
  } else {
   data = data+' ' +paramname+";"+paramtype+";"+paramdefault+";"+paramrequired;
  }
  });
+ if ( missing == true ) {
+ return;
+ }
   $.ajax({  
         type: "POST",
         url: '/nuages/customformupdate/',
-        data: { 'parameters' : data , 'type' : type  },
+        data: { 'type' : type , 'parameters' : data  },
         success: function(data) {
-	alert(data);
+   	$("#result").html(data);
+   	$("#results").show(200);
+        $('#id_type').append('<option value="'+type+'">'+type+'</option></select><p></p>');
   }
   });
 
