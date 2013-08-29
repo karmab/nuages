@@ -139,13 +139,25 @@ function customformupdate() {
   type=$('#id_type').val();
  }
  parameters = $('#parameters').html();
- data = [];
+ data = '';
  var parameters = parameters.split(' ');
  $.each(parameters, function(index, paramname) {
  paramtype=$('#'+paramname+"-type").html();
  paramdefault=$('#'+paramname+"-default").val();
  paramrequired=$('#'+paramname+"-required").prop("checked");
- data[index] = paramname+";"+paramtype+";"+paramdefault+";"+paramrequired;
+ if ( index == 0 ) {
+  data = paramname+";"+paramtype+";"+paramdefault+";"+paramrequired;
+ } else {
+  data = data+' ' +paramname+";"+paramtype+";"+paramdefault+";"+paramrequired;
+ }
  });
- alert(data);
+  $.ajax({  
+        type: "POST",
+        url: '/nuages/customformupdate/',
+        data: { 'parameters' : data , 'type' : type  },
+        success: function(data) {
+	alert(data);
+  }
+  });
+
 }

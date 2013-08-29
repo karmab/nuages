@@ -738,3 +738,55 @@ def customformedit(request):
                         if not element.startswith('__') and element != "forms":
 				types.append(element)
                 return render(request, 'customformedit.html', { 'username': username , 'types': types } )
+
+@login_required
+def customformupdate(request):
+	if request.method == 'POST' and request.POST.has_key('parameters') and request.POST.has_key('type'):
+		type = request.POST['type']
+		parameters = request.POST['parameters']
+		if os.path.exists("portal/customtypes.py.lock"):
+			return HttpResponse("customtypes  currently edited by another user")
+		else:
+			#open lock file
+			open("portal/customtypes.py.lock", 'a').close()
+			types=[]
+			import customtypes
+                	for element in dir(customtypes):
+                        	if not element.startswith('__') and element != "forms":
+					types.append(element)
+			#it s an existing type, we must first remove  along with all of its attribute
+			if type in types:
+				print "prout"
+				attributes=[]
+				exec("type=%s()" % type)
+				for attr in type.fields:
+					attributes.append([attr]
+				#NOW WE NEED TO PARSE THE FILE AND REMOVE ACCORDINGLY LINES!!!!
+			#if it s a new type, just add it at the end of  customtypes.py
+			else:
+				f=open("portal/customtypes.py", 'a')
+				f.write("class %s(forms.Form):" % type)
+				for parameter in parameters.split(';'):
+					name=parameter[0]
+					type=parameter[1]
+					default=parameter[2]
+					required=parameter[3]
+					if type == "IntegerField" and default != '':
+						f.write("\t%s\t= forms.%s(initial=\"%s\")" % (name,type,int(default) ) )
+					elif type == "CharacterField" and default != '':
+						f.write("\t%s\t= forms.%s(initial=\"%s\")" % (name,type,default ) )
+					elif type == "ChoiceField" and default != '':
+						choices=''
+						for choice in default.split(','):
+							if choices == '':
+								choices = "('%s', '%s')" % (choice,choice)
+							else:	
+								choices = choices+",('%s', '%s')" % (choice,choice)
+						f.write("\t%s\t= forms.%s(choices=(%s))" % (name,type,choices ) )
+					else:
+						f.write("\t%s\t= forms.%s()" % (name,type) )
+				f.close()
+
+			#it s an existing type, we must first remove 
+			#remove lock file
+			os.remove("portal/customtypes.py.lock")
