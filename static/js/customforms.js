@@ -177,3 +177,24 @@ function customformupdate() {
   });
 
 }
+
+
+
+function customformdelete() {
+ $("#forminfo").hide();
+ if ( $('#id_type').val() == ""  ) {
+  return;
+ }
+ type=$('#id_type').val();
+ $.ajax({  
+        type: "POST",
+        url: '/nuages/customformdelete/',
+        data: { 'type' : type  },
+        success: function(data) {
+   	$("#result").html(data);
+   	$("#results").show(200);
+   	types = $('#id_type').html().replace('<option value="'+type+'">'+type+'</option>',"");
+        $('#id_type').replaceWith('<select name="type" id="id_type">'+types+'</select><p>');
+  	}
+  });
+}

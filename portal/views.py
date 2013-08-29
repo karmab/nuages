@@ -819,3 +819,35 @@ def customformupdate(request):
 			os.remove("portal/customtypes.py.lock")
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s updated</div>" % type
 			return HttpResponse(response)
+
+@login_required
+def customformdelete(request):
+	logging.debug("prout")
+	if request.method == 'POST' and request.POST.has_key('type'):
+		type = request.POST['type'].capitalize()
+		if os.path.exists("portal/customtypes.py.lock"):
+			response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
+			return HttpResponse(response)
+		else:
+			#open lock file
+			open("portal/customtypes.py.lock", 'a').close()
+			types=[]
+			import customtypes
+			attributes=[]
+			exec("form=%s()" % type)
+			for attr in form.fields:
+				attributes.append(attr)
+			attributes.insert(0,type)
+			#NOW WE NEED TO PARSE THE FILE AND REMOVE ACCORDINGLY LINES!!!!
+			for line in fileinput.input("portal/customtypes.py", inplace=True):
+				found = False
+				for attribute in attributes:
+					if attribute in line:
+						found = True
+						break
+				if not found:
+					print line,
+			#remove lock file
+			os.remove("portal/customtypes.py.lock")
+			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
+			return HttpResponse(response)
