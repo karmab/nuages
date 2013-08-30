@@ -200,7 +200,7 @@ def profiles(request):
 	    providers = ""
 	    if profile.cobblerprofile:
 	    	cobblerprofile=profile.cobblerprofile
-            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Numcpu: %s<p>Memory: %s<p>Guestid: %s<p>Disksize1 in Gb: %s<p>Numero Interfaces: %s<p>Foreman Support: %s<p>Cobbler Support:%s<p>Iso: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p></div>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
+            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler Profile: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Number of cpus: %s<p>Memory: %sMo<p>Guestid: %s<p>Disksize first disk : %sGb<p>Number of network interfaces: %s<p>Foreman Enabled: %s<p>Cobbler Enabled:%s<p>Isos List Enabled: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p></div>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
         elif username.is_staff:
 	    profiles = Profile.objects.all()
 	    if not profiles:
