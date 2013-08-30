@@ -51,7 +51,7 @@ function console(){
 }
 
 function kill(vm,provider){
-var sure = confirm(vm+" will be killed.Sure?");
+var sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
  $("#wheel2").show();
  data = { 'name': vm , 'provider' : provider } ;

@@ -8,13 +8,15 @@
 
 <fieldset class="module aligned">
 
+<p class="alert alert-info" >select provider or wait a few seconds to get all its vms...</p>
 <select name="virtualprovider" id="id_virtualprovider">
 {% for vprovider in vproviders|dictsort:"name" %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>
 {% endfor %}
 </select></p>
 
-<p id="allvms" class="alert alert-info" >select provider or wait a few seconds...</p>
+<!--p id="allvms" class="alert alert-info" >select provider or wait a few seconds...</p-->
+<p id="allvms"></p>
 </fieldset>
 <p id="result"></p>
 

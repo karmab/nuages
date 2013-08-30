@@ -4,6 +4,7 @@
 
 {% block content %}
 <script src="/static/js/profiles.js"></script>
+<p class="alert alert-info" >Select profile to get its description</p>
 <select name="profile" id="id_profile">
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>

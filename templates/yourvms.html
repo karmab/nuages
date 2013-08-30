@@ -8,6 +8,7 @@
 
 <div id="wheel2"></div>
 <fieldset class="module aligned">
+<p class="alert alert-info" >Check this list of all vms created by you or members of your groups</p>
 <table border="1" class='alert alert-info'>
 <tr>
 <td>Vm Name</td>
@@ -38,7 +39,9 @@
 {% else  %}
 <img src="/static/img/blank.png"/>
 {% endif %}
+{% if vm.profile.deletable  %}
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
+{% endif %}
 </td>
 </tr>
 {% endfor %}

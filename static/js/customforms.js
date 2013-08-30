@@ -82,7 +82,7 @@ function customformget() {
         });
         $('#forminfo').append(attributesinfo);
         $('#forminfo').append('</table><p>');
-        $("#forminfo").show(500);
+        $("#forminfo").show(1000);
         },
         error: function(jqXHR, textStatus, errorThrown) {
                 alert(errorThrown);
