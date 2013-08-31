@@ -11,7 +11,7 @@
 <td>Date</td>
 <td>Total</td>
 </tr>
-{% for detail in details %}
+{% for detail in details reversed %}
 <tr>
 <td>{{ detail.month}}</td>
 <td>{{ detail.total }}{{default.currency}}</td>

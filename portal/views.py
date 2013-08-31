@@ -922,24 +922,27 @@ def invoice(request):
 			#at least this time
 			if month != nowmonth:
 				firstyear,firstmonth=month.split('-')
-				numdays = monthrange(firstyear,firstmonth)[1]
+				numdays = monthrange(int(firstyear),int(firstmonth))[1]
 				totaldays = int(numdays) -int(day) +1
 				total = totaldays*price
 				details.append({ 'month': month , 'total' : total })
 				month = createdwhen+ relativedelta(months=1)
+				month = month.strftime("%Y-%m")
 				while month != nowmonth:
 					month    = month.strftime("%Y-%m")
 					currentyear,currentmonth=month.split('-')
-					numdays = monthrange(currentyear,currentmonth)[1]
+					numdays = monthrange(int(currentyear),int(currentmonth))[1]
 					total = int(numdays)*price
 					details.append({ 'month': month , 'total' : total })
 					month = createdwhen+ relativedelta(months=1)
-				month    = month.strftime("%Y-%m")
-			        totaldays= int(nowday) -int(day) +1
-				total = totaldays*price
+					month = month.strftime("%Y-%m")
+			        total = int(nowday)*price
 				details.append({ 'month': month , 'total' : total  })
 				
 			else: 
+				now      = datetime.now()
+				nowday   = now.strftime("%d")
+				nowmonth = now.strftime("%Y-%m")
 				total = int(nowday)*price
-				details.append({ 'month': nowmonth , 'total' : total  })
+				details.append({ 'month': nowmonth , 'total' : nowday  })
                 	return render(request, 'invoice.html', { 'vm': vm , 'details': details , 'default': default } )
