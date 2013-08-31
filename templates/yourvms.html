@@ -46,7 +46,7 @@
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
 </td>
-<td>{{vm.price}}{{default.currency}}<a href="/nuages/invoice/?id={{ vm.id }}"><img src="/static/img/invoice.png"></td>
+<td><a href="/nuages/invoice/?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
 </tr>
 {% endfor %}
 </table>
