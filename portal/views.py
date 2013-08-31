@@ -864,12 +864,25 @@ def invoice(request):
 	if request.method == 'GET' and request.GET.has_key('id'):
 			vmid = request.GET.get('id')
 			vm = VM.objects.get(id=vmid)
+			virtualprovider = vm.virtualprovider.name
 			name = vm.name
     			response = HttpResponse(content_type='application/pdf')
     			response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
     			p = canvas.Canvas(response)
-    			p.drawString(100, 100, "This is the report for vm named %s" % name)
-    			p.drawString(100, 88, "Enjoy it")
+    			#p.drawString(100, 100, "This is the report for vm named %s" % name)
+    			#p.drawString(100, 88, "Enjoy it")
+			p.setLineWidth(.3)
+			p.setFont('Helvetica', 12)
+			p.drawString(30,750,'OFFICIAL COMMUNIQUE')
+			p.drawString(30,735,"OF %s" % virtualprovider)
+			p.drawString(500,750,"12/12/2010")
+			p.line(480,747,580,747)
+			p.drawString(275,725,'AMOUNT OWED:')
+			p.drawString(500,725,"$1,000.00")
+			p.line(378,723,580,723)
+			p.drawString(30,703,'RECEIVED BY:')
+			p.line(120,700,580,700)
+			p.drawString(120,703,"JOHN DOE")
     			p.showPage()
     			p.save()
     			return response	
