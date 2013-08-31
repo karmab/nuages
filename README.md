@@ -48,7 +48,7 @@ Requisites
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
     python websockify from epel
     paramiko ( to connect to ILO through ssh)
-    python-reportlab ( if you plan to generate invoices)
+    python-reportlab and python-dateutil( if you plan to generate invoices)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
     optionally apache server  with mod_wsgi
 

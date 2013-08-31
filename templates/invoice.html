@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Invoice information for {{vm.name}}{% endblock %}
+
+{% block content %}
+<p class="alert alert-info" >Here s invoice information for vm: {{vm.name}}</p>
+<a href="/nuages/invoicepdf/?id={{ vm.id }}"><img src="/static/img/invoicepdf.png">
+<fieldset class="module aligned">
+
+<table border="1" class='alert alert-info'>
+<tr>
+<td>Date</td>
+<td>Total</td>
+</tr>
+{% for detail in details %}
+<tr>
+<td>{{ detail.month}}</td>
+<td>{{ detail.total }}{{default.currency}}</td>
+</tr>
+{% endfor %}
+</table>
+</fieldset>
+{% endblock content %}

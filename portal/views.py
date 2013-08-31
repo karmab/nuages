@@ -18,6 +18,7 @@ from portal.ilo import Ilo
 import socket
 from django.db.models import Q
 from datetime import datetime
+from calendar import monthrange
 
 if os.path.exists("portal/customtypes.py"):
 	from portal.customtypes import *
@@ -854,8 +855,14 @@ def customformdelete(request):
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
 			return HttpResponse(response)
 
+
+
+
+
+
+
 @login_required
-def invoice(request):
+def invoicepdf(request):
 	try:
 		from reportlab.pdfgen import canvas
 	except:
@@ -886,3 +893,53 @@ def invoice(request):
     			p.showPage()
     			p.save()
     			return response	
+
+
+
+@login_required
+def invoice(request):
+	try:
+		from dateutil.relativedelta import relativedelta
+	except:
+        	information = { 'title':'Missing library' , 'details':'python-dateutil missing.Contact administrator...' }
+        	return render(request, 'information.html', { 'information' : information } )
+	if request.method == 'GET' and request.GET.has_key('id'):
+			default = Default.objects.all()[0]
+			details = []
+			vmid = request.GET.get('id')
+			vm = VM.objects.get(id=vmid)
+			virtualprovider = vm.virtualprovider.name
+			price = vm.price
+			if not price:
+        			information = { 'title':'Missing information' , 'details':'no invoice available for this VM' }
+        			return render(request, 'information.html', { 'information' : information } )
+			createdwhen = vm.createdwhen
+			month    = createdwhen.strftime("%Y-%m")
+			day      = createdwhen.strftime("%d")
+			now      = datetime.now()
+			nowday   = now.strftime("%d")
+			nowmonth = now.strftime("%Y-%m")
+			#at least this time
+			if month != nowmonth:
+				firstyear,firstmonth=month.split('-')
+				numdays = monthrange(firstyear,firstmonth)[1]
+				totaldays = int(numdays) -int(day) +1
+				total = totaldays*price
+				details.append({ 'month': month , 'total' : total })
+				month = createdwhen+ relativedelta(months=1)
+				while month != nowmonth:
+					month    = month.strftime("%Y-%m")
+					currentyear,currentmonth=month.split('-')
+					numdays = monthrange(currentyear,currentmonth)[1]
+					total = int(numdays)*price
+					details.append({ 'month': month , 'total' : total })
+					month = createdwhen+ relativedelta(months=1)
+				month    = month.strftime("%Y-%m")
+			        totaldays= int(nowday) -int(day) +1
+				total = totaldays*price
+				details.append({ 'month': month , 'total' : total  })
+				
+			else: 
+				total = int(nowday)*price
+				details.append({ 'month': nowmonth , 'total' : total  })
+                	return render(request, 'invoice.html', { 'vm': vm , 'details': details , 'default': default } )
