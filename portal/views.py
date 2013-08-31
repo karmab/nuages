@@ -855,12 +855,6 @@ def customformdelete(request):
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
 			return HttpResponse(response)
 
-
-
-
-
-
-
 @login_required
 def invoicepdf(request):
 	try:
@@ -898,6 +892,8 @@ def invoicepdf(request):
 
 @login_required
 def invoice(request):
+	username	  = request.user.username
+	username          = User.objects.filter(username=username)[0]
 	try:
 		from dateutil.relativedelta import relativedelta
 	except:
@@ -945,4 +941,4 @@ def invoice(request):
 				nowmonth = now.strftime("%Y-%m")
 				total = int(nowday)*price
 				details.append({ 'month': nowmonth , 'total' : nowday  })
-                	return render(request, 'invoice.html', { 'vm': vm , 'details': details , 'default': default } )
+                	return render(request, 'invoice.html', { 'vm': vm , 'username': username  , 'details': details , 'default': default } )
