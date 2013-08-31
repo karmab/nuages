@@ -17,6 +17,8 @@ import random
 from portal.ilo import Ilo
 import socket
 from django.db.models import Q
+from datetime import datetime
+
 if os.path.exists("portal/customtypes.py"):
 	from portal.customtypes import *
 
@@ -134,7 +136,7 @@ def create(request):
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
 		#VM CREATION IN DB
-		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup,)
+		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
 		success = newvm.save()
 		if success != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
@@ -481,9 +483,9 @@ def yourvms(request):
 			vm.status = status
 			resultvms.append(vm)
 	if len(removed) >= 1:
-		return render(request, 'yourvms.html', { 'vms': resultvms , 'removed': removed, 'username': username , 'default' : default } )
+		return render(request, 'yourvms.html', { 'vms': resultvms , 'removed': removed, 'username': username , 'default' : default  } )
 	else:
-		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default } )
+		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
 
 
 @login_required
@@ -851,3 +853,23 @@ def customformdelete(request):
 			os.remove("portal/customtypes.py.lock")
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
 			return HttpResponse(response)
+
+@login_required
+def invoice(request):
+	try:
+		from reportlab.pdfgen import canvas
+	except:
+        	information = { 'title':'Missing library' , 'details':'python-reportlab missing.Contact administrator...' }
+        	return render(request, 'information.html', { 'information' : information } )
+	if request.method == 'GET' and request.GET.has_key('id'):
+			vmid = request.GET.get('id')
+			vm = VM.objects.get(id=vmid)
+			name = vm.name
+    			response = HttpResponse(content_type='application/pdf')
+    			response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+    			p = canvas.Canvas(response)
+    			p.drawString(100, 100, "This is the report for vm named %s" % name)
+    			p.drawString(100, 88, "Enjoy it")
+    			p.showPage()
+    			p.save()
+    			return response	

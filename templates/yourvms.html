@@ -8,20 +8,23 @@
 
 <div id="wheel2"></div>
 <fieldset class="module aligned">
-<p class="alert alert-info" >Check this list of all vms created by you or members of your groups</p>
+<p class="alert alert-info" >Here s a list of all vms created by you or your groups peers</p>
 <table border="1" class='alert alert-info'>
 <tr>
 <td>Vm Name</td>
 <td>Created by</td>
+<td>Created when</td>
 <td>Provider</td>
 <td>Profile</td>
 <td>Status</td>
-<td>Action</td>
+<td>Actions</td>
+<td>Billing</td>
 </tr>
 {% for vm in vms|dictsort:"name" %}
 <tr>
 <td>{{ vm.name}}</td>
 <td>{{ vm.createdby }}</td>
+<td>{{ vm.createdwhen|date:'Y-m-d H:i' }}</td>
 {% if vm.physical %}
 <td>Physical</td>
 {% else  %}
@@ -43,6 +46,7 @@
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
 </td>
+<td>{{vm.price}}{{default.currency}}<a href="/nuages/invoice/?id={{ vm.id }}"><img src="/static/img/invoice.png"></td>
 </tr>
 {% endfor %}
 </table>
