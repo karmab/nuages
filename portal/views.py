@@ -942,3 +942,41 @@ def invoice(request):
 				total = int(nowday)*price
 				details.append({ 'month': nowmonth , 'total' : nowday  })
                 	return render(request, 'invoice.html', { 'vm': vm , 'username': username  , 'details': details , 'default': default } )
+
+
+@login_required
+def profilecopy(request):
+        logging.debug("prout")
+        username          = request.user.username
+        username          = User.objects.filter(username=username)[0]
+        groups            = username.groups
+        profiles=Profile.objects.all()
+        if request.method == 'POST' and request.is_ajax():
+		if request.method.has_key('newprofile'):
+			profile = request.POST['profile']
+            		profile=Profile.objects.get(name=profile)
+			newprofile = request.POST['newprofile']
+			profile.name = newprofile
+			profile.pk = None
+			profile.save()
+            		return HttpResponse("profile successfully copied")
+		else:
+            		profile = request.POST['profile']
+            		profile=Profile.objects.get(name=profile)
+            		cobblerprofile=profile.name
+            		providers = ""
+            		if profile.cobblerprofile:
+                		cobblerprofile=profile.cobblerprofile
+            		return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler Profile: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Number of cpus: %s<p>Memory: %sMo<p>Guestid: %s<p>Disksize first disk : %sGb<p>Number of network interfaces: %s<p>Foreman Enabled: %s<p>Cobbler Enabled:%s<p>Isos List Enabled: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p></div>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
+        elif username.is_staff:
+            profiles = Profile.objects.all()
+            if not profiles:
+                information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
+                return render(request, 'information.html', { 'information' : information } )
+            else:
+                return render(request, 'profilecopy.html', { 'profiles': profiles , 'username': username } )
+
+
+
+
+

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Nuages Profile copy{% endblock %}
+
+{% block content %}
+<script src="/static/js/profiles.js"></script>
+<p class="alert alert-info" >Select profile and enter name to copy it</p>
+<select name="profile" id="id_profile">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}
+</select>
+<div id="voila2"><input name="voila2" type="submit" class="btn btn-info" value="Enter" onclick="getprofile();"/><input type="submit" class="btn btn-info"  value="Copy Profile" onclick="copyprofile();"/><p></div>
+<input type="text" id="id_newprofile"/><p>
+<fieldset class="module aligned">
+<div id="profileinfo" ><p>
+</fieldset>
+{% endblock content %}
