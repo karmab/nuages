@@ -952,14 +952,17 @@ def profilecopy(request):
         groups            = username.groups
         profiles=Profile.objects.all()
         if request.method == 'POST' and request.is_ajax():
-		if request.method.has_key('newprofile'):
+		if request.POST.has_key('newprofile'):
 			profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)
 			newprofile = request.POST['newprofile']
+            		exist=Profile.objects.filter(name=newprofile)
+			if exist:
+            			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile allready existing</div>")
 			profile.name = newprofile
 			profile.pk = None
 			profile.save()
-            		return HttpResponse("profile successfully copied")
+            		return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied</div>")
 		else:
             		profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)

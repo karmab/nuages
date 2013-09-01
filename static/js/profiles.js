@@ -17,8 +17,6 @@ function getprofile(){
 }
 
 function profilecopy(){
-  alert("prout");
-  return;
   var profile = $('#id_profile').val();
   var newprofile = $('#id_newprofile').val();
   var data = { 'profile' : profile , 'newprofile' : newprofile} ;
