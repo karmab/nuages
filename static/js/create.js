@@ -354,6 +354,10 @@ $( document ).ready(function() {
 	storagedomain.append('</select><p>');
 	storagedomain.show(400) ;
 	storagedomainlabel.show(400) ;
+	if ( hide == true ) {
+		storagedomainlabel.hide();
+		$('#id_storagedomain').hide();
+			    }
 	}
     if ( ( index == 8 ) && ( cobbler == true ) )  {	
 	$('#id_cobblerprovider').replaceWith('<select name="cobblerprovider" id="id_cobblerprovider">');

@@ -132,7 +132,7 @@ def create(request):
 		vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
 		if len(vms) > 0:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM %s allready exists</div>" % name)
-		if not physical and not virtualprovider.type == 'fake':
+		if not physical and not virtualprovider.type == 'fake' and not profile.autostorage:
 			storageresult=checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain)
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
@@ -344,8 +344,22 @@ def profileinfo(request):
 			if type != "fake":
 				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
 				storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
-				for stor in storagelist: 
-					storages.append(stor.name)
+				if profile.autostorage:	
+					#RETRIEVE BEST STORAGE DOMAIN
+					if type == 'ovirt':
+ 						ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+						storages = [ovirt.beststorage()]
+						ovirt.close()
+					elif type == 'vsphere': 
+						pwd = os.environ["PWD"]
+                        			beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+                        			bestds = os.popen(beststoragecommand).read()
+						storages=[bestds]
+					else:
+						storages=["N/A"]
+				else:
+					for stor in storagelist: 
+						storages.append(stor.name)
 			else:
 				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
 				storages=['N/A']

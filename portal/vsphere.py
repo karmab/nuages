@@ -383,11 +383,37 @@ class Vsphere:
 		results[datastorename] = [float(total),float(available),dc.getName()]
 	return results
 
+
+ def beststorage(self):
+	dclist={}
+	hostlist={}
+	dslist={}
+	clusterlist={}
+	networklist={}
+	guestlist=[]
+	rootFolder = self.rootFolder
+	dc = self.dc
+	clu = self.clu
+	pool= self.pool
+	vmfolder = self.vmfolder
+        bestds = ''
+	bestsize = 0 
+	for dts in clu.getDatastores():
+ 		datastorename = dts.getName()
+		available = float(dssize(dts)[1].replace('GB',''))
+		if availables > bestsize:
+			bestsize = available
+			bestds = datastorename
+	return bestds
+
 if __name__ == '__main__':
  	action,vcip,vcuser,vcpassword,dc,clu=sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5],sys.argv[6]
  	vsphere=Vsphere(vcip,vcuser,vcpassword,dc,clu)
  	if action == 'getstorage':
  		storage = vsphere.getstorage()
+ 		print storage
+ 	if action == 'beststorage':
+ 		storage = vsphere.beststorage()
  		print storage
  	if action == 'allvms':
  		storage = vsphere.allvms()
