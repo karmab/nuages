@@ -875,40 +875,87 @@ def customformdelete(request):
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
 			return HttpResponse(response)
 
-@login_required
+#@login_required
 def invoicepdf(request):
 	try:
 		from reportlab.pdfgen import canvas
 	except:
         	information = { 'title':'Missing library' , 'details':'python-reportlab missing.Contact administrator...' }
         	return render(request, 'information.html', { 'information' : information } )
+	try:
+		from dateutil.relativedelta import relativedelta
+	except:
+        	information = { 'title':'Missing library' , 'details':'python-dateutil missing.Contact administrator...' }
+        	return render(request, 'information.html', { 'information' : information } )
 	if request.method == 'GET' and request.GET.has_key('id'):
+			now      = datetime.now()
+			nowday   = now.strftime("%d")
+			nowmonth = now.strftime("%Y-%m")
+			details = []
+			default = Default.objects.all()[0]
+			currency = default.currency
 			vmid = request.GET.get('id')
 			vm = VM.objects.get(id=vmid)
+			price = vm.price
 			virtualprovider = vm.virtualprovider.name
 			name = vm.name
+			createdwhen = vm.createdwhen
+			month    = createdwhen.strftime("%Y-%m")
+			day      = createdwhen.strftime("%d")
     			response = HttpResponse(content_type='application/pdf')
-    			response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+    			response['Content-Disposition'] = 'attachment; filename="%s_%s_%s"' % (now.strftime("%Y-%m-%d"),virtualprovider,vm.name)
     			p = canvas.Canvas(response)
-    			#p.drawString(100, 100, "This is the report for vm named %s" % name)
-    			#p.drawString(100, 88, "Enjoy it")
 			p.setLineWidth(.3)
 			p.setFont('Helvetica', 12)
-			p.drawString(30,750,'OFFICIAL COMMUNIQUE')
-			p.drawString(30,735,"OF %s" % virtualprovider)
-			p.drawString(500,750,"12/12/2010")
-			p.line(480,747,580,747)
-			p.drawString(275,725,'AMOUNT OWED:')
-			p.drawString(500,725,"$1,000.00")
+			p.drawString(30,750,'Billing information regarding VM %s' % name)
+			p.drawString(30,735,"From provider %s" % virtualprovider)
+			p.drawString(500,750,"Date: %s" % datetime.now().strftime("%Y-%m-%d"))
+			p.drawString(275,725,'Price per day:')
+			p.drawString(500,725,"%s" % vm.price+currency)
 			p.line(378,723,580,723)
-			p.drawString(30,703,'RECEIVED BY:')
-			p.line(120,700,580,700)
-			p.drawString(120,703,"JOHN DOE")
+			p.drawString(30,703,'Owner:')
+			#p.line(120,700,580,700)
+			p.drawString(120,703,"%s" % vm.createdby)
+			p.drawString(30,680,'Month:')
+			#p.line(120,700,580,700)
+			p.drawString(120,680,"Total price:")
+			y = 660
+			#at least this time
+			if month != nowmonth:
+				firstyear,firstmonth=month.split('-')
+				numdays = monthrange(int(firstyear),int(firstmonth))[1]
+				totaldays = int(numdays) -int(day) +1
+				total = str(totaldays*price)+currency
+				p.drawString(30,y,"%s" % month)
+				p.drawString(120,y,total)
+				y = y -20
+				month = createdwhen+ relativedelta(months=1)
+				month = month.strftime("%Y-%m")
+				while month != nowmonth:
+					month    = month.strftime("%Y-%m")
+					currentyear,currentmonth=month.split('-')
+					numdays = monthrange(int(currentyear),int(currentmonth))[1]
+					total = str(int(numdays)*price)+currency
+					p.drawString(30,y,"%s" % month)
+					p.drawString(120,y,total)
+					y = y -20
+					month = createdwhen+ relativedelta(months=1)
+					month = month.strftime("%Y-%m")
+			        total = str(int(nowday)*price)+currency
+				p.drawString(30,y,"%s" % month)
+				p.drawString(120,y,total)
+				
+			else: 
+				now      = datetime.now()
+				nowday   = now.strftime("%d")
+				nowmonth = now.strftime("%Y-%m")
+				total = str(int(nowday)*price)+currency
+				p.drawString(30,y,"%s" % nowmonth)
+				p.drawString(120,y,total)
+				y = y -20
     			p.showPage()
     			p.save()
     			return response	
-
-
 
 @login_required
 def invoice(request):
