@@ -132,7 +132,7 @@ def create(request):
 		vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
 		if len(vms) > 0:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM %s allready exists</div>" % name)
-		if not physical:
+		if not physical and not virtualprovider.type == 'fake':
 			storageresult=checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain)
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
@@ -341,10 +341,14 @@ def profileinfo(request):
 		else:
 			virtualprovider=profile.virtualprovider
 			type=virtualprovider.type
-			provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
-			storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
-			for stor in storagelist: 
-				storages.append(stor.name)
+			if type != "fake":
+				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
+				storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
+				for stor in storagelist: 
+					storages.append(stor.name)
+			else:
+				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
+				storages=['N/A']
 		if physical and request.POST.has_key('ipilo'):
 			type = 'ilo'
 			ipilo = request.POST.get('ipilo')
@@ -477,6 +481,8 @@ def yourvms(request):
 			statuscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'status', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
 			status = os.popen(statuscommand).read()
 			if status =='': status = None
+		if not vm.physical and virtualprovider.type == 'fake':
+			status = "N/A"
 		if not status:
 			vm.delete()	
 			removed.append(vm)

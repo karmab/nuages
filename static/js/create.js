@@ -255,6 +255,11 @@ $( document ).ready(function() {
         	mac1label.show(400) ;
         	$('#id_mac1').show(400);
 		break;	
+	case 'fake':
+		$('#id_mac1').replaceWith('<input type="text" name="mac1" id="id_mac1"></input>');	
+        	mac1label.show(400) ;
+        	$('#id_mac1').show(400);
+		break;	
 	case 'iso':
 		$('#id_iso').replaceWith('<select name="iso" id="id_iso">');	
 		$.each(parameter, function(index, value){

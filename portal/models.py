@@ -349,6 +349,11 @@ class VM(models.Model):
                                 macaddr=ovirt.macaddr
                         if not physical and virtualprovider.type == 'vsphere':
                                 macaddr=vspheremacaddr
+                        if not physical and virtualprovider.type == 'fake':
+				if mac1:
+                                	macaddr=[mac1]
+				else:
+                                	macaddr=['11:11:11:11:11:11']
                         if physical:
                                 macaddr=[mac1]
 				if mac2:
