@@ -179,6 +179,8 @@ Screenshots
 ![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages2.png)
 ![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages3.png)
 ![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages4.png)
+![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages5.png)
+![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages6.png)
 
 Caveeats?                                                                                                                                                                      
 ---------
