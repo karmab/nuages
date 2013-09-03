@@ -1022,11 +1022,13 @@ def profilecopy(request):
 		if request.POST.has_key('newprofile'):
 			profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)
+			oldname = profile.name
 			newprofile = request.POST['newprofile']
             		exist=Profile.objects.filter(name=newprofile)
 			if exist:
             			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile allready existing</div>")
 			profile.name = newprofile
+			profile.cobblerprofile = oldname
 			profile.pk = None
 			profile.save()
             		return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied</div>")

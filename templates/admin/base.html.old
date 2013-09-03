@@ -17,22 +17,19 @@
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
 <script src="/static/js/jquery.js"></script>
-<script src="/static/js/wheel.js"></script>
-<script src="/static/js/highcharts.js"></script>
-<script src="/static/js/exporting.js"></script>
 <script src="/static/bootstrap/js/bootstrap.min.js"></script>
 <!-- Container -->
 <div id="container">
 
     {% if not is_popup %}
     <!-- Header -->
-    <div id="header">
+    <div id="header" class="navbar"><div class="navbar-inner">
         <div id="branding">
         {% block branding %}{% endblock %}
         </div>
         {% if user.is_active and user.is_staff %}
         <div id="user-tools">
-            {% trans 'Welcome,' %}
+            {% trans 'Logged as' %}
             <strong>{% filter force_escape %}{% firstof user.first_name user.username %}{% endfilter %}</strong>.
             {% block userlinks %}
                 {% url 'django-admindocs-docroot' as docsroot %}
@@ -40,9 +37,10 @@
                     <a href="{{ docsroot }}">{% trans 'Documentation' %}</a> /
                 {% endif %}
                 <a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a> /
-                <a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a>
+                <a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a> /
+                <a href="/nuages">Nuages</a>
             {% endblock %}
-        </div>
+        </div></div>
         {% endif %}
         {% block nav-global %}{% endblock %}
     </div>

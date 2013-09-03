@@ -4,7 +4,6 @@ body {
     font: 100% verdana, arial, sans-serif;
     background-color: #fff;
     margin: 50px;
-    /* background-image:url('/static/img/nuages.jpg'); */
     background-repeat:no-repeat;
     background-size: 100% auto;
 }
@@ -74,7 +73,7 @@ ul#tabnav li.active a {
 table
 {
    margin: auto;
-   border: 4px outset green;
+   border: 4px;
    border-collapse: collapse;
 }
 
