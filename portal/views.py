@@ -123,7 +123,7 @@ def create(request):
 		else:
 			foremanprovider=None
 		if type:
-			parameters = "type=%s %s" % (type.name, parameters)
+			parameters = "type=%s %s" % (type, parameters)
 		
 		#CHECK SECTION
 		if not physical and virtualprovider.type =='vsphere' and disksize2:
