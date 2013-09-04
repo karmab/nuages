@@ -46,6 +46,7 @@ Requisites
     python-ldap for ldap auth
     ovirt-engine-sdk package from epel (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
+    libvirt-python and python-lxml ( only if you will connect to libvirt hosts)
     python websockify from epel
     paramiko ( to connect to ILO through ssh)
     python-reportlab and python-dateutil( if you plan to generate invoices)

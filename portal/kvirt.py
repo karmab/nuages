@@ -111,14 +111,13 @@ class Kvirt:
 
  def console(self,name):
     conn = self.conn
-    print conn.getInfo()
     vm = conn.lookupByName(name)
     if not vm:
   		return None
     else:
         xml = vm.XMLDesc(0)
         root = ET.fromstring(xml)
-        for element in root.iter('graphics'):
+        for element in root.getiterator('graphics'):
             attributes = element.attrib
             protocol = attributes['type']
             port = attributes['port']
