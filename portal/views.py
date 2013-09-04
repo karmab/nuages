@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from portal.models import *
 from portal.ovirt import Ovirt
+from portal.kvirt import Kvirt
 from portal.cobbler import Cobbler
 from portal.foreman import Foreman
 import django.utils.simplejson as json
@@ -42,6 +43,15 @@ def checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain):
 		ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 		storageinfo = ovirt.getstorage()
 		ovirt.close()
+		remaining = int(storageinfo[storagedomain][1]) - size
+		if remaining <=0:
+			return "Not enough space on storagedomain %s.%s GB needed !"  % (storagedomain,size)
+		else:
+			return 'OK'
+	if virtualprovider.type =='kvirt':
+		kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+		storageinfo = kvirt.getstorage()
+		kvirt.close()
 		remaining = int(storageinfo[storagedomain][1]) - size
 		if remaining <=0:
 			return "Not enough space on storagedomain %s.%s GB needed !"  % (storagedomain,size)
@@ -253,6 +263,18 @@ def storage(request):
 				 	storage.save()
 			storageinfo = json.dumps(storageinfo)
         		return HttpResponse(storageinfo,mimetype='application/json')
+		elif virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+			storageinfo = kvirt.getstorage()
+			kvirt.close()
+			#add storage domains to DB if they dont exist
+			for stor in storageinfo.keys():
+				if not Storage.objects.filter(name=stor).exists():
+					datacenter = storageinfo[stor][2]
+					storage=Storage(name=stor,type=virtualprovider.type,provider=virtualprovider,datacenter=datacenter)
+				 	storage.save()
+			storageinfo = json.dumps(storageinfo)
+        		return HttpResponse(storageinfo,mimetype='application/json')
 		elif virtualprovider.type == 'vsphere':
 			jythoncommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'], 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
 			storageinfo = os.popen(jythoncommand).read()
@@ -267,7 +289,7 @@ def storage(request):
        			return HttpResponse(storageinfo,mimetype='application/json')
         else:
 		if username.is_staff:
-			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
+			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
 		else:
 			usergroups = []
 			groups		  = username.groups
@@ -290,7 +312,7 @@ def storage(request):
 			vquery = Q(name=vproviderslist[0])
 			for provider in vproviderslist:
 				vquery = vquery|Q(name=provider)
-			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
+			vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
 			vproviders=vproviders.filter(vquery)
             	if not vproviders:
         		information = { 'title':'Missing elements' , 'details':'Create Virtual providers first...' }
@@ -350,6 +372,10 @@ def profileinfo(request):
  						ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 						storages = [ovirt.beststorage()]
 						ovirt.close()
+					elif type == 'kvirt':
+						kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+						storages = [kvirt.beststorage()]
+						kvirt.close()
 					elif type == 'vsphere': 
 						pwd = os.environ["PWD"]
                         			beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
@@ -376,6 +402,15 @@ def profileinfo(request):
  				ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 				isos = ovirt.getisos()
 				ovirt.close()
+				isoslist=[]
+				for iso in isos: 
+					specific.append(iso)
+		if type =='kvirt' and profile.iso:
+				type = 'iso'
+				specific=[]
+				kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+				isos = kvirt.getisos()
+				kvirt.close()
 				isoslist=[]
 				for iso in isos: 
 					specific.append(iso)
@@ -435,6 +470,17 @@ def virtualprovidertype(request):
 				results=['iso']
 				for iso in isos: 
 					results.append(iso)
+		if virtualprovider.type == 'kvirt' and request.POST.has_key('profile'):
+			profile = request.POST.get('profile')
+			profile = Profile.objects.filter(id=profile)[0]
+			if profile.iso:
+				kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+				isos = kvirt.getisos()
+				kvirt.close()
+				isoslist=[]
+				results=['iso']
+				for iso in isos: 
+					results.append(iso)
 		results = json.dumps(results)
 		return HttpResponse(results,mimetype='application/json')
 
@@ -490,6 +536,10 @@ def yourvms(request):
  			ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 			status = ovirt.status(name)
 			ovirt.close()
+		if not vm.physical and virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+			status = kvirt.status(name)
+			kvirt.close()
 		if not vm.physical and virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			statuscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'status', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
@@ -527,6 +577,13 @@ def allvms(request):
 			for vm in vms:
 				resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
 			return render(request, 'allvms2.html', { 'vms': resultvms , 'console' : True , 'username': username } )
+		if virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+			vms = kvirt.allvms()
+			kvirt.close()
+			for vm in vms:
+				resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
+			return render(request, 'allvms2.html', { 'vms': resultvms , 'console' : True , 'username': username } )
 		if virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
@@ -536,7 +593,7 @@ def allvms(request):
 				resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
 			return render(request, 'allvms2.html', { 'vms': resultvms, 'username': username } )
 	else:
-		vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere'))
+		vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
 		form = StorageForm()
 		return render(request, 'allvms.html', { 'vproviders' : vproviders , 'username': username} )
 
@@ -565,10 +622,15 @@ def console(request):
 			virtualprovidername = request.GET.get('virtualprovider')
 	    	virtualprovider = VirtualProvider.objects.get(name=virtualprovidername)
 		default = Default.objects.all()[0]
-                if virtualprovider.type == 'ovirt':
-                        ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-			host,port,ticket,protocol = ovirt.console(vmname)
-			ovirt.close()
+                if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
+			if virtualprovider.type == 'ovirt':
+                        	ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+				host,port,ticket,protocol = ovirt.console(vmname)
+				ovirt.close()
+			if virtualprovider.type == 'kvirt':
+				kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+				host,port,ticket,protocol = kvirt.console(vmname)
+				kvirt.close()
 			sockhost=default.consoleip
 			sockport = random.randint(10000,60000)
 			pwd = os.environ["PWD"]
@@ -601,6 +663,11 @@ def start(request):
 			results=ovirt.start(vmname)
 			ovirt.close()
 			return HttpResponse(results)
+                elif virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+			results=kvirt.start(vmname)
+			kvirt.close()
+			return HttpResponse(results)
 		elif virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
@@ -619,6 +686,11 @@ def stop(request):
                         ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 			results= ovirt.stop(vmname)
 			ovirt.close()
+			return HttpResponse(results)
+                elif virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+			results= kvirt.stop(vmname)
+			kvirt.close()
 			return HttpResponse(results)
 		elif virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
@@ -652,6 +724,10 @@ def kill(request):
                         ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 			r=ovirt.remove(name)
 			ovirt.close()
+                elif virtualprovider and virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+			r=kvirt.remove(name)
+			kvirt.close()
 		elif virtualprovider and virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )

@@ -27,7 +27,7 @@ guestwindows2008 = "windows_2008"
 guestwindows200864 = "windows_2008x64"
 
 class Kvirt:
- def __init__(self,host,port,user,password,protocol='ssh'):
+ def __init__(self,host,port,user,protocol='ssh'):
     if user and port :
         url = "qemu+%s://%s@%s:%s/system" % (protocol,user,host,port)
     elif port:
