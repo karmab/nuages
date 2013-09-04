@@ -73,7 +73,7 @@ class Kvirt:
         used = "%.2f" % ( float(s[2])/1024/1024/1024 )
         available = "%.2f" % ( float(s[3])/1024/1024/1024 )
         #Type,Status, Total space in Gb, Available space in Gb
-        results[storagename ] = [used, available,storagename]
+        results[storagename ] = [float(used), float(available),storagename]
     return results
 
  def beststorage(self):
