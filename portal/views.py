@@ -22,7 +22,8 @@ from datetime import datetime
 from calendar import monthrange
 
 if os.path.exists("portal/customtypes.py"):
-	from portal.customtypes import *
+	from customtypes import *
+
 
 def checkconn(host,port):
 	try:
