@@ -14,8 +14,9 @@
     <title>Nuages Console</title>
         <link rel="stylesheet" type="text/css" media="all" href="/static/css/design.css" />
         <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="/static/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+        <link href="/static/css/font-awesome.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
-        <script src="/static/bootstrap/js/bootstrap.min.js"></script>
     <meta charset="utf-8">
 
     <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
@@ -45,20 +46,33 @@
 </head>
 
 <body style="margin: 0px;">
-    <div class="navbar"><div class="navbar-inner">
+<div class="navbar"><div class="navbar-inner">
 <ul class="nav">
-     <li><a href="https://github.com/karmab/nuages"><img src="/static/img/nuages.png"/></a></li>
-     <li class="active"><a href="/nuages/vms/">Create</a></li>
-     <li><a href="/nuages/storage/">Storage</a></li>
+      <a class="brand"><img src="/static/img/nuages.png"></a>
+      <li class="divider-vertical"></li>
+     <li><a href="/nuages/vms/">Create</a></li>
+     <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Information<b class="caret"></b></a>
+      <ul class="dropdown-menu">
+     <li><a href="/nuages/storage/" >Storage</a></li>
      <li><a href="/nuages/profiles/">Profiles</a></li>
+     <li><a href="/nuages/customforms">CustomForms</a></li>
+     </ul></li>
      <li><a href="/nuages/yourvms/">Your VMS</a></li>
      {% if username.is_staff  %}
-     <li><a href="/nuages/allvms/">All VMS</a></li>
+     <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin<b class="caret"></b></a>
+      <ul class="dropdown-menu">
+       <li><a href="/nuages/allvms/">All VMS</a></li>
+       <li><a href="/nuages/customformedit">CustomForm Edit</a></li>
+       <li><a href="/nuages/profilecopy">Profile Copy</a></li>
+       <li><a href="/admin">Configuration</a></li>
+     </ul></li>
      {% endif %}
      <li><a href="/logout/">Logout {{ username.username  }}</a></li>
 </ul>
 </div></div>
-<div>
+
 <table align="left" border="1" class="table table-bordered" >
 <tr>
 <td>Vm Name</td>

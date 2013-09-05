@@ -6,6 +6,7 @@ import time
 import libvirt
 import xml.etree.ElementTree as ET
 
+KB = 1024*1024
 MB = 1024*1024
 GB = 1024*MB
 guestrhel332 = "rhel_3"
@@ -37,14 +38,113 @@ class Kvirt:
 	self.macaddr = []
     self.conn = libvirt.open(url)
     self.host = host
+    self.macaddr = []
+
 
  def close(self):
 	conn=self.conn
 	conn.close()
 	self.conn=None
 
+
  def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None):
-    return "prout"
+	conn=self.conn
+	type,machine,emulator = 'kvm','pc','/usr/libexec/qemu-kvm'
+	memory = memory*1024
+	disksize1 = disksize1*GB
+        #disksize1 = int(disksize1) * 1073741824
+        if disksize2:
+                disksize2 = disksize2*GB
+	storagename = "%s.img" % name
+        storagepool = conn.storagePoolLookupByName(storagedomain)
+        poolxml = storagepool.XMLDesc(0)
+        root = ET.fromstring(poolxml)
+        for element in root.getiterator('path'):
+            storagepath = element.text
+	    break
+	allocation = 0
+        diskxml = """<volume>
+  			<name>%s</name>
+  			<key>%s/%s</key>
+  			<source>
+  			</source>
+  			<capacity unit='bytes'>%s</capacity>
+  			<allocation unit='bytes'>0</allocation>
+  			<target>
+    			<path>%s/%s</path>
+    			<format type='%s'/>
+  			</target>
+			</volume>""" % (storagename, storagepath,storagename,disksize1,  storagepath,storagename,diskformat1)
+        storagepool.createXML(diskxml, 0)
+	storagepool.refresh(0)
+	diskdev,diskbus = 'vda','virtio'
+	if diskinterface != 'virtio':
+		diskdev,diskbus = 'hda','ide'
+
+	#create xml
+        vmxml = """<domain type='%s'>
+                  <name>%s</name>
+                  <memory>%d</memory>
+                  <vcpu>%s</vcpu>
+                  <os>
+                    <type arch='x86_64' machine='%s'>hvm</type>
+                    <boot dev='hd'/>
+                    <boot dev='cdrom'/>
+                    <bootmenu enable='yes'/>
+                  </os>
+                  <features>
+                    <acpi/>
+                    <apic/>
+                    <pae/>
+                  </features>
+                  <clock offset='utc'/>
+                  <on_poweroff>destroy</on_poweroff>
+                  <on_reboot>restart</on_reboot>
+                  <on_crash>restart</on_crash>
+                  <devices>
+                    <emulator>%s</emulator>
+                    <disk type='file' device='disk'>
+                      <driver name='qemu' type='%s'/>
+                      <source file='%s/%s'/>
+	      <target dev='%s' bus='%s'/>
+    		</disk>
+                <disk type='file' device='cdrom'>
+                      <driver name='qemu' type='raw'/>
+                      <source file=''/>
+                      <target dev='hdc' bus='ide'/>
+                      <readonly/>
+                  </disk>
+		<interface type='network'>
+                  <source network='%s'/>
+		<model type='virtio'/>
+		</interface>
+                 <input type='tablet' bus='usb'/>
+                 <input type='mouse' bus='ps2'/>
+                <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
+                 <listen type='address' address='0.0.0.0'/>
+                </graphics>
+                <memballoon model='virtio'/>
+                </devices>
+                </domain>""" % (type, name, memory, numcpu, machine,emulator, diskformat1, storagepath,storagename, diskdev, diskbus, net1)
+	conn.defineXML(vmxml)
+        vm = conn.lookupByName(name)
+        vm.setAutostart(1)
+        xml = vm.XMLDesc(0)
+        root = ET.fromstring(xml)
+	macs={}
+        for element in root.getiterator('interface'):
+		mac = element.find('mac').get('address')
+		network = element.find('source').get('network')
+		bridge = element.find('source').get('bridge')
+		if bridge:
+			macs[bridge]=mac
+		else:
+			macs[network]=mac
+	for net in [net1,net2,net3,net4]:
+		if not net:
+			break
+		else:
+			self.macaddr.append(macs[net])
 
  def start(self,name):
     conn = self.conn
@@ -104,8 +204,7 @@ class Kvirt:
     conn = self.conn
     status = {0:'down',1:'up'}
     vms = {}
-    for ID in conn.listDomainsID():
-        vm = conn.lookupByID(ID)
+    for vm in conn.listAllDomains(0):
         vms[vm.name()] = status[vm.isActive()]
     return vms
 
@@ -119,11 +218,13 @@ class Kvirt:
         root = ET.fromstring(xml)
         for element in root.getiterator('graphics'):
             attributes = element.attrib
+	    if attributes['listen'] == '127.0.0.1':
+                return None,None,None,None
             protocol = attributes['type']
             port = attributes['port']
             if protocol=="spice":
-                sport = attributes['sport']
-                return self.host,sport,None,protocol
+                #sport = attributes['tlsPort']
+                return self.host,port,None,protocol
             else:
                 return self.host,port,None,protocol
 
@@ -138,8 +239,18 @@ class Kvirt:
     return isos
 
  def remove(self,name):
-    conn = self.conn
-    vm = conn.lookupByName(name)
-    vm.undefine()
-    print "VM %s killed" % name
-    return True
+	conn = self.conn
+	vm = conn.lookupByName(name)
+	status = {0:'down',1:'up'}
+	vm = conn.lookupByName(name)
+#	print dir(vm)
+#	xml = vm.XMLDesc(0)
+#	root = ET.fromstring(xml)
+#	for element in root.getiterator('graphics'):
+#            attributes = element.attrib
+#	return
+	if status[vm.isActive()]!="down":
+		vm.destroy()
+	vm.undefine()
+	print "VM %s killed" % name
+	return True

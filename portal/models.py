@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 import time
 from portal.ovirt import Ovirt
+from portal.kvirt import Kvirt
 from portal.cobbler import Cobbler
 from portal.foreman import Foreman
 import django.utils.simplejson as json
@@ -323,6 +324,10 @@ class VM(models.Model):
                         ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                         ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso)
                         ovirt.close()
+                if not physical and virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                        kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso)
+                        kvirt.close()
                 if not physical and virtualprovider.type == 'vsphere':
                         pwd = os.environ["PWD"]
                         #get best datastore
@@ -378,6 +383,10 @@ class VM(models.Model):
                         ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                         ovirt.start(name)
                         ovirt.close()
+                if not physical and virtualprovider.type == 'kvirt':
+			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                        kvirt.start(name)
+                        kvirt.close()
                 if not physical and virtualprovider.type == 'vsphere':
                         startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (pwd,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                         os.popen(startcommand).read()

@@ -631,15 +631,25 @@ def console(request):
 				kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
 				host,port,ticket,protocol = kvirt.console(vmname)
 				kvirt.close()
+				if not host:
+					information = { 'title':'Console not configured' , 'details':'the display of this vm doesnt listen on the host ip' }
+                			return render(request, 'information.html', { 'information' : information } )
 			sockhost=default.consoleip
 			sockport = random.randint(10000,60000)
 			pwd = os.environ["PWD"]
 			information = { 'host' : sockhost , 'port' : sockport , 'ticket' : ticket }
 			vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
-			if protocol =="spice":
+			if protocol =="spice" and virtualprovider.type == 'ovirt':
 				pwd = os.environ["PWD"]
 				cert="%s/%s.pem" % (pwd,virtualprovider.name)
 				websockifycommand = "websockify %s -D --timeout=30 --cert %s --ssl-target %s:%s" % (sockport,cert,host,port)
+				os.popen(websockifycommand)
+				return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
+			if protocol =="spice" and virtualprovider.type == 'kvirt':
+				pwd = os.environ["PWD"]
+				#cert="%s/%s.pem" % (pwd,virtualprovider.name)
+				#websockifycommand = "websockify %s -D --timeout=30 --cert %s --ssl-target %s:%s" % (sockport,cert,host,port)
+				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 			elif protocol =="vnc":
@@ -647,9 +657,11 @@ def console(request):
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 		else:
-			return HttpResponse("Console not implemented for %s" % virtualprovider.type )
+			information = { 'title':'Console not implemented' , 'details':"Console not implemented for %s" % virtualprovider.type }
+                	return render(request, 'information.html', { 'information' : information } )
 	else:
-			return redirect('portal.views.yourvms')
+			information = { 'title':'Wrong Console' , 'details':"something went wrong.Report to sysadmin" }
+                	return render(request, 'information.html', { 'information' : information } )
 		
 
 @login_required
