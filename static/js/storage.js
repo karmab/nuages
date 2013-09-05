@@ -35,6 +35,10 @@ function getstorage(){
 	}
 	var sd = "#storageinfo" + counter ; 
 	counter = counter +1 ; 
+    Highcharts.setOptions({
+             colors: ['#48D1CC', '#50B432']
+            });
+
         //$('#storageinfo').highcharts({
         $(sd).highcharts({
             chart: {
@@ -46,13 +50,12 @@ function getstorage(){
                 text: key
             },
             tooltip: {
-        	pointFormat: '{series.name}: <b>{point.percentage}%</b>',
-            	percentageDecimals: 1
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
             },
             plotOptions: {
                 pie: {
                     allowPointSelect: true,
-		    showInLegend: true,
+		            showInLegend: true,
                     cursor: 'pointer',
                     dataLabels: {
                         enabled: true,
@@ -70,7 +73,8 @@ function getstorage(){
                 name: 'Storage Information',
                 data: [
                     ['Used',   value[0] ],
-                    ['Available', value[1]  ]
+                   // ['Available', value[1]  ]
+                { name: 'Available', y:value[1], sliced : false , selected: true  }
                 ]
             }]
         });
