@@ -98,7 +98,7 @@ class VirtualProvider(models.Model):
 	port                = models.IntegerField(default=VIRTUALPORT)
 	user                = models.CharField(max_length=60)
 	password            = models.CharField(max_length=20)
-	type                = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere'),('kvirt', 'kvirt'),('fake', 'fake') ))
+	type                = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere'),('kvirt', 'libvirt'),('fake', 'fake') ))
 	ssl      	    = models.BooleanField(default=True)
 	clu                 = models.CharField(max_length=50,blank=True)
 	datacenter          = models.CharField(max_length=50, blank=True)
@@ -345,6 +345,8 @@ class VM(models.Model):
                 if cobbler and cobblerprovider:
                         if not physical and virtualprovider.type == 'ovirt':
                                 macaddr=ovirt.macaddr
+                        if not physical and virtualprovider.type == 'kvirt':
+                                macaddr=kvirt.macaddr
                         if not physical and virtualprovider.type == 'vsphere':
                                 macaddr=vspheremacaddr
                         if not physical and virtualprovider.type == 'fake':

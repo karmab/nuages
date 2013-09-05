@@ -76,10 +76,27 @@ class Kvirt:
   			</target>
 			</volume>""" % (storagename, storagepath,storagename,disksize1,  storagepath,storagename,diskformat1)
         storagepool.createXML(diskxml, 0)
+	if disksize2:
+		storagename2 = "%s-1.img" % name
+        	diskxml = """<volume>
+  			<name>%s</name>
+  			<key>%s/%s</key>
+  			<source>
+  			</source>
+  			<capacity unit='bytes'>%s</capacity>
+  			<allocation unit='bytes'>0</allocation>
+  			<target>
+    			<path>%s/%s</path>
+    			<format type='%s'/>
+  			</target>
+			</volume>""" % (storagename2, storagepath,storagename2,disksize2,  storagepath,storagename2,diskformat1)
+        	storagepool.createXML(diskxml, 0)
 	storagepool.refresh(0)
-	diskdev,diskbus = 'vda','virtio'
+	diskdev1,diskbus1 = 'vda','virtio'
+	diskdev2,diskbus2 = 'vdb','virtio'
 	if diskinterface != 'virtio':
-		diskdev,diskbus = 'hda','ide'
+		diskdev1,diskbus1 = 'hda','ide'
+		diskdev2,diskbus2 = 'hdb','ide'
 	if not iso:
 		iso = ''
 	else:
@@ -110,26 +127,54 @@ class Kvirt:
                     <disk type='file' device='disk'>
                       <driver name='qemu' type='%s'/>
                       <source file='%s/%s'/>
-	      <target dev='%s' bus='%s'/>
-    		</disk>
-                <disk type='file' device='cdrom'>
+	      	      <target dev='%s' bus='%s'/>
+    		    </disk>""" % (type, name, memory, numcpu, machine,emulator, diskformat1, storagepath,storagename, diskdev1, diskbus1)
+	if disksize2:
+		vmxml="""%s
+			<disk type='file' device='disk'>
+                      	<driver name='qemu' type='%s'/>
+                      	<source file='%s/%s'/>
+                      	<target dev='%s' bus='%s'/>
+                    	</disk>""" % (vmxml,diskformat1, storagepath,storagename2, diskdev2, diskbus2)
+
+	vmxml="""%s
+		<disk type='file' device='cdrom'>
                       <driver name='qemu' type='raw'/>
                       <source file='%s'/>
                       <target dev='hdc' bus='ide'/>
                       <readonly/>
                   </disk>
-		<interface type='network'>
+		 <interface type='network'>
                   <source network='%s'/>
 		<model type='virtio'/>
-		</interface>
-                 <input type='tablet' bus='usb'/>
+		</interface>"""% (vmxml,iso,net1)
+	if net2:
+		vmxml="""%s
+		 <interface type='network'>
+                  <source network='%s'/>
+		<model type='virtio'/>
+		</interface>"""% (vmxml,net2)
+	if net3:
+		vmxml="""%s
+		 <interface type='network'>
+                  <source network='%s'/>
+		<model type='virtio'/>
+		</interface>"""% (vmxml,net3)
+	if net4:
+		vmxml="""%s
+		 <interface type='network'>
+                  <source network='%s'/>
+		<model type='virtio'/>
+		</interface>"""% (vmxml,net4)
+	vmxml="""%s
+		<input type='tablet' bus='usb'/>
                  <input type='mouse' bus='ps2'/>
                 <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
                  <listen type='address' address='0.0.0.0'/>
                 </graphics>
                 <memballoon model='virtio'/>
                 </devices>
-                </domain>""" % (type, name, memory, numcpu, machine,emulator, diskformat1, storagepath,storagename, diskdev, diskbus, iso,net1)
+                </domain>""" % (vmxml)
 	conn.defineXML(vmxml)
         vm = conn.lookupByName(name)
         vm.setAutostart(1)
@@ -254,7 +299,8 @@ class Kvirt:
 		source = element.find('source')
 		if source != None:
 			imagefile = element.find('source').get('file')
-			disks.append(imagefile)
+			if not 'iso' in imagefile:
+				disks.append(imagefile)
 	if status[vm.isActive()]!="down":
 		vm.destroy()
 	vm.undefine()
