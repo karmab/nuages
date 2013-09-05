@@ -80,7 +80,11 @@ class Kvirt:
 	diskdev,diskbus = 'vda','virtio'
 	if diskinterface != 'virtio':
 		diskdev,diskbus = 'hda','ide'
-
+	if not iso:
+		iso = ''
+	else:
+		iso= "%s/%s" % (storagepath,iso)
+	
 	#create xml
         vmxml = """<domain type='%s'>
                   <name>%s</name>
@@ -110,7 +114,7 @@ class Kvirt:
     		</disk>
                 <disk type='file' device='cdrom'>
                       <driver name='qemu' type='raw'/>
-                      <source file=''/>
+                      <source file='%s'/>
                       <target dev='hdc' bus='ide'/>
                       <readonly/>
                   </disk>
@@ -125,7 +129,7 @@ class Kvirt:
                 </graphics>
                 <memballoon model='virtio'/>
                 </devices>
-                </domain>""" % (type, name, memory, numcpu, machine,emulator, diskformat1, storagepath,storagename, diskdev, diskbus, net1)
+                </domain>""" % (type, name, memory, numcpu, machine,emulator, diskformat1, storagepath,storagename, diskdev, diskbus, iso,net1)
 	conn.defineXML(vmxml)
         vm = conn.lookupByName(name)
         vm.setAutostart(1)
@@ -243,14 +247,28 @@ class Kvirt:
 	vm = conn.lookupByName(name)
 	status = {0:'down',1:'up'}
 	vm = conn.lookupByName(name)
-#	print dir(vm)
-#	xml = vm.XMLDesc(0)
-#	root = ET.fromstring(xml)
-#	for element in root.getiterator('graphics'):
-#            attributes = element.attrib
-#	return
+	vmxml = vm.XMLDesc(0)
+	root = ET.fromstring(vmxml)
+	disks=[]
+        for element in root.getiterator('disk'):
+		source = element.find('source')
+		if source != None:
+			imagefile = element.find('source').get('file')
+			disks.append(imagefile)
 	if status[vm.isActive()]!="down":
 		vm.destroy()
 	vm.undefine()
+    	for storage in conn.listStoragePools():
+		deleted = False
+        	storagename = storage
+        	storage = conn.storagePoolLookupByName(storage) 
+		for stor in storage.listVolumes():
+			for disk in disks:
+				if stor in disk:
+					volume = storage.storageVolLookupByName(stor)
+					volume.delete(0)
+					deleted = True
+		if deleted:
+			storage.refresh(0)
 	print "VM %s killed" % name
 	return True
