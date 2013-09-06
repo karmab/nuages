@@ -508,6 +508,7 @@ def yourvms(request):
 		default = Default.objects.all()[0]
 	resultvms=[]
 	removed=[]
+	activeproviders={}
 	for vm in vms:
 		name = vm.name
 		#handle physical machines
@@ -534,6 +535,7 @@ def yourvms(request):
         	except socket.error:
 			continue
 		if not vm.physical and virtualprovider.type == 'ovirt':
+			#IMPROVE THIS CODE AS IT MAKES LOADING OF THE PAGE SLOW!!!
  			ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 			status = ovirt.status(name)
 			ovirt.close()

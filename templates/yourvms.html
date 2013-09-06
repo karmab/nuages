@@ -54,11 +54,11 @@
 </fieldset>
 
 {% if removed %}
-Additional information:
+<p class="alert alert-success" >Additional information:
 {% for vm in removed %}
-
-<p>{{vm.name}} was removed from DB<p>
+{{vm.name}} was removed from DB
 {% endfor %}
+</p>
 {% endif %}
 
 {% endblock content %}               
