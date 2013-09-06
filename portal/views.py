@@ -610,8 +610,8 @@ def console(request):
 			vm = VM.objects.get(id=vmid)
 			vmname = vm.name
 			virtualprovidername = vm.virtualprovider
-            vmcreatedby = vm.createdby.username
-            if vmcreatedby !=username.username:
+		vmcreatedby = vm.createdby.username
+            	if vmcreatedby !=username.username:
 			    vmgroups = vm.createdby.groups
 			    commongroup = False
 			    for group in vmgroups.all():
