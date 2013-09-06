@@ -610,14 +610,18 @@ def console(request):
 			vm = VM.objects.get(id=vmid)
 			vmname = vm.name
 			virtualprovidername = vm.virtualprovider
-			vmgroups = vm.createdby.groups
-			commongroup = False
-			for group in vmgroups.all():
-				if group in usergroups.all():
-					commongroup = True
-					break
-			if not commongroup:
-				return redirect('portal.views.yourvms')
+            vmcreatedby = vm.createdby.username
+            if vmcreatedby !=username.username:
+			    vmgroups = vm.createdby.groups
+			    commongroup = False
+			    for group in vmgroups.all():
+				    if group in usergroups.all():
+					    commongroup = True
+					    break
+			    if not commongroup:
+				    #return redirect('portal.views.yourvms')
+                    information = { 'title':'Console not authorized' , 'details':'Your user is not authorized to access this VM' }
+                    return render(request, 'information.html', { 'information' : information } )
 		if request.GET.has_key('name') and request.GET.has_key('virtualprovider') and username.is_staff:
 			vmname = request.GET.get('name')
 			virtualprovidername = request.GET.get('virtualprovider')
