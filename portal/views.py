@@ -16,6 +16,7 @@ from django.contrib.auth.models import User
 import logging
 import random
 from portal.ilo import Ilo
+from portal.oa import Oa
 import socket
 from django.db.models import Q
 from datetime import datetime
@@ -391,12 +392,22 @@ def profileinfo(request):
 				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
 				storages=['N/A']
 		if physical and request.POST.has_key('ipilo'):
-			type = 'ilo'
-			ipilo = request.POST.get('ipilo')
-			ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
-			macs = ilo.getmacs()
-			for mac in macs:
-				specific.append(mac)
+			if physicalprovider.type=='ilo':
+				type = 'ilo'
+				ipilo = request.POST.get('ipilo')
+				ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
+				macs = ilo.getmacs()
+				for mac in macs:
+					specific.append(mac)
+			elif physicalprovider.type=='oa' and request.POST.has_key('name'):
+				name = request.POST.get('name')
+				type = 'oa'
+				ipilo = request.POST.get('ipilo')
+				oa=Oa(ipilo,physicalprovider.user,physicalprovider.password)
+				bladeid = oa.getid(name)
+				macs = oa.getmacs(bladeid)
+				for mac in macs:
+					specific.append(mac)
 		if type =='ovirt' and profile.iso:
 				type = 'iso'
 				specific=[]
@@ -460,6 +471,14 @@ def virtualprovidertype(request):
 			macs = ilo.getmacs()
 			for mac in macs:
 				results.append(mac)
+		if virtualprovider.type == 'oa' and request.POST.has_key('ipilo') and request.POST.has_key('name'):
+			name = request.POST.get('name')
+			ipilo = request.POST.get('ipilo')
+			oa=Oa(ipilo,virtualprovider.user,virtualprovider.password)
+			bladeid = oa.getid(name)
+			macs = oa.getmacs(bladeid)
+			for mac in macs:
+				results.append(mac)
 		if virtualprovider.type == 'ovirt' and request.POST.has_key('profile'):
 			profile = request.POST.get('profile')
 			profile = Profile.objects.filter(id=profile)[0]
@@ -520,8 +539,13 @@ def yourvms(request):
                 		sock.settimeout(5)
                 		sock.connect((ipilo, 22))
 				ipilo = vm.ipilo
-				ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
-				status = ilo.status()
+				if physicalprovider.type =='ilo':
+					ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
+					status = ilo.status()
+				elif physicalprovider.type =='oa':
+					oa=Oa(ipilo,physicalprovider.user,physicalprovider.password)
+					bladeid =oa.getid(name)
+					status = oa.status(bladeid)
 				vm.status = status
 				resultvms.append(vm)
 				continue
@@ -725,8 +749,12 @@ def kill(request):
 	if request.method == 'POST':
 		name     = request.POST.get('name')
 		provider = request.POST.get('provider')
-		virtualprovider= VirtualProvider.objects.get(name=provider)
-	    	vm = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
+		if provider =='':
+			virtualprovider = None
+	    		vm = VM.objects.filter(name=name).filter(physical=True)[0]
+		else:
+			virtualprovider= VirtualProvider.objects.get(name=provider)
+	    		vm = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
 		cobblerprovider=vm.cobblerprovider
 		foremanprovider=vm.foremanprovider
 		results=[]

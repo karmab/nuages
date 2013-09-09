@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 import logging
 import random
 from portal.ilo import Ilo
+from portal.oa import Oa
 import socket
 from django.forms import ModelForm
 from django.db.models import Q
@@ -88,7 +89,7 @@ class PhysicalProvider(models.Model):
 	name                = models.CharField(max_length=20)
 	user                = models.CharField(max_length=60)
 	password            = models.CharField(max_length=20)
-	type                = models.CharField(max_length=20, default='ilo',choices=( ('ilo', 'ilo'),('drac', 'drac'),('ssh', 'ssh'),('fake', 'fake') ))
+	type                = models.CharField(max_length=20, default='ilo',choices=( ('ilo', 'ilo'),('oa','oa'),('drac', 'drac'),('ssh', 'ssh'),('fake', 'fake') ))
 	def __unicode__(self):
 		return self.name
 
@@ -377,10 +378,14 @@ class VM(models.Model):
 			if foremanparameters and parameters:
                         	f.addparameters(name=name,dns=dns,parameters=parameters)
 		super(VM, self).save(*args, **kwargs)
-                if physical:
+                if physical and physicalprovider.type == 'ilo':
                         ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
                         ilo.pxe()
                         ilo.reset()
+                if physical and physicalprovider.type == 'oa':
+                        oa=Oa(ipilo,physicalprovider.user,physicalprovider.password)
+			bladeid = oa.getid(name)
+                        oa.pxe(bladeid)
                 if not physical and virtualprovider.type == 'ovirt':
                         ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                         ovirt.start(name)

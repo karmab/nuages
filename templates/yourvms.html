@@ -44,7 +44,11 @@
 <img src="/static/img/blank.png"/>
 {% endif %}
 {% if vm.profile.deletable  %}
+{% if vm.physical %}
+<img src="/static/img/kill.png" onclick="kill('{{vm.name}}','');" />
+{% else  %}
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
+{% endif %}
 {% endif %}
 </td>
 <td><a href="/nuages/invoice/?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>

@@ -120,7 +120,7 @@ $( document ).ready(function() {
 			var additionaliplabel = $('#id_iplabel'+String(numif)+"_"+String(numvm));
  			additionalip.show(400);
  			additionaliplabel.show(400);
-			if ( profiletype == 'ilo' ) {
+			if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
 				var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
 				var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
  				additionalmac.show(400);
@@ -188,6 +188,7 @@ $( document ).ready(function() {
   result.hide();
   var profile = $('#id_profile').val();
   var ipiloval = $('#id_ip1').val();
+  var name = $('#id_name').val();
   var isoslist = '';
   var macslist = '';
   foreman = false;
@@ -199,12 +200,18 @@ $( document ).ready(function() {
 	$("#result").show(500);
 	return;
   }
+  if ( ( physical.prop('checked') == true ) && ( name == '' ) ) {
+  	$("#result").hide();
+	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Name is required to be set if physical is checked!</div>");
+	$("#result").show(500);
+	return;
+  }
   $('#id_mac1').replaceWith('<input style="display: none;" id="id_mac1" name="mac1" maxlength="20" type="text"><p>');
   $('#id_iso').replaceWith('<select style="display: none;" name="iso" id="id_iso">');
   $.ajax({  
    type: 'POST',
    url: '/nuages/profileinfo/',
-   data: { 'profile' : profile , 'ipilo' : ipiloval , 'physical' : physical.prop('checked') } ,
+   data: { 'profile' : profile , 'ipilo' : ipiloval , 'name': name , 'physical' : physical.prop('checked') } ,
    success: function(data) {
    profiletype = '' ;
    $.each(data, function(index, parameter) {
@@ -236,7 +243,7 @@ $( document ).ready(function() {
 	}
     if ( index == 3 ) {
 	switch (profiletype){
-	case 'ilo':
+	case 'ilo','oa':
 		if ( parameter != "" ) {
 		$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
 		$.each(parameter, function(index, value){
@@ -285,7 +292,7 @@ $( document ).ready(function() {
 	if ( parameter >= 2 ) {
  	ip2label.show(400);
  	ip2.show(400);
-	if ( profiletype == 'ilo' ) {
+	if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
 	if ( macslist != "" ) {
 		$('#id_mac2').replaceWith('<select name="mac2" id="id_mac2">');	
         	$('#id_mac2').html(macslist);
@@ -298,7 +305,7 @@ $( document ).ready(function() {
 	if ( parameter >= 3 ) {
  	ip3label.show(400);
  	ip3.show(400);
-	if ( profiletype == 'ilo' ) {
+	if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
 	if ( macslist != "" ) {
 	$('#id_mac3').replaceWith('<select name="mac3" id="id_mac3">');	
         $('#id_mac3').html(macslist);
@@ -312,7 +319,7 @@ $( document ).ready(function() {
 	if ( parameter >= 4 ) {
  	ip4label.show(400);
  	ip4.show(400);
-	if ( profiletype == 'ilo' ) {
+	if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
 	if ( macslist != "" ) {
 	$('#id_mac4').replaceWith('<select name="mac4" id="id_mac4">');	
         $('#id_mac4').html(macslist);
@@ -337,7 +344,7 @@ $( document ).ready(function() {
 			var additionaliplabel = $('#id_iplabel'+String(numif)+"_"+String(numvm));
  			additionalip.show(400);
  			additionaliplabel.show(400);
-			if ( profiletype == 'ilo' ) {
+			if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
 			var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
 			var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
  			additionalmac.show(400);
