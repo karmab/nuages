@@ -30,6 +30,16 @@ class Cobbler:
  		self.token = self.s.login(cobbleruser,cobblerpassword)
 
 	def create(self,name,profile, numinterfaces, dns=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, gwstatic=None, gwbackup=None, staticroutes=None, backuproutes=None,macaddr=None,parameters=None,cmdline=None):
+		if ip1:
+			ip1=ip1.encode('ascii')
+		if ip2:
+			ip2=ip2.encode('ascii')
+		if ip3:
+			ip3=ip3.encode('ascii')
+		if ip4:
+			ip4=ip4.encode('ascii')
+		if dns:
+			dns=dns.encode('ascii')
 		profile=profile.encode('ascii')
 		s = self.s
 		token = self.token

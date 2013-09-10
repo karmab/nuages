@@ -32,8 +32,13 @@
 <td>{{vm.virtualprovider }}</td>
 {% endif %}
 <td>{{vm.profile}}</td>
+{% if vm.status != 'N/A' %}
 <td><img src="/static/img/{{vm.status}}.png">{{vm.status}}</td>
+{% else  %}
+<td><img src="/static/img/blank.png"/>N/A</td>
+{% endif %}
 <td>
+{% if vm.status != 'N/A' %}
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
 <img src="/static/img/down.png"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% if vm.status != 'down' and not vm.physical %}
@@ -50,8 +55,15 @@
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
 {% endif %}
+{% else  %}
+N/A
+{% endif %}
 </td>
+{% if vm.price %}
 <td><a href="/nuages/invoice/?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
+{% else  %}
+<td>N/A</td>
+{% endif %}
 </tr>
 {% endfor %}
 </table>

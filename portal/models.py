@@ -264,7 +264,7 @@ class VM(models.Model):
 	puppetclasses     = models.CharField(max_length=30, null=True,default='',choices=( ('xx', '') , ('yy' , '') ))
 	parameters        = models.TextField(blank=True)
 	createdby	  = models.ForeignKey(User,default=1,blank=True)
-	createdwhen       = models.DateTimeField(editable=False,blank=True,null=True)
+	createdwhen       = models.DateTimeField(editable=True,blank=True,null=True)
 	price             = models.IntegerField(blank=True,null=True)
 	status  	  = models.CharField(max_length=20, default='N/A')
 	def __unicode__(self):
@@ -276,6 +276,7 @@ class VM(models.Model):
 		#if VM.objects.filter(name=self.name).filter(virtualprovider=self.virtualprovider).exists():
 			#super(VM, self).save(*args, **kwargs)
 			#return
+		self.createdwhen=datetime.now()
 		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,puppetclasses,parameters,createdby,iso,ipilo,hostgroup = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.puppetclasses,self.parameters,self.createdby,self.iso,self.ipilo,self.hostgroup
 		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,foremanparameters,cobblerparameters=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.foremanparameters,profile.cobblerparameters
 		if profile.price:
@@ -293,7 +294,7 @@ class VM(models.Model):
 			provider=virtualprovider
 			connection=checkconn(virtualprovider.host,virtualprovider.port)
 		if not connection:
-			return "Connectivity issue with %s!" % provider.host
+			return "Connectivity issue with provider!"
 		if cobbler and cobblerprovider:
 			connection = checkconn(cobblerprovider.host, COBBLERPORT)
 			if not connection:

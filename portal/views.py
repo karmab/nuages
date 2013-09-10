@@ -527,16 +527,20 @@ def yourvms(request):
 		default = Default.objects.all()[0]
 	resultvms=[]
 	removed=[]
-	activeproviders={}
+	inactives=[]
 	for vm in vms:
 		name = vm.name
 		#handle physical machines
 		if vm.physical:
 			ipilo=vm.ipilo
 			physicalprovider=vm.physicalprovider
+			if physicalprovider in inactives:
+				vm.status = 'N/A'
+				resultvms.append(vm)
+				continue
 			try:
                 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                		sock.settimeout(5)
+                		sock.settimeout(3)
                 		sock.connect((ipilo, 22))
 				ipilo = vm.ipilo
 				if physicalprovider.type =='ilo':
@@ -550,16 +554,25 @@ def yourvms(request):
 				resultvms.append(vm)
 				continue
         		except:
+				inactives.append(physicalprovider)
+				vm.status = 'N/A'
+				resultvms.append(vm)
 				continue
 		virtualprovider = vm.virtualprovider
+		if virtualprovider in inactives:
+			vm.status = 'N/A'
+			resultvms.append(vm)
+			continue
 		try:
                 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                	sock.settimeout(5)
+                	sock.settimeout(3)
                 	sock.connect((virtualprovider.host, virtualprovider.port))
         	except socket.error:
+			inactives.append(virtualprovider)
+			vm.status = 'N/A'
+			resultvms.append(vm)
 			continue
 		if not vm.physical and virtualprovider.type == 'ovirt':
-			#IMPROVE THIS CODE AS IT MAKES LOADING OF THE PAGE SLOW!!!
  			ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 			status = ovirt.status(name)
 			ovirt.close()
@@ -574,12 +587,14 @@ def yourvms(request):
 			if status =='': status = None
 		if not vm.physical and virtualprovider.type == 'fake':
 			status = "N/A"
-		if not status:
-			vm.delete()	
-			removed.append(vm)
-		else:
-			vm.status = status
-			resultvms.append(vm)
+		vm.status = status
+		resultvms.append(vm)
+		#if not status:
+		#	vm.delete()	
+		#	removed.append(vm)
+		#else:
+		#vm.status = status
+		#resultvms.append(vm)
 	if len(removed) >= 1:
 		return render(request, 'yourvms.html', { 'vms': resultvms , 'removed': removed, 'username': username , 'default' : default  } )
 	else:
