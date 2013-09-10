@@ -89,6 +89,20 @@ class Oa:
 	else:
         	return 'N/A'
 
+    def getilo(self,bladeid):
+        host, username, password = self.host, self.username, self.password
+        s = paramiko.SSHClient()
+        s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        s.connect(host, username=username, password=password)
+        stdin, stdout, stderr = s.exec_command('show server info %s' % bladeid)
+        for line in stdout:
+            if 'IP Address:'  in line:	
+		matchip = re.search('IP Address: (.*)',line)
+		ipilo = matchip.group(1)
+		break
+        s.close()
+	return ipilo
+
     def stop(self,bladeid):
         host, username, password = self.host, self.username, self.password
         s = paramiko.SSHClient()
