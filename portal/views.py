@@ -372,7 +372,7 @@ def profileinfo(request):
 					#RETRIEVE BEST STORAGE DOMAIN
 					if type == 'ovirt':
  						ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-						storages = [ovirt.beststorage()]
+						storages = [ovirt.beststorage(datacenter)]
 						ovirt.close()
 					elif type == 'kvirt':
 						kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
@@ -891,8 +891,6 @@ def customformedit(request):
        		return HttpResponse(attributes,mimetype='application/json')
 	else:
 		if not os.path.exists("portal/customtypes.py"):
-			#information = { 'title':'Missing customforms' , 'details':'Create customforms first!' }
-                	#return render(request, 'information.html', { 'information' : information } )
                 	return render(request, 'customformedit.html', { 'username': username  } )
 		types=[]
 		import customtypes
@@ -904,6 +902,43 @@ def customformedit(request):
         		return HttpResponse(types,mimetype='application/json')
 		else:
                 	return render(request, 'customformedit.html', { 'username': username , 'types': types } )
+
+
+
+@login_required
+def customformcreate(request):
+	logging.debug("prout")
+	if request.method == 'POST' and request.POST.has_key('type'):
+		type = request.POST['type'].capitalize()
+		if not os.path.exists("portal/customtypes.py") or not  open("portal/customtypes.py").readlines():
+			f=open("portal/customtypes.py","a")
+			f.write("from django import forms\n")
+			f.close()
+		if os.path.exists("portal/customtypes.py.lock"):
+			response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
+			return HttpResponse(response)
+		else:
+			#open lock file
+			open("portal/customtypes.py.lock", 'a').close()
+			types=[]
+			import customtypes
+                	for element in dir(customtypes):
+                        	if not element.startswith('__') and element != "forms":
+					types.append(element)
+			#it s an existing type, we must first remove  along with all of its attribute
+			if type in types:
+				os.remove("portal/customtypes.py.lock")
+				response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customform allready existing</div>"
+				return HttpResponse(response)
+			else:
+				f = open("portal/customtypes.py", 'a')
+				f.write("class %s(forms.Form):\n" % type)
+				f.write("\tpass\n")
+				f.close()
+				#remove lock file
+				os.remove("portal/customtypes.py.lock")
+				response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s created</div>" % type
+				return HttpResponse(response)
 
 @login_required
 def customformupdate(request):
@@ -928,7 +963,7 @@ def customformupdate(request):
 					types.append(element)
 			#it s an existing type, we must first remove  along with all of its attribute
 			if type in types:
-				attributes=[]
+				attributes=["pass"]
 				exec("form=%s()" % type)
 				for attr in form.fields:
 					attributes.append(attr)

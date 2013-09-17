@@ -229,21 +229,37 @@ class Ovirt:
     					results[s.name ] = [used, available,ds.name]
 	return results
 
- def beststorage(self):
+# def beststorage(self):
+#	results={}
+#	api=self.api
+#	datacenters = api.datacenters.list()
+#	bestsize = 0
+#	beststoragedomain = ''
+# 	for ds in datacenters:
+#  		for s in ds.storagedomains.list():
+#			if s.get_status().get_state()=="active" and s.get_type()=="data":
+#    					used = s.get_used()/1024/1024/1024
+#    					available = float(s.get_available()/1024/1024/1024)
+#					if available > bestsize:
+#						beststoragedomain = s.name
+#						bestsize = available
+#	return beststoragedomain
+
+ def beststorage(self,datacenter):
 	results={}
 	api=self.api
-	datacenters = api.datacenters.list()
+	datacenter = api.datacenters.get(name=datacenter)
 	bestsize = 0
 	beststoragedomain = ''
- 	for ds in datacenters:
-  		for s in ds.storagedomains.list():
-			if s.get_status().get_state()=="active" and s.get_type()=="data":
-    					used = s.get_used()/1024/1024/1024
-    					available = float(s.get_available()/1024/1024/1024)
-					if available > bestsize:
-						beststoragedomain = s.name
-						bestsize = available
+  	for s in datacenter.storagedomains.list():
+		if s.get_status().get_state()=="active" and s.get_type()=="data":
+			used = s.get_used()/1024/1024/1024
+			available = float(s.get_available()/1024/1024/1024)
+			if available > bestsize:
+				beststoragedomain = s.name
+				bestsize = available
 	return beststoragedomain
+
 
  def status(self,name):
 	api=self.api

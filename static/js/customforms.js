@@ -145,6 +145,19 @@ function customformupdate() {
  parameters = $('#parameters').html();
  data = '';
  missing = false;
+ if ( parameters == '' ) {
+  	$.ajax({  
+	 type: "POST",
+         url: '/nuages/customformcreate/',
+         data: { 'type' : type  },
+         success: function(data) {
+   	 $("#result").html(data);
+   	 $("#results").show(200);
+         $('#id_type').append('<option value="'+type+'">'+type+'</option></select><p></p>');
+                                 }
+              });
+ 	return;
+ }
  var parameters = parameters.split(' ');
  $.each(parameters, function(index, paramname) {
  paramtype=$('#'+paramname+"-type").html();
