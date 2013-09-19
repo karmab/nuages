@@ -2,7 +2,7 @@
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
 <title>{% block title %}{% endblock %}</title>
-<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}" />
+<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "/static/css/admin.css" %}{% endblock %}" />
 <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
 
@@ -32,7 +32,6 @@
      <li><a href="/nuages/customforms">CustomForms</a></li>
      </ul></li>
      <li><a href="/nuages/yourvms/">Your VMS</a></li>
-     {% if username.is_staff  %}
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin<b class="caret"></b></a>
       <ul class="dropdown-menu">
@@ -41,7 +40,6 @@
        <li><a href="/nuages/profilecopy">Profile Copy</a></li>
        <li><a href="/admin">Configuration</a></li>
      </ul></li>
-     {% endif %}
        <li><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a></li>
        <li><a href="/logout/">Logout {{ username.username  }}</a></li>
 </ul>

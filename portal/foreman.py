@@ -41,11 +41,16 @@ def foremangetid(host,port,user,password, searchtype, searchname):
  else:
   url = "http://%s:%s/api/%s/%s" % (host, port,searchtype, searchname)
   result = foremando(url=url, user=user, password=password)
- if searchtype.endswith("es") and searchtype != "architectures":
+ if searchtype == "ptables":
+  shortname = "ptable"
+ elif searchtype.endswith("es") and searchtype != "architectures":
   shortname = searchtype[:-2]
  else:
   shortname = searchtype[:-1]
- return str(result[shortname]["id"])
+ try:
+ 	return str(result[shortname]["id"])
+ except:
+	return 0
 
 #VM CREATION IN FOREMAN
 class Foreman:
@@ -138,7 +143,7 @@ class Foreman:
   			postdata["host"]["hostgroup_id"] = hostgroupid
  		if ptableid:
   			ptableid = foremangetid(host,port,user,password, "ptables", ptableid)
-  			postdata["host"]["ptable_id"] = hostgroupid
+  			postdata["host"]["ptable_id"] = ptableid
  		result = foremando(url=url, actiontype="POST", postdata=postdata, user=user, password=password)
  		if not result.has_key('errors'):
   			now    = datetime.datetime.now()
@@ -150,7 +155,6 @@ class Foreman:
   			print header+"%s not created in Foreman because %s\n" % (name, result["errors"][0])
 
 	def addclasses(self,name,dns,classes):
-		return "prout"
 		name=name.encode('ascii')
 		dns=dns.encode('ascii')
 		#should be a reflection of
@@ -158,23 +162,28 @@ class Foreman:
 		host, port, user , password = self.host,self.port,self.user, self.password
  		classes = classes.split(",")
  		for classe in classes:
-  			classid = foremangetid(host,user,password, "puppetclasses", classe) 
-  			url = "http://%s:%s/api/hosts/%s/puppetclass_ids" % (host,port,name)
+  			classid = foremangetid(host,port,user,password, "puppetclasses", classe) 
+  			url = "http://%s:%s/api/hosts/%s.%s/puppetclass_ids" % (host,port,name,dns)
   			postdata = {"puppetclass_id": classid}
   			foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
+  			now = datetime.datetime.now()
+  			header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
+  			print header+"class %s added to %s.%s\n" % (classe,name,dns)
 
 	def addparameters(self,name,dns,parameters):
-		return "prout"
 		host, port, user , password = self.host,self.port,self.user, self.password
 		name=name.encode('ascii')
 		dns=dns.encode('ascii')
  		parameters = parameters.split(" ")
  		for parameter in parameters:
   			parameter,value = parameter.split("=")
-  			parameterid = foremangetid(foreman, "parameters", parameter)
-  			url = "http://%s:%s/api/hosts/%s/parameter_ids" % (host,port, name)
+  			parameterid = foremangetid(host,port,user,password,"parameters", parameter)
+  			url = "http://%s:%s/api/hosts/%s.%s/parameter_ids" % (host,port, name,dns)
   			postdata = {"parameter_id": parameterid}
   			foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
+  			now = datetime.datetime.now()
+  			header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
+  			print header+"parameter %s added to %s.%s\n" % (parameter,name,dns)
 	def hostgroups(self,environment):
 		host, port, user , password = self.host,self.port,self.user, self.password
                 url="http://%s:%s/api/hostgroups?search=environment+=+%s" % (host,port,environment)
