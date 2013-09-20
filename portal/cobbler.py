@@ -21,8 +21,6 @@ import StringIO
 #hostname
 #profile
 #cmdline  (ksmetas)
-pwd = os.environ["PWD"]
-hostname=os.environ["HOSTNAME"]
 
 class Cobbler:
 	def __init__(self, cobblerhost, cobbleruser, cobblerpassword):
@@ -45,9 +43,7 @@ class Cobbler:
 		token = self.token
  		system = s.find_system({"name":name})
  		if system!=[]:
-			now = datetime.datetime.now()
-	        	header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
-  			print header+"%s allready defined in cobbler...\n" % (name)
+  			print "%s allready defined in cobbler..." % (name)
   			return
 		if gwstatic and staticroutes:
     			staticroutes = staticroutes.replace(",",":%s " % gwstatic)+":"+gwstatic
@@ -112,9 +108,7 @@ class Cobbler:
 			s.modify_system(system,"kernel_options", cmdline, token)
 		s.save_system(system, token)
 		s.sync(token)
-		now = datetime.datetime.now()
-	        header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
-		print header+"%s created in Cobbler\n" % name
+		print "%s created in Cobbler" % name
 
 	def simplecreate(self,name,profile,dns=None ,macaddr=None,parameters=None,cmdline=None):
 		if dns:
@@ -124,9 +118,7 @@ class Cobbler:
 		token = self.token
  		system = s.find_system({"name":name})
  		if system!=[]:
-			now = datetime.datetime.now()
-	        	header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
-  			print header+"%s allready defined in cobbler...\n" % (name)
+  			print "%s allready defined in cobbler..." % (name)
 			return
 		system = s.new_system(token)
 		s.modify_system(system, 'name', name, token)
@@ -142,9 +134,7 @@ class Cobbler:
 			s.modify_system(system,"kernel_options", cmdline, token)
 		s.save_system(system, token)
 		s.sync(token)
-		now = datetime.datetime.now()
-	        header= "%s %s " % (now.strftime("%b %d %H:%M:%S"), hostname)
-		print header+"%s created in Cobbler\n" % name
+		print "%s created in Cobbler\n" % name
 
 	def checkprofile(self,name):
 		s = self.s
