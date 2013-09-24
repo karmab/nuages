@@ -1,4 +1,6 @@
 #!/usr/bin/env jython
+
+import random
 import os 
 from com.vmware.vim25 import *
 from com.vmware.vim25.mo import *
@@ -207,6 +209,15 @@ class Vsphere:
 	confspec.setMemoryMB(memory)
 	confspec.setNumCPUs(numcpu)
 	confspec.setGuestId(guestid) 
+	#enable VNC
+	vncport = random.randint(5900, 7000)
+        opt1 = OptionValue()
+	opt1.setKey('RemoteDisplay.vnc.port')
+	opt1.setValue(vncport);
+        opt2 = OptionValue()
+	opt2.setKey('RemoteDisplay.vnc.enabled')
+	opt2.setValue("TRUE");
+	confspec.setExtraConfig([opt1,opt2])
 	scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
 
 	#NICSPEC
