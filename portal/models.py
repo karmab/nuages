@@ -167,13 +167,13 @@ class Profile(models.Model):
 	disksize2         = models.IntegerField(blank=True,null=True)
 	diskformat2       = models.CharField(max_length=10, default=DISKFORMAT)
 	numinterfaces     = models.IntegerField(default=NUMINTERFACES)
-	net1              = models.CharField(max_length=10, default=NET1)
+	net1              = models.CharField(max_length=40, default=NET1)
 	subnet1           = models.GenericIPAddressField(default=SUBNET1, blank=True, null=True, protocol="IPv4")
-	net2              = models.CharField(max_length=10, blank=True)
+	net2              = models.CharField(max_length=40, blank=True)
 	subnet2           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-	net3              = models.CharField(max_length=10, blank=True)
+	net3              = models.CharField(max_length=40, blank=True)
 	subnet3           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-	net4              = models.CharField(max_length=10, blank=True)
+	net4              = models.CharField(max_length=40, blank=True)
 	subnet4           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
 	diskinterface     = models.CharField(max_length=20, default=DISKINTERFACE)
 	netinterface      = models.CharField(max_length=20, default=NETINTERFACE)
@@ -335,7 +335,7 @@ class VM(models.Model):
                 if not physical and virtualprovider.type == 'vsphere':
                         pwd = os.environ["PWD"]
                         #get best datastore
-                        storagecommand = "/usr/bin/jython %s/portal/virtualproviders/vpshere.py %s %s %s %s %s %s" % (pwd,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
+                        storagecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (pwd,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
                         storageinfo = os.popen(storagecommand).read()
                         storageinfo= ast.literal_eval(storageinfo)
                         size=0
@@ -343,9 +343,9 @@ class VM(models.Model):
                                 if storageinfo[stor][1] > size:
                                         ds=stor
                                         size=storageinfo[stor][1]
-                        jythoncommand = "/usr/bin/jython %s/portal/virtualproviders/vpshere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s %s" % (pwd,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name,numcpu, numinterfaces, diskformat1,disksize1,ds,memory,guestid,net1,net2,net3,net4)
-                        macaddr = os.popen(jythoncommand).read()
-                        vspheremacaddr= ast.literal_eval(macaddr)
+                        createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s '%s' '%s' '%s' '%s'" % (pwd,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name,numcpu, numinterfaces, diskformat1,disksize1,ds,memory,guestid,net1,net2,net3,net4)
+                        macaddr = os.popen(createcommand).read()
+                        vspheremacaddr = ast.literal_eval(macaddr)
                 if cobbler and cobblerprovider:
                         if not physical and virtualprovider.type == 'ovirt':
                                 macaddr=ovirt.macaddr
@@ -398,7 +398,7 @@ class VM(models.Model):
                         kvirt.start(name)
                         kvirt.close()
                 if not physical and virtualprovider.type == 'vsphere':
-                        startcommand = "/usr/bin/jython %s/portal/virtualproviders/vpshere.py %s %s %s %s %s %s %s" % (pwd,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+                        startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (pwd,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                         os.popen(startcommand).read()
 		return 'OK'
 

@@ -417,7 +417,7 @@ class Vsphere:
 	for dts in clu.getDatastores():
  		datastorename = dts.getName()
 		available = float(dssize(dts)[1].replace('GB',''))
-		if availables > bestsize:
+		if available > bestsize:
 			bestsize = available
 			bestds = datastorename
 	return bestds
@@ -461,4 +461,4 @@ if __name__ == '__main__':
 			net3 = sys.argv[17]
 		if numinterfaces >= 4:
 			net4 = sys.argv[18]
- 		vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, net1=net1, net2=net2, net3=net3,net4=net4)
+ 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, net1=net1, net2=net2, net3=net3,net4=net4)
