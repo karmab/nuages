@@ -104,6 +104,8 @@ class VirtualProvider(models.Model):
 	clu                 = models.CharField(max_length=50,blank=True)
 	datacenter          = models.CharField(max_length=50, blank=True)
 	active        	    = models.BooleanField(default=True)
+	sha1                = models.CharField(max_length=80,blank=True, null=True)
+	fqdn                = models.CharField(max_length=60,blank=True, null=True)
 	def __unicode__(self):
 		return self.name
 	def clean(self):

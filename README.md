@@ -53,6 +53,7 @@ Requisites
     paramiko ( to connect to ILO through ssh)
     python-reportlab and python-dateutil( if you plan to generate invoices)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
+    python-ssl and python-crypto if you plan to connect to vmware html5 consoles (another option is to directly set sha1 and fqdn for the virtualprovider in the admin portal)
     optionally apache server  with mod_wsgi
 
 Ovirt SDK Installation

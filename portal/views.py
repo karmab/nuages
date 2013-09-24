@@ -26,6 +26,19 @@ if os.path.exists("portal/customtypes.py"):
 	from customtypes import *
 
 
+def getvspherecert(host):
+	try:
+		import ssl
+		from M2Crypto import X509
+	except:
+		return None,None
+	pem = ssl.get_server_certificate((host, 443))
+	x509 = X509.load_cert_string(pem, X509.FORMAT_PEM)
+	fp = x509.get_fingerprint('sha1')
+	sha1 = ':'.join(fp[pos:pos+2] for pos in xrange(0, len(fp), 2))
+	subject = x509.get_subject()
+	return subject.CN, sha1
+
 def checkconn(host,port):
 	try:
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -633,7 +646,7 @@ def allvms(request):
 			vms= ast.literal_eval(results)	
 			for vm in vms:
 				resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
-			return render(request, 'allvms2.html', { 'vms': resultvms, 'username': username } )
+			return render(request, 'allvms2.html', { 'vms': resultvms, 'console' : True , 'username': username } )
 	else:
 		vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
 		form = StorageForm()
@@ -702,11 +715,21 @@ def console(request):
 				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
-		else:
-			information = { 'title':'Console not implemented' , 'details':"Console not implemented for %s" % virtualprovider.type }
-                	return render(request, 'information.html', { 'information' : information } )
+		elif virtualprovider.type == 'vsphere':
+			if not virtualprovider.sha1 or not virtualprovider.fqdn:
+				virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
+				if fqdn == None or sha1 == None:
+					information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to sysadmin" }
+                			return render(request, 'information.html', { 'information' : information } )
+				virtualprovider.save()
+			fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
+			pwd = os.environ["PWD"]
+			consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (os.environ['PWD'],'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
+			consoleurl = os.popen(consolecommand).read()
+			print consoleurl
+			return redirect(consoleurl)
 	else:
-			information = { 'title':'Wrong Console' , 'details':"something went wrong.Report to sysadmin" }
+			information = { 'title':'Wrong Console' , 'details':"something went wrong. Report to sysadmin" }
                 	return render(request, 'information.html', { 'information' : information } )
 		
 
