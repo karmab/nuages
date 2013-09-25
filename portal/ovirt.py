@@ -77,7 +77,7 @@ class Ovirt:
 	api.disconnect()
 	self.api=None
 
- def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None):
+ def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None,vnc=False):
 	boot1,boot2='hd','network'
 	if iso in ["","xx","yy"]:
 		iso=None
@@ -118,7 +118,11 @@ class Ovirt:
 	boot = [params.Boot(dev=boot1),params.Boot(dev=boot2)]
 	#vm creation
 	kernel,initrd,cmdline=None,None,None
-	api.vms.add(params.VM(name=name, memory=memory, cluster=clu, template=api.templates.get('Blank'), os=params.OperatingSystem(type_=guestid, boot=boot, kernel=kernel, initrd=initrd, cmdline=cmdline), cpu=params.CPU(topology=params.CpuTopology(cores=numcpu)), type_="server"))
+	if vnc:
+		display=params.Display(type_='vnc')
+	else:
+		display=params.Display(type_='spice')
+	api.vms.add(params.VM(name=name, memory=memory, cluster=clu, display=display, template=api.templates.get('Blank'), os=params.OperatingSystem(type_=guestid, boot=boot, kernel=kernel, initrd=initrd, cmdline=cmdline), cpu=params.CPU(topology=params.CpuTopology(cores=numcpu)), type_="server"))
 	#add nics
 	api.vms.get(name).nics.add(params.NIC(name='eth0', network=params.Network(name=net1), interface=netinterface))
 

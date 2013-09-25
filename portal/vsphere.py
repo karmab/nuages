@@ -167,7 +167,7 @@ class Vsphere:
 	self.best = host	
 
 
- def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None):
+ def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
 	memory = int(memory)
 	numcpu = int(numcpu)
 	disksize1 = int(disksize1)
@@ -209,15 +209,16 @@ class Vsphere:
 	confspec.setMemoryMB(memory)
 	confspec.setNumCPUs(numcpu)
 	confspec.setGuestId(guestid) 
-	#enable VNC
-	vncport = random.randint(5900, 7000)
-        opt1 = OptionValue()
-	opt1.setKey('RemoteDisplay.vnc.port')
-	opt1.setValue(vncport);
-        opt2 = OptionValue()
-	opt2.setKey('RemoteDisplay.vnc.enabled')
-	opt2.setValue("TRUE");
-	confspec.setExtraConfig([opt1,opt2])
+	if vnc:
+		#enable VNC
+		vncport = random.randint(5900, 7000)
+        	opt1 = OptionValue()
+		opt1.setKey('RemoteDisplay.vnc.port')
+		opt1.setValue(vncport);
+        	opt2 = OptionValue()
+		opt2.setKey('RemoteDisplay.vnc.enabled')
+		opt2.setValue("TRUE");
+		confspec.setExtraConfig([opt1,opt2])
 	scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
 
 	#NICSPEC
@@ -346,7 +347,7 @@ class Vsphere:
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		print "%s not found,aborting" % (name)
- 		sys.exit(0)
+		return
 	if vm.getRuntime().getPowerState().toString()=="poweredOn":
   		t = vm.powerOffVM_Task()
   		result = t.waitForMe()
@@ -358,11 +359,41 @@ class Vsphere:
 	vmfolder = self.vmfolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
- 		print "%s not found,aborting" % (name)
- 		print ""
-	print vm.getRuntime().getPowerState().toString()
+ 		#print "%s not found,aborting" % (name)
+ 		print ''
+	else:
+		print vm.getRuntime().getPowerState().toString()
 
- def console(self, name, fqdn, sha1):
+ def console(self, name):
+	rootFolder = self.rootFolder
+	clu = self.clu
+	vmfolder = self.vmfolder
+	vm=InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
+	if not vm:
+ 		print "%s not found,aborting" % (name)
+ 		sys.exit(0)
+	extraconfig = vm.getConfig().getExtraConfig()
+ 	vncfound = False
+	for extra in extraconfig:
+		key, value = extra.getKey(), extra.getValue()
+		if 'vnc' in key:
+        		vncfound = True
+        		vncport = value
+        		break
+    		else:
+        		continue
+  	if vncfound:
+		morhosts={}
+		hosts=InventoryNavigator(rootFolder).searchManagedEntities("HostSystem")
+		for h in hosts:
+			morhosts[h.getMOR()]=h.getName()
+		morhost = vm.getRuntime().getHost()
+		host = morhosts[morhost]
+   		return host,vncport
+	else:
+		return None,None
+
+ def html5console(self, name, fqdn, sha1):
 	vcip = self.vcip
  	vcconsoleport = "7331"
 	si = self.si
@@ -443,8 +474,8 @@ if __name__ == '__main__':
  		storage = vsphere.beststorage()
  		print storage
  	if action == 'allvms':
- 		storage = vsphere.allvms()
- 		print storage
+ 		allvms = vsphere.allvms()
+ 		print allvms
 	elif action == 'start':
 		name = sys.argv[7]
  		vsphere.start(name)
@@ -457,19 +488,27 @@ if __name__ == '__main__':
 	elif action == 'remove':
 		name = sys.argv[7]
  		vsphere.remove(name)
-	elif action == 'console':
+	elif action == 'html5console':
 		name, fqdn, sha1 = sys.argv[7], sys.argv[8], sys.argv[9]
- 		console = vsphere.console(name, fqdn, sha1)
+ 		html5console = vsphere.hmtl5console(name, fqdn, sha1)
+		print html5console
+	elif action == 'console':
+		name = sys.argv[7]
+ 		console = vsphere.console(name)
 		print console
 	elif action == 'create':
 		net1, net2, net3, net4 = None, None, None, None
-		name, numcpu, numinterfaces, diskmode1, disksize1, ds, memory, guestid, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15]
+		name, numcpu, numinterfaces, diskmode1, disksize1, ds, memory, guestid, vnc, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16]
 		diskmode1 = 'persistent'
 		numcpu, numinterfaces, disksize1 = int(numcpu), int(numinterfaces), int(disksize1)
 		if numinterfaces >= 2:
-			net2 = sys.argv[16]
+			net2 = sys.argv[17]
 		if numinterfaces >= 3:
-			net3 = sys.argv[17]
+			net3 = sys.argv[18]
 		if numinterfaces >= 4:
-			net4 = sys.argv[18]
- 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, net1=net1, net2=net2, net3=net3,net4=net4)
+			net4 = sys.argv[19]
+		if 'rue' in vnc or 'RUE' in vnc:
+			vnc = True
+		else:
+			vnc = False
+ 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, vnc=vnc, net1=net1, net2=net2, net3=net3,net4=net4)

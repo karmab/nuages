@@ -228,7 +228,7 @@ def profiles(request):
 	    providers = ""
 	    if profile.cobblerprofile:
 	    	cobblerprofile=profile.cobblerprofile
-            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler Profile: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Number of cpus: %s<p>Memory: %sMo<p>Guestid: %s<p>Disksize first disk : %sGb<p>Number of network interfaces: %s<p>Foreman Enabled: %s<p>Cobbler Enabled:%s<p>Isos List Enabled: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p></div>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
+            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler Profile: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Number of cpus: %s<p>Memory: %sMo<p>Guestid: %s<p>Disksize first disk : %sGb<p>Number of network interfaces: %s<p>Foreman Enabled: %s<p>Cobbler Enabled:%s<p>Isos List Enabled: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p>VNC: %s<p></div>" % (cobblerprofile, profile.datacenter, profile.clu, profile.numcpu, profile.memory, profile.guestid, profile.disksize1, profile.numinterfaces, profile.foreman, profile.cobbler, profile.iso, profile.virtualprovider, profile.physicalprovider, profile.vnc ))
         elif username.is_staff:
 	    profiles = Profile.objects.all()
 	    if not profiles:
@@ -520,6 +520,7 @@ def virtualprovidertype(request):
 
 @login_required
 def yourvms(request):
+	allvms = {}
 	username	  = request.user.username
 	username	  = User.objects.get(username=username)
 	usergroups        = username.groups
@@ -587,32 +588,38 @@ def yourvms(request):
 			resultvms.append(vm)
 			continue
 		if not vm.physical and virtualprovider.type == 'ovirt':
- 			ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-			status = ovirt.status(name)
-			ovirt.close()
+			if not allvms.has_key(virtualprovider.name):
+ 				ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+				allvms[virtualprovider.name] = ovirt.allvms()
+			if allvms[virtualprovider.name].has_key(name):
+				status = allvms[virtualprovider.name][name]
+			else:
+				status = 'NotFound'
 		if not vm.physical and virtualprovider.type == 'kvirt':
-			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-			status = kvirt.status(name)
-			kvirt.close()
+			if not allvms.has_key(virtualprovider.name):
+				kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+				allvms[virtualprovider.name] = kvirt.allvms()
+				kvirt.close()
+			if allvms[virtualprovider.name].has_key(name):
+				status = allvms[virtualprovider.name][name]
+			else:
+				status = 'NotFound'
 		if not vm.physical and virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
-			statuscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'status', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
-			status = os.popen(statuscommand).read()
-			if status =='': status = None
+			if not allvms.has_key(virtualprovider.name):
+				pwd = os.environ["PWD"]
+				allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+				allvmscommand = os.popen(allvmscommand).read()
+				allvms[virtualprovider.name] = ast.literal_eval(allvmscommand)
+			if allvms[virtualprovider.name].has_key(name):
+				status = allvms[virtualprovider.name][name]
+			else:
+				status = 'NotFound'
 		if not vm.physical and virtualprovider.type == 'fake':
 			status = "N/A"
 		vm.status = status
 		resultvms.append(vm)
-		#if not status:
-		#	vm.delete()	
-		#	removed.append(vm)
-		#else:
-		#vm.status = status
-		#resultvms.append(vm)
-	if len(removed) >= 1:
-		return render(request, 'yourvms.html', { 'vms': resultvms , 'removed': removed, 'username': username , 'default' : default  } )
-	else:
-		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
+	return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
 
 
 @login_required
@@ -682,6 +689,9 @@ def console(request):
 			virtualprovidername = request.GET.get('virtualprovider')
 	    	virtualprovider = VirtualProvider.objects.get(name=virtualprovidername)
 		default = Default.objects.all()[0]
+		sockhost=default.consoleip
+		sockport = random.randint(10000,60000)
+		pwd = os.environ["PWD"]
                 if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
 			if virtualprovider.type == 'ovirt':
                         	ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
@@ -694,9 +704,6 @@ def console(request):
 				if not host:
 					information = { 'title':'Console not configured' , 'details':'the display of this vm doesnt listen on the host ip' }
                 			return render(request, 'information.html', { 'information' : information } )
-			sockhost=default.consoleip
-			sockport = random.randint(10000,60000)
-			pwd = os.environ["PWD"]
 			information = { 'host' : sockhost , 'port' : sockport , 'ticket' : ticket }
 			vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
 			if protocol =="spice" and virtualprovider.type == 'ovirt':
@@ -717,18 +724,28 @@ def console(request):
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 		elif virtualprovider.type == 'vsphere':
-			if not virtualprovider.sha1 or not virtualprovider.fqdn:
-				virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
-				if fqdn == None or sha1 == None:
-					information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to sysadmin" }
-                			return render(request, 'information.html', { 'information' : information } )
-				virtualprovider.save()
-			fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
-			pwd = os.environ["PWD"]
-			consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (os.environ['PWD'],'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
-			consoleurl = os.popen(consolecommand).read()
-			print consoleurl
-			return redirect(consoleurl)
+			consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
+			consoledetails = os.popen(consolecommand).read()
+			host,port = ast.literal_eval(consoledetails)
+			if host != None:
+				pwd = os.environ["PWD"]
+				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
+				os.popen(websockifycommand)
+				information = { 'host' : sockhost , 'port' : sockport  }
+				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
+			else:
+				if not virtualprovider.sha1 or not virtualprovider.fqdn:
+					virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
+					if fqdn == None or sha1 == None:
+						information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to sysadmin" }
+                				return render(request, 'information.html', { 'information' : information } )
+					virtualprovider.save()
+				fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
+				pwd = os.environ["PWD"]
+				consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (os.environ['PWD'],'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
+				consoleurl = os.popen(consolecommand).read()
+				print consoleurl
+				return redirect(consoleurl)
 	else:
 			information = { 'title':'Wrong Console' , 'details':"something went wrong. Report to sysadmin" }
                 	return render(request, 'information.html', { 'information' : information } )
