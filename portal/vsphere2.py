@@ -1,7 +1,7 @@
 
 import os 
 import sys
-from pysphere import VIServer
+from pysphere import VIServer,VIProperty
 
 class Vsphere:
  def __init__(self, vcip, vcuser, vcpassword, dc, clu):
@@ -9,13 +9,17 @@ class Vsphere:
 	s = VIServer()
 	s.connect(vcip, vcuser, vcpassword)
 	self.s = s
-	self.clu = None
-	clusters = s.get_clusters()
-	for mor in clusters:
-		if clusters[mor]==clu:
-			self.clu = mor
-			break
-	self.dc = dc
+	self.clu = s._get_clusters()[clu]
+#	clusters = s.get_clusters()
+#	for mor in clusters:
+#		if clusters[mor]==clu:
+#			self.clu = mor
+#			break
+	#self.dc = dc
+	self.dc = s._get_datacenters()[dc]
+	hosts ={}
+	for host in s.get_hosts(from_mor=self.clu):
+		hosts[s.get_hosts(from_mor=self.clu)[host]]=host
 
 
  def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
@@ -116,13 +120,21 @@ class Vsphere:
         dc = self.dc
         clu = self.clu
         results = {}
-        for dts in s.get_datastores(from_mor=clu):
-	      print dts
-              #  datastorename = dts.getName()
-              #  total = dssize(dts)[0].replace('GB','')
-              #  available = dssize(dts)[1].replace('GB','')
-              #  results[datastorename] = [float(total), float(available), dc.getName()]
-        #return results
+        for dts in s.get_datastores():
+		props=VIProperty(s, dts)
+		vms = props.vm
+		for vm  in vms: 
+			mor = vm._obj
+			vm = VIProperty(s, mor)
+			vm =  s.get_vm_by_name(vm.name)
+			print vm.get_properties()
+			break
+		datastorename = props.name
+		total = props.summary.capacity / 1024 / 1024 /1024
+		available = props.summary.freeSpace / 1024 / 1024 /1024
+		#print props._values
+		results[datastorename] = [total, available, dc]
+        return results
 
 
  def beststorage(self):
