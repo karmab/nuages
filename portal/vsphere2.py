@@ -1,18 +1,21 @@
-#!/usr/bin/env jython
 
 import os 
 import sys
 from pysphere import VIServer
 
-
-
 class Vsphere:
  def __init__(self, vcip, vcuser, vcpassword, dc, clu):
+	self.translation = {'POWERED OFF':'down', 'POWERED ON':'up'}
 	s = VIServer()
 	s.connect(vcip, vcuser, vcpassword)
 	self.s = s
+	self.clu = None
+	clusters = s.get_clusters()
+	for mor in clusters:
+		if clusters[mor]==clu:
+			self.clu = mor
+			break
 	self.dc = dc
-	self.clu = clu
 
 
  def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
@@ -42,6 +45,9 @@ class Vsphere:
 	except:
 		print "vm %s not found" % name
 		return
+	if vm.get_status() == 'POWERED ON':
+		vm.power_off()
+	vm.destroy()
 
  def stop(self, name):
 	s = self.s
@@ -56,7 +62,7 @@ class Vsphere:
 		vm.power_off()
 
  def status(self, name):
-	translation = {'POWERED OFF':'down', 'POWERED ON':'up'}
+	translation = self.translation
 	s = self.s
 	dc = self.dc
 	clu = self.clu
@@ -89,17 +95,34 @@ class Vsphere:
 		return
 
  def allvms(self):
+	vms={}
 	s = self.s
 	dc = self.dc
 	clu = self.clu
-	translation = {'POWERED OFF':'down', 'POWERED ON':'up'}
-	allvms = s.get_registered_vms()
-	print allvms
+	translation = self.translation
+	up = s.get_registered_vms(status='poweredOn')
+	down = s.get_registered_vms(status='poweredOff')
+	for path in up:
+		name = path.split('/')[1].replace('.vmx','')
+		vms[name] = 'up'
+	for path in down:
+		name = path.split('/')[1].replace('.vmx','')
+		vms[name] = 'down'
+	return sorted(vms)
+		
 
  def getstorage(self):
 	s = self.s
-	dc = self.dc
-	clu = self.clu
+        dc = self.dc
+        clu = self.clu
+        results = {}
+        for dts in s.get_datastores(from_mor=clu):
+	      print dts
+              #  datastorename = dts.getName()
+              #  total = dssize(dts)[0].replace('GB','')
+              #  available = dssize(dts)[1].replace('GB','')
+              #  results[datastorename] = [float(total), float(available), dc.getName()]
+        #return results
 
 
  def beststorage(self):
