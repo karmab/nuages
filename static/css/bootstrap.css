@@ -1,5 +1,11 @@
-/* set the background-color to red */
+/* set the background-color to blue */
 .navbar-inner
+{
+    background-color: #ADD8E6;
+    background-image: none;
+}   
+
+.dropdown-menu
 {
     background-color: #ADD8E6;
     background-image: none;

@@ -732,6 +732,7 @@ def console(request):
 				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				information = { 'host' : sockhost , 'port' : sockport  }
+				vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 			else:
 				if not virtualprovider.sha1 or not virtualprovider.fqdn:

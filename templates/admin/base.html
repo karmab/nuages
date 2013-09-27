@@ -23,7 +23,7 @@
 <ul class="nav">
       <a class="brand"><img src="/static/img/nuages.png"></a>
       <li class="divider-vertical"></li>
-     <li><a href="/nuages/vms/">Create</a></li>
+     <li><a href="/nuages/vms/"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown">Information<b class="caret"></b></a>
       <ul class="dropdown-menu">
@@ -31,9 +31,9 @@
      <li><a href="/nuages/profiles/">Profiles</a></li>
      <li><a href="/nuages/customforms">CustomForms</a></li>
      </ul></li>
-     <li><a href="/nuages/yourvms/">Your VMS</a></li>
+     <li><a href="/nuages/yourvms/"><i class="icon-white icon-list"></i>Your VMS</a></li>
      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin<b class="caret"></b></a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></a>
       <ul class="dropdown-menu">
        <li><a href="/nuages/allvms/">All VMS</a></li>
        <li><a href="/nuages/customformedit">CustomForm Edit</a></li>
@@ -41,7 +41,7 @@
        <li><a href="/admin">Configuration</a></li>
      </ul></li>
        <li><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a></li>
-       <li><a href="/logout/">Logout {{ username.username  }}</a></li>
+       <li><a href="/logout/"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</a></li>
 </ul>
 </div></div>
 
