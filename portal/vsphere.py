@@ -138,33 +138,34 @@ class Vsphere:
 	self.si = si
 	self.vcip = vcip
 	self.rootFolder = si.getRootFolder()
-	rootFolder = self.rootFolder
-	self.dc = InventoryNavigator(rootFolder).searchManagedEntity("Datacenter",dc)
-	dc = self.dc
-	self.vmfolder = dc.getVmFolder()
+	self.dc = InventoryNavigator(self.rootFolder).searchManagedEntity("Datacenter",dc)
 	self.macaddr = []	
-	hosts=InventoryNavigator(rootFolder).searchManagedEntities("HostSystem")
-	morhosts={}
-	hostlist={}
-	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",clu)
 	self.clu = clu
-	pool = clu.getResourcePool()
-	self.pool = pool
- 	for h in hosts:
-  		morhosts[h.getMOR()] = h.getName()
-  		hostlist[h.getName()] = h
-	self.hostlist = hostlist
-	bestesx = {}
-	for hst in clu.getHosts():
- 		if hst.getSummary().getRuntime().isInMaintenanceMode():
-			continue
-		counter=0
-		for vm in hst.getVms():
-			if vm.getRuntime().getPowerState().toString()=="poweredOn":
-				counter = counter+1
-		bestesx[counter] = hst
-	host = bestesx[min(bestesx.keys())]
-	self.best = host	
+
+#	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",clu)
+#	self.vmfolder = dc.getVmFolder()
+#	hosts=InventoryNavigator(rootFolder).searchManagedEntities("HostSystem")
+#	morhosts={}
+#	hostlist={}
+#	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",clu)
+#	self.clu = clu
+#	pool = clu.getResourcePool()
+#	self.pool = pool
+# 	for h in hosts:
+#  		morhosts[h.getMOR()] = h.getName()
+#  		hostlist[h.getName()] = h
+#	self.hostlist = hostlist
+#	bestesx = {}
+#	for hst in clu.getHosts():
+# 		if hst.getSummary().getRuntime().isInMaintenanceMode():
+#			continue
+#		counter=0
+#		for vm in hst.getVms():
+#			if vm.getRuntime().getPowerState().toString()=="poweredOn":
+#				counter = counter+1
+#		bestesx[counter] = hst
+#	host = bestesx[min(bestesx.keys())]
+#	self.best = host	
 
 
  def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
@@ -188,10 +189,9 @@ class Vsphere:
 	#si = self.si
 	rootFolder = self.rootFolder
 	dc = self.dc
-	clu = self.clu
-	pool= self.pool
-	vmfolder = self.vmfolder
-	host = self.best
+	vmfolder = dc.getVmFolder()
+	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
+	pool = clu.getResourcePool()
 
 	#SELECT DS
 	datastore = InventoryNavigator(rootFolder).searchManagedEntity("Datastore",ds)
@@ -311,22 +311,16 @@ class Vsphere:
 
  def start(self, name):
 	rootFolder = self.rootFolder
-	clu = self.clu
-	vmfolder = self.vmfolder
-	host = self.best
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		print "%s not found,aborting" % (name)
  		sys.exit(0)
-	t = vm.powerOnVM_Task(host)
+	t = vm.powerOnVM_Task()
 	result = t.waitForMe()
 	print "%s on launching %s"% (result, name)
 
  def remove(self, name):
 	rootFolder = self.rootFolder
-	clu = self.clu
-	vmfolder = self.vmfolder
-	host = self.best
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		print "%s not found,aborting" % (name)
@@ -342,8 +336,6 @@ class Vsphere:
 
  def stop(self, name):
 	rootFolder = self.rootFolder
-	clu = self.clu
-	vmfolder = self.vmfolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		print "%s not found,aborting" % (name)
@@ -355,8 +347,6 @@ class Vsphere:
 
  def status(self, name):
 	rootFolder = self.rootFolder
-	clu = self.clu
-	vmfolder = self.vmfolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		#print "%s not found,aborting" % (name)
@@ -366,8 +356,6 @@ class Vsphere:
 
  def console(self, name):
 	rootFolder = self.rootFolder
-	clu = self.clu
-	vmfolder = self.vmfolder
 	vm=InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		print "%s not found,aborting" % (name)
@@ -398,8 +386,6 @@ class Vsphere:
  	vcconsoleport = "7331"
 	si = self.si
 	rootFolder = self.rootFolder
-	clu = self.clu
-	vmfolder = self.vmfolder
 	vm=InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		print "%s not found,aborting" % (name)
@@ -413,8 +399,6 @@ class Vsphere:
  def allvms(self):
 	translation = {'poweredOff':'down', 'poweredOn':'up'}
         rootFolder = self.rootFolder
-        clu = self.clu
-        vmfolder = self.vmfolder
 	vms = {}
         vmlist= InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine")
 	for vm in vmlist:
@@ -430,9 +414,7 @@ class Vsphere:
 	guestlist = []
 	rootFolder = self.rootFolder
 	dc = self.dc
-	clu = self.clu
-	pool= self.pool
-	vmfolder = self.vmfolder
+	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
         results = {}
 	for dts in clu.getDatastores():
  		datastorename = dts.getName()
@@ -451,9 +433,7 @@ class Vsphere:
 	guestlist = []
 	rootFolder = self.rootFolder
 	dc = self.dc
-	clu = self.clu
-	pool= self.pool
-	vmfolder = self.vmfolder
+	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
         bestds = ''
 	bestsize = 0 
 	for dts in clu.getDatastores():
