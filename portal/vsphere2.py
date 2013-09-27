@@ -10,14 +10,16 @@ class Vsphere:
 	s = VIServer()
 	s.connect(vcip, vcuser, vcpassword)
 	self.s = s
-	self.clu = s._get_clusters()[clu]
+	self.clu = clu
+	self.dc = dc
+#	self.clu = s._get_clusters()[clu]
 #	clusters = s.get_clusters()
 #	for mor in clusters:
 #		if clusters[mor]==clu:
 #			self.clu = mor
 #			break
 	#self.dc = dc
-	self.dc = s._get_datacenters()[dc]
+#	self.dc = s._get_datacenters()[dc]
 #	hosts ={}
 #	for host in s.get_hosts(from_mor=self.clu):
 #		hosts[s.get_hosts(from_mor=self.clu)[host]]=host
@@ -25,14 +27,10 @@ class Vsphere:
 
  def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 
 
  def start(self, name):
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 	try:
 		vm =  s.get_vm_by_name(name)
 	except:
@@ -43,8 +41,6 @@ class Vsphere:
 
  def remove(self, name):
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 	try:
 		vm =  s.get_vm_by_name(name)
 	except:
@@ -56,8 +52,6 @@ class Vsphere:
 
  def stop(self, name):
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 	try:
 		vm =  s.get_vm_by_name(name)
 	except:
@@ -69,8 +63,6 @@ class Vsphere:
  def status(self, name):
 	translation = self.translation
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 	try:
 		vm =  s.get_vm_by_name(name)
 	except:
@@ -80,8 +72,6 @@ class Vsphere:
 
  def console(self, name):
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 	try:
 		vm =  s.get_vm_by_name(name)
 	except:
@@ -107,7 +97,6 @@ class Vsphere:
 	vcconsoleport = "7331"
 	s = self.s
 	dc = self.dc
-	clu = self.clu
 	try:
 		vm =  s.get_vm_by_name(name)
 	except:
@@ -121,8 +110,6 @@ class Vsphere:
  def allvms(self):
 	vms={}
 	s = self.s
-	dc = self.dc
-	clu = self.clu
 	translation = self.translation
 	up = s.get_registered_vms(status='poweredOn')
 	down = s.get_registered_vms(status='poweredOff')
@@ -137,25 +124,40 @@ class Vsphere:
 
  def getstorage(self):
 	s = self.s
-        dc = self.dc
-        clu = self.clu
-        results = {}
+	dc = s._get_datacenters()[self.dc]
+	dcprop = VIProperty(s, dc)
+	dc = dcprop.name
+	dcs = s.get_datacenters()
+#	for mor, name in dcs.items():
+#        	if name == self.dc:
+#			dcmor = mor
+#			break
+#	clusters = s.get_clusters(from_mor=dcmor)
+#	for mor, name in clusters.items():
+#        	if name == self.clu:
+#			clumor = mor
+#			break
+#	hosts = s.get_hosts(from_mor=clumor)
+#	for mor, name in hosts.items():
+#		print mor,name
+#		hostprop = VIProperty(s, mor)
+#		print hostprop.vm
+	results = {}
         for dts in s.get_datastores():
 		props=VIProperty(s, dts)
-		vms = props.vm
-		for vm  in vms: 
-			mor = vm._obj
-			vm = VIProperty(s, mor)
-			vm =  s.get_vm_by_name(vm.name)
-			print vm.get_properties()
-			break
+		vms = props.vm	
+		clumember = False
+#		for vm  in vms: 
+#			print vm._obj
+#			#vm = VIProperty(s, mor)
+#			#vm =  s.get_vm_by_name(vm.name)
+#			#print vm.properties.runtime.host.name
+#			break
 		datastorename = props.name
 		total = props.summary.capacity / 1024 / 1024 /1024
 		available = props.summary.freeSpace / 1024 / 1024 /1024
-		#print props._values
 		results[datastorename] = [total, available, dc]
         return results
-
 
  def beststorage(self):
 	s = self.s
