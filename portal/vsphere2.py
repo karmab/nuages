@@ -1,10 +1,11 @@
 
 import os 
 import sys
-from pysphere import VIServer,VIProperty
+from pysphere import VIServer,VIProperty,VIMor,MORTypes
 
 class Vsphere:
  def __init__(self, vcip, vcuser, vcpassword, dc, clu):
+	self.vcip = vcip
 	self.translation = {'POWERED OFF':'down', 'POWERED ON':'up'}
 	s = VIServer()
 	s.connect(vcip, vcuser, vcpassword)
@@ -17,9 +18,9 @@ class Vsphere:
 #			break
 	#self.dc = dc
 	self.dc = s._get_datacenters()[dc]
-	hosts ={}
-	for host in s.get_hosts(from_mor=self.clu):
-		hosts[s.get_hosts(from_mor=self.clu)[host]]=host
+#	hosts ={}
+#	for host in s.get_hosts(from_mor=self.clu):
+#		hosts[s.get_hosts(from_mor=self.clu)[host]]=host
 
 
  def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
@@ -86,9 +87,24 @@ class Vsphere:
 	except:
 		print "vm %s not found" % name
 		return
-	print "console"
+        vncfound = False
+	for config in vm.properties.config.extraConfig:
+                key, value = config.key, config.value
+                if 'vnc' in key:
+                        vncfound = True
+                        vncport = value
+                        break
+                else:
+                        continue
+        if vncfound:
+		host = vm.properties.runtime.host.name
+                return host,vncport
+        else:
+                return None,None
 
  def html5console(self, name, fqdn, sha1):
+	vcip = self.vcip
+	vcconsoleport = "7331"
 	s = self.s
 	dc = self.dc
 	clu = self.clu
@@ -97,7 +113,11 @@ class Vsphere:
 	except:
 		print "vm %s not found" % name
 		return
-
+	session = s.acquire_clone_ticket()
+	vmid = vm._mor
+	vmurl = "http://%s:%s/console/?vmId=%s&vmName=%s&host=%s&sessionTicket=%s&thumbprint=%s" % (vcip, vcconsoleport, vmid, name, fqdn, session, sha1)
+	return vmurl
+	
  def allvms(self):
 	vms={}
 	s = self.s
