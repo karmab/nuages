@@ -379,7 +379,7 @@ class VM(models.Model):
                         foremanhost, foremanport, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
                         f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword)
                         f.create(name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
-			if foremanparameters and parameters:
+			if foremanparameters and parameters != '':
                         	f.addparameters(name=name,dns=dns,parameters=parameters)
 		super(VM, self).save(*args, **kwargs)
                 if physical and physicalprovider.type == 'ilo':

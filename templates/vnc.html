@@ -2,76 +2,44 @@
 <html>
 <head>
 
-    <!-- 
-    noVNC example: simple example using default UI
-    Copyright (C) 2012 Joel Martin
-    noVNC is licensed under the MPL 2.0 (see LICENSE.txt)
-    This file is licensed under the 2-Clause BSD license (see LICENSE.txt).
-
-    Connect parameters are provided in query string:
-        http://example.com/?host=HOST&port=PORT&encrypt=1&true_color=1
-    -->
     <title>Nuages Console</title>
         <link rel="stylesheet" type="text/css" media="all" href="/static/css/design.css" />
         <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
         <link href="/static/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
-        <link href="/static/css/font-awesome.css" rel="stylesheet">
         <link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
-    <meta charset="utf-8">
-
-    <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-                Remove this if you use the .htaccess -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-    <!-- Apple iOS Safari settings -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <!-- App Start Icon  -->
-    <link rel="apple-touch-startup-image" href="/static/novnc/screen_320x460.png" />
-    <!-- For iOS devices set the icon to use if user bookmarks app on their homescreen -->
-    <link rel="apple-touch-icon" href="/static/novnc/images/screen_57x57.png">
-    <!--
-    <link rel="apple-touch-icon-precomposed" href="images/screen_57x57.png" />
-    -->
-
-
-    <!-- Stylesheets -->
-
-     <!--
-    <script type='text/javascript'
-        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
-    -->
-        <script src="/static/novnc/util.js"></script>
+	<script src="/static/novnc/util.js"></script>
 </head>
+<body>
+<!--script src="/static/novnc/util.js"></script-->
 
-<body style="margin: 0px;">
 <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
       <a class="brand"><img src="/static/img/nuages.png"></a>
       <li class="divider-vertical"></li>
-     <li><a href="/nuages/vms/">Create</a></li>
+     <li><a href="/nuages/vms/"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Information<b class="caret"></b></a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></a>
       <ul class="dropdown-menu">
-     <li><a href="/nuages/storage/" >Storage</a></li>
-     <li><a href="/nuages/profiles/">Profiles</a></li>
-     <li><a href="/nuages/customforms">CustomForms</a></li>
+     <li><a href="/nuages/storage/" ><i class="icon-white icon-hdd"></i>Storage</a></li>
+     <li><a href="/nuages/profiles/"><i class="icon-white icon-tasks"></i>Profiles</a></li>
+     <li><a href="/nuages/customforms"><i class="icon-white icon-thumbs-up"></i>CustomForms</a></li>
      </ul></li>
-     <li><a href="/nuages/yourvms/">Your VMS</a></li>
+     <li><a href="/nuages/yourvms/"><i class="icon-white icon-list"></i>Your VMS</a></li>
      {% if username.is_staff  %}
      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Admin<b class="caret"></b></a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></a>
       <ul class="dropdown-menu">
-       <li><a href="/nuages/allvms/">All VMS</a></li>
-       <li><a href="/nuages/customformedit">CustomForm Edit</a></li>
-       <li><a href="/nuages/profilecopy">Profile Copy</a></li>
-       <li><a href="/admin">Configuration</a></li>
+       <li><a href="/nuages/allvms/"><i class="icon-white icon-globe"></i>All VMS</a></li>
+       <li><a href="/nuages/customformedit"><i class="icon-white icon-leaf"></i>CustomForm Edit</a></li>
+       <li><a href="/nuages/profilecopy"><i class="icon-white icon-tag"></i>Profile Copy</a></li>
+       <li><a href="/admin"><i class="icon-white icon-wrench"></i>Configuration</a></li>
      </ul></li>
      {% endif %}
-     <li><a href="/logout/">Logout {{ username.username  }}</a></li>
+     <li><a href="/logout/"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</a></li>
 </ul>
 </div></div>
+
+
 
 <table align="left" border="1" class="table table-bordered" >
 <tr>
@@ -85,6 +53,7 @@
 <td>
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
 <img src="/static/img/down.png" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
+<img src="/static/img/reboot.png" onclick="sendCtrlAltDel();"/>
 </td>
 </tr>
 </table>

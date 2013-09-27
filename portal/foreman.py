@@ -177,7 +177,11 @@ class Foreman:
 		for element in res:
 			parametersinfo[element['parameter']['name']] = { 'id' : element['parameter']['id'] , 'value' : element['parameter']['value'] } 
  		for parameter in parameters:
-  			parameter, value = parameter.split("=")
+			try:
+  				parameter, value = parameter.split("=")
+			except:
+				print parameter
+				continue
 			#update existing parameter
 			if parametersinfo.has_key(parameter):
   				parameterid, oldvalue = parametersinfo[parameter]['id'], parametersinfo[parameter]['value']

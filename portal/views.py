@@ -520,6 +520,9 @@ def virtualprovidertype(request):
 
 @login_required
 def yourvms(request):
+	ajax = False
+	if request.is_ajax():
+		ajax = True
 	allvms = {}
 	username	  = request.user.username
 	username	  = User.objects.get(username=username)
@@ -541,10 +544,14 @@ def yourvms(request):
 	else:
 		default = Default.objects.all()[0]
 	resultvms=[]
-	removed=[]
+	actives=[]
 	inactives=[]
 	for vm in vms:
 		name = vm.name
+		if not ajax:
+			vm.status = "Please wait"
+			resultvms.append(vm)
+			continue
 		#handle physical machines
 		if vm.physical:
 			ipilo=vm.ipilo
@@ -555,7 +562,7 @@ def yourvms(request):
 				continue
 			try:
                 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                		sock.settimeout(3)
+                		sock.settimeout(2)
                 		sock.connect((ipilo, 22))
 				ipilo = vm.ipilo
 				if physicalprovider.type =='ilo':
@@ -578,15 +585,17 @@ def yourvms(request):
 			vm.status = 'N/A'
 			resultvms.append(vm)
 			continue
-		try:
-                	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                	sock.settimeout(3)
-                	sock.connect((virtualprovider.host, virtualprovider.port))
-        	except socket.error:
-			inactives.append(virtualprovider)
-			vm.status = 'N/A'
-			resultvms.append(vm)
-			continue
+		elif not virtualprovider in actives:
+			try:
+                		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                		sock.settimeout(2)
+                		sock.connect((virtualprovider.host, virtualprovider.port))
+				actives.append(virtualprovider)
+        		except socket.error:
+				inactives.append(virtualprovider)
+				vm.status = 'N/A'
+				resultvms.append(vm)
+				continue
 		if not vm.physical and virtualprovider.type == 'ovirt':
 			if not allvms.has_key(virtualprovider.name):
  				ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
@@ -619,8 +628,10 @@ def yourvms(request):
 			status = "N/A"
 		vm.status = status
 		resultvms.append(vm)
-	return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
-
+	if ajax:
+		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default , 'ajax' : ajax } )
+	else:
+		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
 
 @login_required
 def allvms(request):
@@ -697,6 +708,9 @@ def console(request):
                         	ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
 				host,port,ticket,protocol = ovirt.console(vmname)
 				ovirt.close()
+				if not host:
+					information = { 'title':'Console not accessible' , 'details':'Machine %s doesnt seem to be up' % vmname }
+                			return render(request, 'information.html', { 'information' : information } )
 			if virtualprovider.type == 'kvirt':
 				kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
 				host,port,ticket,protocol = kvirt.console(vmname)
@@ -754,6 +768,7 @@ def console(request):
 
 @login_required
 def start(request):
+	logging.debug("prout")
 	if request.method == 'POST':
 		vmname = request.POST.get('name')
 		virtualprovider=request.POST.get('virtualprovider')
@@ -771,13 +786,16 @@ def start(request):
 		elif virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
-			start = os.popen(startcommand).read()
-			startinfo= ast.literal_eval(start)	
+			startinfo = os.popen(startcommand).read()
+			#startinfo= ast.literal_eval(startinfo)	
+			print startinfo
 			startinfo = json.dumps(startinfo)
+			print startinfo
        			return HttpResponse(startinfo,mimetype='application/json')
 
 @login_required
 def stop(request):
+	logging.debug("prout")
 	if request.method == 'POST':
 		vmname = request.POST.get('name')
 		virtualprovider=request.POST.get('virtualprovider')
@@ -795,9 +813,12 @@ def stop(request):
 		elif virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
-			stop = os.popen(stopcommand).read()
-			stopinfo= ast.literal_eval(stop)	
+			print stopcommand
+			stopinfo = os.popen(stopcommand).read()
+			#stopinfo= ast.literal_eval(stopinfo)	
+			print stopinfo
 			stopinfo = json.dumps(stopinfo)
+			print stopinfo
        			return HttpResponse(stopinfo,mimetype='application/json')
 
 @login_required

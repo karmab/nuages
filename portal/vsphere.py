@@ -315,9 +315,10 @@ class Vsphere:
 	if not vm:
  		print "%s not found,aborting" % (name)
  		sys.exit(0)
-	t = vm.powerOnVM_Task()
-	result = t.waitForMe()
-	print "%s on launching %s"% (result, name)
+	if vm.getRuntime().getPowerState().toString()=="poweredOff":
+		t = vm.powerOnVM_Task(None)
+		result = t.waitForMe()
+		return "%s on launching %s"% (result, name)
 
  def remove(self, name):
 	rootFolder = self.rootFolder
@@ -343,7 +344,7 @@ class Vsphere:
 	if vm.getRuntime().getPowerState().toString()=="poweredOn":
   		t = vm.powerOffVM_Task()
   		result = t.waitForMe()
-  		print "%s powering off VM"% (result)
+  		return "%s powering off VM"% (result)
 
  def status(self, name):
 	rootFolder = self.rootFolder
@@ -357,9 +358,8 @@ class Vsphere:
  def console(self, name):
 	rootFolder = self.rootFolder
 	vm=InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
-	if not vm:
- 		print "%s not found,aborting" % (name)
- 		sys.exit(0)
+	if not vm or vm.getRuntime().getPowerState().toString()=="poweredOff":
+		return None,None
 	extraconfig = vm.getConfig().getExtraConfig()
  	vncfound = False
 	for extra in extraconfig:

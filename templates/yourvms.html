@@ -3,12 +3,14 @@
 {% block title %}Nuages VMS Information{% endblock %}
 
 {% block content %}
-<!--script src="/static/js/refresh.js"></script-->
+<script src="/static/js/yourvms.js"></script>
 <script src="/static/js/actions.js"></script>
 
-<div id="wheel2"></div>
+<!--div id="wheel2"></div-->
 <fieldset class="module aligned">
 <p class="alert alert-info" >Here s a list of all vms created by you or your groups peers</p>
+<div id="actionpending" class="hidden">0</div>
+<div id="refreshpending" class="hidden">0</div>
 <div id="results"></div>
 <table border="1" class='alert alert-info'>
 <tr>
@@ -23,7 +25,7 @@
 </tr>
 {% for vm in vms|dictsort:"name" %}
 <tr>
-<td>{{ vm.name}}</td>
+<td><a href="/nuages/vms/console/?id={{ vm.id }}">{{ vm.name}}</a></td>
 <td>{{ vm.createdby }}</td>
 <td>{{ vm.createdwhen|date:'Y-m-d H:i' }}</td>
 {% if vm.physical %}
@@ -32,12 +34,16 @@
 <td>{{vm.virtualprovider }}</td>
 {% endif %}
 <td>{{vm.profile}}</td>
-{% if vm.status != 'N/A' %}
-<td><img src="/static/img/{{vm.status}}.png">{{vm.status}}</td>
-{% else  %}
-<td><img src="/static/img/blank.png"/>N/A</td>
-{% endif %}
 <td>
+{% if ajax %}
+<img src="/static/img/{{vm.status}}.png">{{vm.status}}
+{% else %}
+wait...
+{% endif %}
+</td>
+
+<td>
+{% if ajax %}
 {% if vm.status != 'N/A' and vm.status != 'NotFound'%}
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
 <img src="/static/img/down.png"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
@@ -55,10 +61,14 @@
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
 {% endif %}
+{% endif %}
+
 {% else  %}
-N/A
+wait...
 {% endif %}
 </td>
+
+
 {% if vm.price %}
 <td><a href="/nuages/invoice/?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
 {% else  %}
@@ -68,13 +78,5 @@ N/A
 {% endfor %}
 </table>
 </fieldset>
-
-{% if removed %}
-<p class="alert alert-success" >Additional information:
-{% for vm in removed %}
-{{vm.name}} was removed from DB
-{% endfor %}
-</p>
-{% endif %}
 
 {% endblock content %}               

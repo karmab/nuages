@@ -284,8 +284,8 @@ class Ovirt:
  def console(self,name):
 	api=self.api
 	vm =api.vms.get(name=name)
- 	if not vm:
-  		return None
+ 	if not vm or vm.status.state=="down":
+  		return None,None,None,None
 	else:
   		vm.ticket().set_ticket("")
   		ticket = vm.ticket().get_ticket().get_value()

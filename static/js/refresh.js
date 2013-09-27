@@ -1,3 +1,9 @@
 $(document).ready(function() {
- setInterval("location.reload();", 10000);
-});    
+setInterval(function(){
+  var pending = $("#pending").html();
+ if ( pending == 0 ) {
+ location.reload();
+	}
+},3000);
+$.ajaxSetup({ cache: false });
+});

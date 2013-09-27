@@ -260,8 +260,8 @@ class Kvirt:
  def console(self,name):
     conn = self.conn
     vm = conn.lookupByName(name)
-    if not vm:
-  		return None
+    if not vm or vm.isActive() == 0:
+  		return None,None,None,None
     else:
         xml = vm.XMLDesc(0)
         root = ET.fromstring(xml)

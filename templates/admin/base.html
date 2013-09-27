@@ -23,25 +23,25 @@
 <ul class="nav">
       <a class="brand"><img src="/static/img/nuages.png"></a>
       <li class="divider-vertical"></li>
-     <li><a href="/nuages/vms/"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
+     <li><a href="/nuages/vms/"><div style="font-size:10pt"><i class="icon-white icon-shopping-cart"></i>Create</div></a></li>
      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Information<b class="caret"></b></a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><div style="font-size:10pt"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></div></a>
       <ul class="dropdown-menu">
-     <li><a href="/nuages/storage/" ><i class="icon-white icon-hdd"></i>Storage</a></li>
-     <li><a href="/nuages/profiles/"><i class="icon-white icon-tasks"></i>Profiles</a></li>
-     <li><a href="/nuages/customforms"><i class="icon-white icon-thumbs-up"></i>CustomForms</a></li>
+     <li><a href="/nuages/storage/" ><div style="font-size:10pt"><i class="icon-white icon-hdd"></i>Storage</div></a></li>
+     <li><a href="/nuages/profiles/"><div style="font-size:10pt"><i class="icon-white icon-tasks"></i>Profiles</div></a></li>
+     <li><a href="/nuages/customforms"><div style="font-size:10pt"><i class="icon-white icon-thumbs-up"></i>CustomForms</div></a></li>
      </ul></li>
-     <li><a href="/nuages/yourvms/"><i class="icon-white icon-list"></i>Your VMS</a></li>
+     <li><a href="/nuages/yourvms/"><div style="font-size:10pt"><i class="icon-white icon-list"></i>Your VMS</div></a></li>
      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></a>
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><div style="font-size:10pt"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></div></a>
       <ul class="dropdown-menu">
-       <li><a href="/nuages/allvms/"><i class="icon-white icon-globe"></i>All VMS</a></li>
-       <li><a href="/nuages/customformedit"><i class="icon-white icon-leaf"></i>CustomForm Edit</a></li>
-       <li><a href="/nuages/profilecopy"><i class="icon-white icon-tag"></i>Profile Copy</a></li>
-       <li><a href="/admin"><i class="icon-white icon-wrench"></i>Configuration</a></li>
+       <li><a href="/nuages/allvms/"><div style="font-size:10pt"><i class="icon-white icon-globe"></i>All VMS</div></a></li>
+       <li><a href="/nuages/customformedit"><div style="font-size:10pt"><i class="icon-white icon-leaf"></i>CustomForm Edit</div></a></li>
+       <li><a href="/nuages/profilecopy"><div style="font-size:10pt"><i class="icon-white icon-tag"></i>Profile Copy</div></a></li>
+       <li><a href="/admin"><div style="font-size:10pt"><i class="icon-white icon-wrench"></i>Configuration</div></a></li>
      </ul></li>
-       <li><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a></li>
-       <li><a href="/logout/"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</a></li>
+       <li><a href="{% url 'admin:password_change' %}"><div style="font-size:10pt">{% trans 'Change password' %}</div></a></li>
+       <li><a href="/logout/"><div style="font-size:10pt"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</div></a></li>
 </ul>
 </div></div>
 
