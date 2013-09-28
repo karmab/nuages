@@ -269,6 +269,7 @@ class VM(models.Model):
 	createdby	  = models.ForeignKey(User,default=1,blank=True)
 	createdwhen       = models.DateTimeField(editable=True,blank=True,null=True)
 	price             = models.IntegerField(blank=True,null=True)
+	unmanaged         = models.BooleanField(default=False)
 	status  	  = models.CharField(max_length=20, default='N/A')
 	def __unicode__(self):
 		if self.virtualprovider:

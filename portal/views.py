@@ -552,6 +552,10 @@ def yourvms(request):
 			vm.status = "Please wait"
 			resultvms.append(vm)
 			continue
+		if vm.unmanaged:
+			vm.status = "Unmanaged"
+			resultvms.append(vm)
+			continue
 		#handle physical machines
 		if vm.physical:
 			ipilo=vm.ipilo
@@ -823,7 +827,6 @@ def stop(request):
 
 @login_required
 def kill(request):
-	logging.debug("prout")
 	if request.method == 'POST':
 		name     = request.POST.get('name')
 		provider = request.POST.get('provider')
@@ -859,9 +862,22 @@ def kill(request):
 			remove = os.popen(removecommand).read()
 			removeinfo= ast.literal_eval(remove)	
 			r='VM killed in vsphere'
-		vm.delete()
+		#vm.delete()
+		vm.unmanaged = True
+		vm.save()
 		return HttpResponse("VM %s killed" % name)
 
+def dbremove(request):
+	if request.method == 'POST':
+		vmid   = request.POST.get('id')
+		vmname   = request.POST.get('name')
+	    	vm = VM.objects.get(id=vmid)
+		if vm.unmanaged:
+			vm.delete()
+			return HttpResponse("VM %s removed from DB" % vmname)
+		else:
+			return HttpResponse("VM %s not removed from DB as still managed" % vmname)
+			
 @login_required
 def hostgroups(request):
 	if request.method == 'POST':

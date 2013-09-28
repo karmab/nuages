@@ -82,3 +82,28 @@ if (sure) {
  return;
  }
 }
+
+function dbremove(vmid,vmname){
+var sure = confirm(vmname+" will be removed from db!!!Sure?");
+if (sure) {
+ var actionpending = $("#actionpending");
+ actionpending.html('1');
+ data = { 'id': vmid , 'name' : vmname } ;
+ $.ajax({  
+  type: "POST",
+  url: '/nuages/vms/dbremove',
+  data: data,
+  success: function(data) {
+            $("#results").hide();
+            $("#results").addClass("alert alert-success");
+            $("#results").html(data);
+            $("#results").show(200);
+  	    actionpending.html('0');
+  	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
+		}
+	});
+ }
+ else {
+ return;
+ }
+}
