@@ -99,6 +99,26 @@ def createcdspec():
  cdspec.setDevice(cd)
  return cdspec 
 
+def createisospec(iso=None):
+ cdspec = VirtualDeviceConfigSpec()
+ cdspec.setOperation(VirtualDeviceConfigSpecOperation.add)
+ connect=VirtualDeviceConnectInfo()
+ connect.setStartConnected(True)
+ connect.setAllowGuestControl(True)
+ connect.setConnected(False)
+ cd=VirtualCdrom()
+ cd.setConnectable(connect)
+ cdbacking=VirtualCdromIsoBackingInfo()
+ if iso:
+ 	cdbacking.setFileName(iso) 
+ cd.setBacking(cdbacking)               
+ cd.setControllerKey(201)
+ cd.setUnitNumber(0)
+ cd.setKey(-1)
+ cdspec.setDevice(cd)
+ return cdspec 
+
+
 def createclonespec(pool):
  clonespec = VirtualMachineCloneSpec()
  relocatespec = VirtualMachineRelocateSpec()
@@ -219,6 +239,7 @@ class Vsphere:
 		opt2.setKey('RemoteDisplay.vnc.enabled')
 		opt2.setValue("TRUE");
 		confspec.setExtraConfig([opt1,opt2])
+
 	scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
 
 	#NICSPEC
@@ -243,6 +264,11 @@ class Vsphere:
  		devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3]
 	if numinterfaces ==4:
  		devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3, nicspec4]
+
+	if iso:
+		#add iso
+		cdspec=createisospec()
+		devconfspec.append(cdspec)
 
 	confspec.setDeviceChange(devconfspec)
 
@@ -444,6 +470,45 @@ class Vsphere:
 			bestds = datastorename
 	return bestds
 
+ def getisos(self):
+	rootFolder = self.rootFolder
+	dc = self.dc
+	clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
+	isos=[]
+        results = {}
+	searchspec = HostDatastoreBrowserSearchSpec()
+	filequery = [IsoImageFileQuery(),FolderFileQuery()]
+	filequeryflags = FileQueryFlags()
+	filequeryflags.setFileSize(True)
+	filequeryflags.setModification(False)
+	filequeryflags.setFileOwner(False)
+	filequeryflags.setFileType(False)
+	searchspec.setQuery(filequery)
+     	searchspec.setDetails(filequeryflags)
+      	searchspec.setSortFoldersFirst(True)
+      	searchspec.setSearchCaseInsensitive(True)
+	for dts in clu.getDatastores():
+ 		datastorename = dts.getName()
+		datastorepath = "["+ datastorename +"]"
+		browser = dts.getBrowser()
+		t  = browser.searchDatastore_Task(datastorepath, searchspec)
+		t.waitForMe()
+		result = t.getTaskInfo().getResult();
+		fileinfo = result.getFile()
+		for element in fileinfo:
+			folderpath = element.getPath()
+			if not folderpath.endswith('iso'):
+				t  = browser.searchDatastoreSubFolders_Task( "%s%s" % ( datastorepath, folderpath), searchspec)
+                		t.waitForMe()
+              			result = t.getTaskInfo().getResult();
+				results = result.getHostDatastoreBrowserSearchResults()
+				for r in results:
+                			fileinfo = r.getFile()
+                			for isofile in fileinfo:
+						isos.append(isofile.getPath())
+	return isos
+
+
 if __name__ == '__main__':
  	action, vcip, vcuser, vcpassword, dc, clu = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
  	vsphere = Vsphere(vcip, vcuser, vcpassword, dc, clu)
@@ -456,6 +521,9 @@ if __name__ == '__main__':
  	if action == 'allvms':
  		allvms = vsphere.allvms()
  		print allvms
+ 	if action == 'getisos':
+ 		isos = vsphere.getisos()
+ 		print isos
 	elif action == 'start':
 		name = sys.argv[7]
  		vsphere.start(name)
