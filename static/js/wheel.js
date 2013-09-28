@@ -1,10 +1,10 @@
 $(document).ajaxStart(function() {
-  $("#wheel2").show();
+  $("#wheel").show();
 });
 
 
 $(document).ajaxStop(function() {
-  $("#wheel2").hide();
+  $("#wheel").hide();
 });
 
 $(document).ajaxSend(function(event, xhr, settings) {

@@ -1,5 +1,5 @@
 function start(vm,provider){
-  //$("#wheel2").show();
+  $("#actionwheel").show();
   var actionpending = $("#actionpending");
   actionpending.html('1');
   data = { 'name': vm , 'virtualprovider': provider } ;
@@ -9,18 +9,18 @@ function start(vm,provider){
         url: '/nuages/vms/start',
         data: data,
         success: function(data) {
+            $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
             $("#results").html(data);
             $("#results").show(200);
-            //$("#wheel2").hide();
   	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
 		}
 	});
 }
 
 function stop(vm,provider){
-  //$("#wheel2").show();
+  $("#actionwheel").show();
   var actionpending = $("#actionpending");
   actionpending.html('1');
   data = { 'name': vm , 'virtualprovider': provider } ;
@@ -30,11 +30,11 @@ function stop(vm,provider){
         url: '/nuages/vms/stop',
         data: data,
         success: function(data) {
+            $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
             $("#results").html(data);
             $("#results").show(200);
-            //$("#wheel2").hide();
   	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
 		}
 	});
@@ -59,7 +59,7 @@ function console(){
 function kill(vm,provider){
 var sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
- //$("#wheel2").show();
+ $("#actionwheel").show();
  var actionpending = $("#actionpending");
  actionpending.html('1');
  data = { 'name': vm , 'provider' : provider } ;
@@ -68,7 +68,7 @@ if (sure) {
   url: '/nuages/vms/kill',
   data: data,
   success: function(data) {
-	    //$("#wheel2").hide();
+            $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
             $("#results").html(data);
@@ -88,12 +88,14 @@ var sure = confirm(vmname+" will be removed from db!!!Sure?");
 if (sure) {
  var actionpending = $("#actionpending");
  actionpending.html('1');
+ $("#actionwheel").show();
  data = { 'id': vmid , 'name' : vmname } ;
  $.ajax({  
   type: "POST",
   url: '/nuages/vms/dbremove',
   data: data,
   success: function(data) {
+ 	    $("#actionwheel").hide());
             $("#results").hide();
             $("#results").addClass("alert alert-success");
             $("#results").html(data);
