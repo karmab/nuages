@@ -191,6 +191,7 @@ class Profile(models.Model):
 	deletable         = models.BooleanField(default=True)
 	vnc	          = models.BooleanField(default=False)
 	price             = models.IntegerField(blank=True,null=True)
+	maxvms            = models.IntegerField(blank=True,null=True)
 	groups            = models.ManyToManyField(Group,blank=True,null=True)
 	def __unicode__(self):
 		return self.name

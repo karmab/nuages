@@ -119,8 +119,12 @@ def create(request):
 			physical= True
 		#get associated profiles
 		#TODO:add tags to model
-		tags=None
-		profile=Profile.objects.filter(id=profile)[0]
+		tags = None
+		profile = Profile.objects.get(id=profile)
+		if profile.maxvms:
+			currentvms = len(VM.objects.get(profile=profile))
+			if currentvms + numvms > profile.maxvms:
+				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Exceeded maximum vms for this profile<p</div>") 
 		if storagedomain == '' and not physical:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>") 
 		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,requireip=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.requireip
