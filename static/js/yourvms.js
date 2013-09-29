@@ -24,6 +24,6 @@ setInterval(function(){
 	    $("#refreshpending").replaceWith('<div id="refreshpending" class="hidden">0</div>');
 		}
 	});
-},5000);
+},3000);
 $.ajaxSetup({ cache: false });
 });

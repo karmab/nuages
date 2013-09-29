@@ -31,6 +31,7 @@ function stop(vm,provider){
         data: data,
         success: function(data) {
             $("#actionwheel").hide();
+  	    alert("coucou3");
             $("#results").hide();
             $("#results").addClass("alert alert-success");
             $("#results").html(data);
@@ -86,16 +87,16 @@ if (sure) {
 function dbremove(vmid,vmname){
 var sure = confirm(vmname+" will be removed from db!!!Sure?");
 if (sure) {
+ $("#actionwheel").show();
  var actionpending = $("#actionpending");
  actionpending.html('1');
- $("#actionwheel").show();
  data = { 'id': vmid , 'name' : vmname } ;
  $.ajax({  
   type: "POST",
   url: '/nuages/vms/dbremove',
   data: data,
   success: function(data) {
- 	    $("#actionwheel").hide());
+ 	    $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
             $("#results").html(data);
