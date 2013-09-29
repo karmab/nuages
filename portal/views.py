@@ -444,6 +444,13 @@ def profileinfo(request):
 				isoslist=[]
 				for iso in isos: 
 					specific.append(iso)
+		if type =='vsphere' and profile.iso:
+				type = 'iso'
+				isocommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+				isocommand = os.popen(isocommand).read()
+				isos = ast.literal_eval(isocommand)
+				for iso in isos: 
+					specific.append(iso)
 		results = [type,profile.hide ,provider,specific,profile.foreman, profile.cobbler,profile.numinterfaces,storages]
 		if profile.cobbler:
 			cobblerprovider=profile.cobblerprovider

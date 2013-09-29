@@ -188,7 +188,7 @@ class Vsphere:
 #	self.best = host	
 
 
- def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
+ def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False,iso=None):
 	memory = int(memory)
 	numcpu = int(numcpu)
 	disksize1 = int(disksize1)
@@ -497,7 +497,7 @@ class Vsphere:
 		fileinfo = result.getFile()
 		for element in fileinfo:
 			folderpath = element.getPath()
-			if not folderpath.endswith('iso'):
+			if not folderpath.endswith('iso') and 'ISO' in folderpath.upper() :
 				t  = browser.searchDatastoreSubFolders_Task( "%s%s" % ( datastorepath, folderpath), searchspec)
                 		t.waitForMe()
               			result = t.getTaskInfo().getResult();
@@ -505,7 +505,9 @@ class Vsphere:
 				for r in results:
                 			fileinfo = r.getFile()
                 			for isofile in fileinfo:
-						isos.append(isofile.getPath())
+						path = isofile.getPath()
+						if path.endswith('.iso'):
+							isos.append("%s/%s/%s" % (datastorepath, folderpath, path))
 	return isos
 
 
