@@ -267,7 +267,7 @@ class Vsphere:
 
 	if iso:
 		#add iso
-		cdspec=createisospec()
+		cdspec=createisospec(iso)
 		devconfspec.append(cdspec)
 
 	confspec.setDeviceChange(devconfspec)
