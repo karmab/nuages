@@ -263,7 +263,7 @@ class VM(models.Model):
 	ip4               = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
 	mac4              = models.CharField(max_length=20, blank=True,null=True)
 	ipilo             = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-	iso	          = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
+	iso	          = models.CharField(max_length=100, default='',choices=( ('xx', '') , ('yy' , '') ))
 	hostgroup	  = models.CharField(max_length=30, default='',choices=( ('xx', '') , ('yy' , '') ))
 	puppetclasses     = models.CharField(max_length=30, null=True,default='',choices=( ('xx', '') , ('yy' , '') ))
 	parameters        = models.TextField(blank=True)
