@@ -548,17 +548,19 @@ if __name__ == '__main__':
 		print console
 	elif action == 'create':
 		net1, net2, net3, net4 = None, None, None, None
-		name, numcpu, numinterfaces, diskmode1, disksize1, ds, memory, guestid, vnc, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16]
+		name, numcpu, numinterfaces, diskmode1, disksize1, ds, memory, guestid, vnc, iso, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16], sys.argv[17]
 		diskmode1 = 'persistent'
 		numcpu, numinterfaces, disksize1 = int(numcpu), int(numinterfaces), int(disksize1)
 		if numinterfaces >= 2:
-			net2 = sys.argv[17]
+			net2 = sys.argv[18]
 		if numinterfaces >= 3:
-			net3 = sys.argv[18]
+			net3 = sys.argv[19]
 		if numinterfaces >= 4:
-			net4 = sys.argv[19]
+			net4 = sys.argv[20]
 		if 'rue' in vnc or 'RUE' in vnc:
 			vnc = True
 		else:
 			vnc = False
- 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, vnc=vnc, net1=net1, net2=net2, net3=net3,net4=net4)
+		if iso == '':
+			iso  = None
+ 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, vnc=vnc, iso=iso, net1=net1, net2=net2, net3=net3,net4=net4)
