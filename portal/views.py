@@ -121,7 +121,7 @@ def create(request):
 		tags = None
 		profile = Profile.objects.get(id=profile)
 		if profile.maxvms:
-			currentvms = len(VM.objects.get(profile=profile))
+			currentvms = len(VM.objects.filter(profile=profile))
 			if currentvms + numvms > profile.maxvms:
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Exceeded maximum vms for this profile<p</div>") 
 		if storagedomain == '' and not physical:
