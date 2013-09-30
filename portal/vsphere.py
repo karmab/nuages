@@ -55,7 +55,7 @@ def createnicspec(nicname, netname, guestid):
  return nicspec
 
 
-def creatediskspec(disksize,ds,diskmode,thin=False,ckey=1000):
+def creatediskspec(name,disksize,ds,diskmode,thin=False,ckey=1000):
  #SCSISPEC
  scsispec = VirtualDeviceConfigSpec()
  scsispec.setOperation(VirtualDeviceConfigSpecOperation.add)
@@ -74,7 +74,8 @@ def creatediskspec(disksize,ds,diskmode,thin=False,ckey=1000):
  vd.setUnitNumber(0)
  vd.setControllerKey(ckey)
  diskfilebacking = VirtualDiskFlatVer2BackingInfo()
- filename = "["+ ds.getName() +"]"
+ #filename = "["+ ds.getName() +"]"
+ filename = "[%s] %s/%s_Disk1.vmdk" % (ds.getName(),name,name)
  diskfilebacking.setFileName(filename)
  diskfilebacking.setDiskMode(diskmode)
  if thin:
@@ -85,26 +86,18 @@ def creatediskspec(disksize,ds,diskmode,thin=False,ckey=1000):
  return scsispec, diskspec, filename
 
 
-def creatediskspec2(disksize,ds,diskmode,thin=False,ckey=1001):
- #SCSISPEC
- scsispec = VirtualDeviceConfigSpec()
- scsispec.setOperation(VirtualDeviceConfigSpecOperation.add)
- scsictrl = VirtualLsiLogicController()
- scsictrl.setKey(ckey)
- scsictrl.setBusNumber(0)
- scsictrl.setSharedBus(VirtualSCSISharing.noSharing)
- scsispec.setDevice(scsictrl)
+def creatediskspec2(name,disksize,ds,diskmode,thin=False,ckey=1000):
  diskspec = VirtualDeviceConfigSpec()
  diskspec.setOperation(VirtualDeviceConfigSpecOperation.add)
  diskspec.setFileOperation(VirtualDeviceConfigSpecFileOperation.create)
  vd = VirtualDisk()
  vd.setCapacityInKB(disksize)
  diskspec.setDevice(vd)
- vd.setKey(0)
- vd.setUnitNumber(0)
+ vd.setKey(1)
+ vd.setUnitNumber(1)
  vd.setControllerKey(ckey)
  diskfilebacking = VirtualDiskFlatVer2BackingInfo()
- filename = "["+ ds.getName() +"]"
+ filename = "[%s] %s/%s_Disk2.vmdk" % (ds.getName(),name,name)
  diskfilebacking.setFileName(filename)
  diskfilebacking.setDiskMode(diskmode)
  if thin:
@@ -112,7 +105,7 @@ def creatediskspec2(disksize,ds,diskmode,thin=False,ckey=1001):
  else:
   diskfilebacking.setThinProvisioned(False)
  vd.setBacking(diskfilebacking)
- return scsispec, diskspec, filename
+ return diskspec
 
 
 
@@ -271,12 +264,12 @@ class Vsphere:
 		confspec.setExtraConfig([opt1,opt2])
 
 	#scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
-	scsispec1, diskspec1, filename1 = creatediskspec(disksize1, datastore, diskmode1, thin)
+	scsispec1, diskspec1, filename1 = creatediskspec(name,disksize1, datastore, diskmode1, thin)
 	devconfspec = [scsispec1, diskspec1]
 
 	#if disksize2:
-	#scsispec2,diskspec2,filename2 = creatediskspec2(disksize2, datastore, diskmode2, thin)
-	#devconfspec.extend([scsispec2,diskspec2])
+	#diskspec2 = creatediskspec2(name,disksize2, datastore, diskmode2, thin)
+	#devconfspec.append(diskspec2)
 
 	#NICSPEC
 	if numinterfaces >= 1:

@@ -348,7 +348,6 @@ class VM(models.Model):
                                         ds=stor
                                         size=storageinfo[stor][1]
                         createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s '%s' '%s' '%s' '%s' '%s' '%s'" % (pwd,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  diskformat1, disksize1, ds, memory, guestid, vnc, iso, net1, net2, net3, net4)
-			print createcommand
                         vspheremacaddr = os.popen(createcommand).read()
                         vspheremacaddr = ast.literal_eval(vspheremacaddr)
                 if cobbler and cobblerprovider:
