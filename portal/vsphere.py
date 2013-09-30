@@ -74,8 +74,8 @@ def creatediskspec(name,disksize,ds,diskmode,thin=False,ckey=1000):
  vd.setUnitNumber(0)
  vd.setControllerKey(ckey)
  diskfilebacking = VirtualDiskFlatVer2BackingInfo()
- #filename = "["+ ds.getName() +"]"
- filename = "[%s] %s/%s_Disk1.vmdk" % (ds.getName(),name,name)
+ filename = "["+ ds.getName() +"]"
+ #filename = "[%s] %s/%s_Disk1.vmdk" % (ds.getName(),name,name)
  diskfilebacking.setFileName(filename)
  diskfilebacking.setDiskMode(diskmode)
  if thin:
