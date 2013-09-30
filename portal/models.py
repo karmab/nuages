@@ -61,7 +61,7 @@ class IpamProvider(models.Model):
 	port                = models.IntegerField(default=80)
 	user                = models.CharField(max_length=60)
 	password            = models.CharField(max_length=20)
-	type	            = models.CharField(max_length=10, default='nuages')
+	type	            = models.CharField(max_length=10, default='naman')
 	def __unicode__(self):
 		return self.name
 
