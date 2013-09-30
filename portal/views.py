@@ -110,6 +110,7 @@ def create(request):
                 puppetclasses     = request.POST.get('puppetclasses')
                 parameters        = request.POST.get('parameters')
                 ipilo             = request.POST.get('ipilo')
+                ipoa              = request.POST.get('ipoa')
                 numvms            = int(request.POST.get('numvms'))
                 hostgroup         = request.POST.get('hostgroup')
 		if physical == 'false':
@@ -126,7 +127,7 @@ def create(request):
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Exceeded maximum vms for this profile<p</div>") 
 		if storagedomain == '' and not physical:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>") 
-		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,requireip=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.requireip
+		clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, requireip=profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.requireip
 		ipamprovider = profile.ipamprovider
 		if requireip and not ipamprovider and not ip1:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 needed <p><p</div>")
@@ -165,19 +166,19 @@ def create(request):
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
 		#VM CREATION IN DB
-		newvm=VM(name=name,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=ip1,mac1=mac1,ip2=ip2,mac2=mac2,ip3=ip3,mac3=mac3,ip4=ip4,mac4=mac4,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
+		newvm = VM(name=name, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=ip1, mac1=mac1, ip2=ip2, mac2=mac2, ip3=ip3, mac3=mac3, ip4=ip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
 		success = newvm.save()
 		if success != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
 		if numvms > 1:
 			successes={ name : "Machine %s successfully created!!!" % name }
 			for num in range(2,numvms+1):
-				newname=request.POST.get("name_%s" % num)
-				newip1=request.POST.get("ip1_%s" % num)
-				newmac1=request.POST.get("mac1_%s" % num)
-				newip2=request.POST.get("ip2_%s" % num)
-				newip3=request.POST.get("ip3_%s" % num)
-				newip4=request.POST.get("ip4_%s" % num)
+				newname = request.POST.get("name_%s" % num)
+				newip1 = request.POST.get("ip1_%s" % num)
+				newmac1 = request.POST.get("mac1_%s" % num)
+				newip2 = request.POST.get("ip2_%s" % num)
+				newip3 = request.POST.get("ip3_%s" % num)
+				newip4 = request.POST.get("ip4_%s" % num)
 				if requireip and not ipamprovider and not newip1:
 					successes[newname]="Ip1 needed for %s" % newname
 					continue
@@ -190,7 +191,7 @@ def create(request):
 				if requireip and not ipamprovider and numinterfaces > 3 and not newip4:
 					successes[newname]="Ip4 needed for %s" % newname
 					continue
-				newvm=VM(name=newname,storagedomain=storagedomain,physicalprovider=physicalprovider,virtualprovider=virtualprovider,physical=physical,cobblerprovider=cobblerprovider,foremanprovider=foremanprovider,profile=profile,ip1=newip1,mac1=newmac1,ip2=newip2,mac2=mac2,ip3=newip3,mac3=mac3,ip4=newip4,mac4=mac4,puppetclasses=puppetclasses,parameters=parameters,createdby=username,iso=iso,ipilo=ipilo,hostgroup=hostgroup)
+				newvm = VM(name=newname, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=newip1, mac1=newmac1, ip2=newip2, mac2=mac2, ip3=newip3, mac3=mac3, ip4=newip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
 				success = newvm.save()
 				if success == 'OK':
 					successes[newname]="Machine %s successfully created!!!" % newname
@@ -394,7 +395,6 @@ def profileinfo(request):
 						kvirt.close()
 					elif type == 'vsphere': 
 						pwd = os.environ["PWD"]
-                        			#beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                         			beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                         			bestds = os.popen(beststoragecommand).read()
 						storages=[bestds]
@@ -823,7 +823,6 @@ def stop(request):
 		elif virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
-			print stopcommand
 			stopinfo = os.popen(stopcommand).read()
 			#stopinfo= ast.literal_eval(stopinfo)	
 			print stopinfo

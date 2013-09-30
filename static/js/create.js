@@ -35,6 +35,8 @@ $( document ).ready(function() {
  var parameters      = $('#id_parameters');
  var ipilo = $('#id_ipilo');
  var ipilolabel = $('label[for="id_ipilo"]');
+ var ipoa = $('#id_ipoa');
+ var ipoalabel = $('label[for="id_ipoa"]');
  var hostgroup = $('#id_hostgroup');
  var hostgrouplabel = $('label[for="id_hostgroup"]');
  var storagedomain = $('#id_storagedomain');
@@ -55,6 +57,8 @@ $( document ).ready(function() {
  parameters.hide() ;
  ipilo.hide();
  ipilolabel.hide();
+ ipoa.hide();
+ ipoalabel.hide();
  hostgroup.hide();
  hostgrouplabel.hide();
  storagedomain.hide();
@@ -142,7 +146,10 @@ $( document ).ready(function() {
   var mac1label = $('label[for="id_mac1"]');
   var ipilo = $('#id_ipilo');
   var ipilolabel = $('label[for="id_ipilo"]');
+  var ipoa = $('#id_ipoa');
+  var ipoalabel = $('label[for="id_ipoa"]');
   var iso = $('#id_iso');
+  var ipilo = $('#id_ipilo');
   var isolabel = $('label[for="id_iso"]');
   var profile = $('#id_profile').val();
   var physical = $('#id_physical');
@@ -162,6 +169,8 @@ $( document ).ready(function() {
   mac1label.hide(300);
   ipilo.hide(300);
   ipilolabel.hide(300);
+  ipoa.hide(300);
+  ipoalabel.hide(300);
   iso.hide(300);
   isolabel.hide(300);
   puppetclasseslabel.hide(300) ;
@@ -196,7 +205,7 @@ $( document ).ready(function() {
   hide    = false;
   if ( ( physical.prop('checked') == true ) && ( ipiloval == '' ) ) {
   	$("#result").hide();
-	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 is required to be set to Ilo ip if physical is checked!</div>");
+	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 is required to be set to Ilo or Oa ip if physical is checked!</div>");
 	$("#result").show(500);
 	return;
   }
@@ -243,7 +252,7 @@ $( document ).ready(function() {
 	}
     if ( index == 3 ) {
 	switch (profiletype){
-	case 'ilo','oa':
+	case 'ilo':
 		if ( parameter != "" ) {
 		$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
 		$.each(parameter, function(index, value){
@@ -258,6 +267,27 @@ $( document ).ready(function() {
 		ipilo.val( ipiloval );
         	ipilolabel.show(400) ;
         	ipilo.show(400) ;
+		ip1.val('');
+        	mac1label.show(400) ;
+        	$('#id_mac1').show(400);
+		break;	
+	case 'oa':
+		if ( parameter != "" ) {
+		$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
+		$.each(parameter, function(index, value){
+			macname = value.split('=')[0];
+			mac= value.split('=')[1];
+			mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
+        		macslist = macslist+mac;
+		});
+        	$('#id_mac1').html(macslist);
+        	$('#id_mac1').append('</select><p>');
+		}
+        	ipilolabel.show(400) ;
+        	ipilo.show(400) ;
+		ipoa.val( ipiloval );
+        	ipoalabel.show(400) ;
+        	ipoa.show(400) ;
 		ip1.val('');
         	mac1label.show(400) ;
         	$('#id_mac1').show(400);
@@ -515,6 +545,7 @@ function createvm(){
   var puppetclasses     = $('#id_puppetclasses').val();
   var parameters  	= $('#id_parameters').val();
   var ipilo             = $('#id_ipilo').val();
+  var ipoa              = $('#id_ipoa').val();
   var numvms            = $('#numvms').val();
   var name_2            = $('#id_name_2').val();
   var ip1_2             = $('#id_ip1_2').val();
@@ -595,7 +626,7 @@ function createvm(){
   				}
 	}
  }	
-  var details = { 'name' : name , 'physicalprovider' : virtualprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain , 'type' : type };
+  var details = { 'name' : name , 'physicalprovider' : virtualprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'ipoa' : ipoa , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain , 'type' : type };
   	$.ajax({  
 		type: 'POST',
 		url: '/nuages/vms/',
