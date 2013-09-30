@@ -9,13 +9,15 @@
 <div id="actionwheel"></div>
 <fieldset class="module aligned">
 
-<p class="alert alert-info" >select provider or wait a few seconds to get all its vms...</p>
+<p class="alert alert-info" >select provider or just wait to get all its vms (check if you want info to be refreshed every 5 seconds)</p>
 <select name="virtualprovider" id="id_virtualprovider">
 {% for vprovider in vproviders|dictsort:"name" %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>
 {% endfor %}
-</select>
-<div id="getvms"><input name="getvms" type="submit" class="btn btn-info" value="Enter" onclick="getvms();"/></div><p>
+</select><p>
+<input id ="getvms" name="getvms" type="submit" class="btn btn-info" value="Enter" onclick="getvms();"/>
+<input id="refresh" type="checkbox"></p>
+
 <div id="results"></div>
 
 <div id="actionpending" class="hidden">0</div>

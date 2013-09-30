@@ -1,5 +1,9 @@
 $(document).ready(function() {
 setInterval(function(){
+  var refresh = $('#refresh');
+  if ( refresh.prop('checked') == false ) {
+   return;
+  }
   var virtualprovider = $('#id_virtualprovider').val();
   var data = { 'virtualprovider' : virtualprovider } ; 
   var actionpending = $("#actionpending").html();

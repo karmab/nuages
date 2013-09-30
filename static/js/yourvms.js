@@ -1,6 +1,9 @@
 $(document).ready(function() {
 setInterval(function(){
-   	
+   var refresh = $('#refresh');
+   if ( refresh.prop('checked') == false ) {
+    return;
+    }
    var actionpending = $("#actionpending").html();
    if ( actionpending == 1 ) {
 	return;
@@ -24,6 +27,6 @@ setInterval(function(){
 	    $("#refreshpending").replaceWith('<div id="refreshpending" class="hidden">0</div>');
 		}
 	});
-},3000);
+},5000);
 $.ajaxSetup({ cache: false });
 });
