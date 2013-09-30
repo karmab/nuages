@@ -14,13 +14,13 @@
 {% for vprovider in vproviders|dictsort:"name" %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>
 {% endfor %}
-</select></p>
+</select>
+<div id="getvms"><input name="getvms" type="submit" class="btn btn-info" value="Enter" onclick="getvms();"/></div><p>
+<div id="results"></div>
 
 <div id="actionpending" class="hidden">0</div>
 <div id="refreshpending" class="hidden">0</div>
-<div id="results"></div>
 <p id="allvms"></p>
 </fieldset>
-<!--p id="result"></p-->
 
 {% endblock content %}               

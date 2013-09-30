@@ -1,4 +1,5 @@
 function start(vm,provider){
+  $("#results").replaceWith('<div id="results"></div>');
   $("#actionwheel").show();
   var actionpending = $("#actionpending");
   actionpending.html('1');
@@ -12,7 +13,9 @@ function start(vm,provider){
             $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
-            $("#results").html(data);
+            //$("#results").html(data);
+            $("#results").html("<button type='button' class='close' data-dismiss='alert'>&times;</button>");
+            $("#results").append(data);
             $("#results").show(200);
   	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
 		}
@@ -20,6 +23,7 @@ function start(vm,provider){
 }
 
 function stop(vm,provider){
+  $("#results").replaceWith('<div id="results"></div>');
   $("#actionwheel").show();
   var actionpending = $("#actionpending");
   actionpending.html('1');
@@ -31,10 +35,11 @@ function stop(vm,provider){
         data: data,
         success: function(data) {
             $("#actionwheel").hide();
-  	    alert("coucou3");
             $("#results").hide();
             $("#results").addClass("alert alert-success");
-            $("#results").html(data);
+            //$("#results").html(data);
+            $("#results").html("<button type='button' class='close' data-dismiss='alert'>&times;</button>");
+            $("#results").append(data);
             $("#results").show(200);
   	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
 		}
@@ -58,6 +63,7 @@ function console(){
 }
 
 function kill(vm,provider){
+  $("#results").replaceWith('<div id="results"></div>');
 var sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
  $("#actionwheel").show();
@@ -72,7 +78,9 @@ if (sure) {
             $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
-            $("#results").html(data);
+            //$("#results").html(data);
+            $("#results").html("<button type='button' class='close' data-dismiss='alert'>&times;</button>");
+            $("#results").append(data);
             $("#results").show(200);
   	    actionpending.html('0');
   	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
@@ -99,7 +107,9 @@ if (sure) {
  	    $("#actionwheel").hide();
             $("#results").hide();
             $("#results").addClass("alert alert-success");
-            $("#results").html(data);
+            //$("#results").html(data);
+            $("#results").html("<button type='button' class='close' data-dismiss='alert'>&times;</button>");
+            $("#results").append(data);
             $("#results").show(200);
   	    actionpending.html('0');
   	    $("#actionpending").replaceWith('<div id="actionpending" class="hidden">0</div>');
