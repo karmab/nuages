@@ -9,7 +9,7 @@
 <div id="actionwheel"></div>
 <fieldset class="module aligned">
 
-<p class="alert alert-info" >select provider or just wait to get all its vms (check if you want info to be refreshed every 5 seconds)</p>
+<p class="alert alert-info" >select provider or just wait to get all its vms (check box if you want a 5s refresh)</p>
 <select name="virtualprovider" id="id_virtualprovider">
 {% for vprovider in vproviders|dictsort:"name" %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>

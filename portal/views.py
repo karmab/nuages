@@ -832,6 +832,7 @@ def stop(request):
 
 @login_required
 def kill(request):
+	logging.debug("prout")
 	if request.method == 'POST':
 		name     = request.POST.get('name')
 		provider = request.POST.get('provider')
@@ -864,8 +865,9 @@ def kill(request):
 		elif virtualprovider and virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+			print removecommand
 			remove = os.popen(removecommand).read()
-			removeinfo= ast.literal_eval(remove)	
+			#removeinfo= ast.literal_eval(remove)	
 			r='VM killed in vsphere'
 		#vm.delete()
 		vm.unmanaged = True

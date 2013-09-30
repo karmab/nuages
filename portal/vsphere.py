@@ -54,9 +54,9 @@ def createnicspec(nicname, netname, guestid):
  nicspec.setDevice(nic)
  return nicspec
 
-def creatediskspec(disksize,ds,diskmode,thin=False):
+
+def creatediskspec(disksize,ds,diskmode,thin=False,ckey=1000):
  #SCSISPEC
- ckey = 1000
  scsispec = VirtualDeviceConfigSpec()
  scsispec.setOperation(VirtualDeviceConfigSpecOperation.add)
  scsictrl = VirtualLsiLogicController()
@@ -72,7 +72,7 @@ def creatediskspec(disksize,ds,diskmode,thin=False):
  diskspec.setDevice(vd)
  vd.setKey(0)
  vd.setUnitNumber(0)
- vd.setControllerKey(ckey);
+ vd.setControllerKey(ckey)
  diskfilebacking = VirtualDiskFlatVer2BackingInfo()
  filename = "["+ ds.getName() +"]"
  diskfilebacking.setFileName(filename)
@@ -83,6 +83,37 @@ def creatediskspec(disksize,ds,diskmode,thin=False):
   diskfilebacking.setThinProvisioned(False)
  vd.setBacking(diskfilebacking)
  return scsispec, diskspec, filename
+
+
+def creatediskspec2(disksize,ds,diskmode,thin=False,ckey=1001):
+ #SCSISPEC
+ scsispec = VirtualDeviceConfigSpec()
+ scsispec.setOperation(VirtualDeviceConfigSpecOperation.add)
+ scsictrl = VirtualLsiLogicController()
+ scsictrl.setKey(ckey)
+ scsictrl.setBusNumber(0)
+ scsictrl.setSharedBus(VirtualSCSISharing.noSharing)
+ scsispec.setDevice(scsictrl)
+ diskspec = VirtualDeviceConfigSpec()
+ diskspec.setOperation(VirtualDeviceConfigSpecOperation.add)
+ diskspec.setFileOperation(VirtualDeviceConfigSpecFileOperation.create)
+ vd = VirtualDisk()
+ vd.setCapacityInKB(disksize)
+ diskspec.setDevice(vd)
+ vd.setKey(0)
+ vd.setUnitNumber(0)
+ vd.setControllerKey(ckey)
+ diskfilebacking = VirtualDiskFlatVer2BackingInfo()
+ filename = "["+ ds.getName() +"]"
+ diskfilebacking.setFileName(filename)
+ diskfilebacking.setDiskMode(diskmode)
+ if thin:
+  diskfilebacking.setThinProvisioned(True)
+ else:
+  diskfilebacking.setThinProvisioned(False)
+ vd.setBacking(diskfilebacking)
+ return scsispec, diskspec, filename
+
 
 
 def createcdspec():
@@ -192,6 +223,7 @@ class Vsphere:
 	memory = int(memory)
 	numcpu = int(numcpu)
 	disksize1 = int(disksize1)
+	disksize2 = 10
 	if disksize2:
 		disksize2 = int(disksize2)
 	numinterfaces = int(numinterfaces)
@@ -216,12 +248,10 @@ class Vsphere:
 	#SELECT DS
 	datastore = InventoryNavigator(rootFolder).searchManagedEntity("Datastore",ds)
 	if not datastore:
- 		print "%s not found,aborting" % (ds)
- 		sys.exit(0)
+ 		return "%s not found,aborting" % (ds)
 	#TODO:change this if to a test sum of all possible disks to be added to this datastore
 	if float(dssize(datastore)[1].replace("GB","")) -float(disksizeg1.replace("GB","")) <= 0:
- 		print "New Disk too large to fit in selected Datastore,aborting..."
- 		sys.exit(0)
+ 		return "New Disk too large to fit in selected Datastore,aborting..."
 	#define specifications for the VM
 	confspec = VirtualMachineConfigSpec()
 	confspec.setName(name)
@@ -240,7 +270,13 @@ class Vsphere:
 		opt2.setValue("TRUE");
 		confspec.setExtraConfig([opt1,opt2])
 
-	scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
+	#scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
+	scsispec1, diskspec1, filename1 = creatediskspec(disksize1, datastore, diskmode1, thin)
+	devconfspec = [scsispec1, diskspec1]
+
+	#if disksize2:
+	#scsispec2,diskspec2,filename2 = creatediskspec2(disksize2, datastore, diskmode2, thin)
+	#devconfspec.extend([scsispec2,diskspec2])
 
 	#NICSPEC
 	if numinterfaces >= 1:
@@ -257,13 +293,17 @@ class Vsphere:
  		nicspec4 = createnicspec(nicname4, net4, guestid)
 
 	if numinterfaces ==1:
- 		devconfspec = [scsispec, diskspec, nicspec1]
+ 		#devconfspec = [scsispec, diskspec, nicspec1]
+		devconfspec.append(nicspec1)
 	if numinterfaces ==2:
- 		devconfspec = [scsispec, diskspec, nicspec1, nicspec2]
+ 		#devconfspec = [scsispec, diskspec, nicspec1, nicspec2]
+		devconfspec.append(nicspec2)
 	if numinterfaces ==3:
- 		devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3]
+ 		#devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3]
+		devconfspec.append(nicspec3)
 	if numinterfaces ==4:
- 		devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3, nicspec4]
+ 		#devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3, nicspec4]
+		devconfspec.append(nicspec4)
 
 	if iso:
 		#add iso
@@ -274,7 +314,7 @@ class Vsphere:
 
 	confspec.setDeviceChange(devconfspec)
 	vmfi = VirtualMachineFileInfo()
-	vmfi.setVmPathName(filename)
+	vmfi.setVmPathName(filename1)
 	confspec.setFiles(vmfi)
 
 	t = vmfolder.createVM_Task(confspec,pool,None)
@@ -284,8 +324,7 @@ class Vsphere:
 	#2-GETMAC
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine",name)
 	if not vm:
- 		print "%s not found,aborting" % (name)
- 		sys.exit(0)
+ 		return "%s not found" % (name)
 	devices = vm.getConfig().getHardware().getDevice()
 	macaddr = []
 	for dev in devices:
@@ -318,8 +357,7 @@ class Vsphere:
    				#2-GETMAC
    				vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
    				if not vm:
-    					print "%s not found,aborting" % (name)
-    					sys.exit(1)
+    					return "%s not found" % (name)
    				devices = vm.getConfig().getHardware().getDevice()
    				for dev in devices:
     					if "addressType" in dir(dev):
@@ -331,7 +369,7 @@ class Vsphere:
       							confspec.setDeviceChange(devconfspec)
       							t = vm.reconfigVM_Task(confspec)
       							result = t.waitForMe()
-      							print "%s for changing DistributedVirtualSwitch for mac %s of %s" % (result, mac, name)
+      							#print "%s for changing DistributedVirtualSwitch for mac %s of %s" % (result, mac, name)
 	self.macaddr = macaddr
 	return macaddr
 
@@ -339,47 +377,42 @@ class Vsphere:
 	rootFolder = self.rootFolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
- 		print "%s not found,aborting" % (name)
- 		sys.exit(0)
+ 		return "%s not found" % (name)
 	if vm.getRuntime().getPowerState().toString()=="poweredOff":
 		t = vm.powerOnVM_Task(None)
 		result = t.waitForMe()
-		return "%s on launching %s"% (result, name)
+		return "%s started"% (name)
 
  def remove(self, name):
 	rootFolder = self.rootFolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
- 		print "%s not found,aborting" % (name)
- 		sys.exit(0)
+		return "%s not deleted"% (name)
 	if vm.getRuntime().getPowerState().toString()=="poweredOn":
   		t = vm.powerOffVM_Task()
   		result = t.waitForMe()
-  		print "%s powering off VM"% (result)
   	t = vm.destroy_Task()
   	result = t.waitForMe()
-  	print "%s on deleting %s in VC"% (result, name)
-	return True
+	return "%s deleted"% (name)
 
  def stop(self, name):
 	rootFolder = self.rootFolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
- 		print "%s not found,aborting" % (name)
-		return
+ 		return "%s not found,aborting" % (name)
 	if vm.getRuntime().getPowerState().toString()=="poweredOn":
   		t = vm.powerOffVM_Task()
   		result = t.waitForMe()
-  		return "%s powering off VM"% (result)
+  		return "%s stopped"% (name)
 
  def status(self, name):
 	rootFolder = self.rootFolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
  		#print "%s not found,aborting" % (name)
- 		print ''
+ 		return ''
 	else:
-		print vm.getRuntime().getPowerState().toString()
+		return vm.getRuntime().getPowerState().toString()
 
  def console(self, name):
 	rootFolder = self.rootFolder
@@ -414,8 +447,7 @@ class Vsphere:
 	rootFolder = self.rootFolder
 	vm=InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
 	if not vm:
- 		print "%s not found,aborting" % (name)
- 		sys.exit(0)
+ 		return "%s not found,aborting" % (name)
 	sessionmanager = si.getSessionManager()
  	session = sessionmanager.acquireCloneTicket()
  	vmid = vm.getMOR().get_value()
@@ -515,37 +547,31 @@ if __name__ == '__main__':
  	action, vcip, vcuser, vcpassword, dc, clu = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
  	vsphere = Vsphere(vcip, vcuser, vcpassword, dc, clu)
  	if action == 'getstorage':
- 		storage = vsphere.getstorage()
- 		print storage
+ 		print vsphere.getstorage()
  	if action == 'beststorage':
- 		storage = vsphere.beststorage()
- 		print storage
+ 		print vsphere.beststorage()
  	if action == 'allvms':
- 		allvms = vsphere.allvms()
- 		print allvms
+ 		print vsphere.allvms()
  	if action == 'getisos':
- 		isos = vsphere.getisos()
- 		print isos
+ 		print vsphere.getisos()
 	elif action == 'start':
 		name = sys.argv[7]
- 		vsphere.start(name)
+ 		print vsphere.start(name)
 	elif action == 'stop':
 		name = sys.argv[7]
- 		vsphere.stop(name)
+ 		print vsphere.stop(name)
 	elif action == 'status':
 		name = sys.argv[7]
- 		vsphere.status(name)
+ 		print vsphere.status(name)
 	elif action == 'remove':
 		name = sys.argv[7]
- 		vsphere.remove(name)
+ 		print vsphere.remove(name)
 	elif action == 'html5console':
 		name, fqdn, sha1 = sys.argv[7], sys.argv[8], sys.argv[9]
- 		html5console = vsphere.hmtl5console(name, fqdn, sha1)
-		print html5console
+ 		print vsphere.hmtl5console(name, fqdn, sha1)
 	elif action == 'console':
 		name = sys.argv[7]
- 		console = vsphere.console(name)
-		print console
+ 		print vsphere.console(name)
 	elif action == 'create':
 		net1, net2, net3, net4 = None, None, None, None
 		name, numcpu, numinterfaces, diskmode1, disksize1, ds, memory, guestid, vnc, iso, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16], sys.argv[17]

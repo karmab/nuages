@@ -8,8 +8,9 @@
 
 <div id="actionwheel"></div>
 <fieldset class="module aligned">
-<p class="alert alert-info" >Here s a list of all vms created by you or your groups peers</p>
-<p class="alert alert-info" >Autorefresh info every 5 minutes:   <input id="refresh" type="checkbox"></p>
+<p class="alert alert-info" >Here s a list of all vms created by you or your groups peers<br>
+Autorefresh info every 5s / Enable actions:<input id="refresh" type="checkbox"></p>
+<!--p class="alert alert-info" >Autorefresh info every 5s/ Enable actions:   <input id="refresh" type="checkbox"></p-->
 <div id="actionpending" class="hidden">0</div>
 <div id="refreshpending" class="hidden">0</div>
 <div id="results"></div>
@@ -28,9 +29,9 @@
 <tr>
 <td>
 {% if not vm.physical %}
-<a href="/nuages/vms/console/?id={{ vm.id }}">
+<a href="/nuages/vms/console/?id={{ vm.id }}"><img src="/static/img/console.png">
 {% elif vm.ipilo %}
-<a href="https://{{ default.consoleip }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png"></a>
+<a href="https://{{ default.consoleip }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png">
 {% endif %}
 {{ vm.name}}</a></td>
 <td>{{ vm.createdby }}</td>
@@ -54,13 +55,6 @@ wait...
 {% if vm.status != 'N/A' and vm.status != 'NotFound'%}
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
 <img src="/static/img/down.png"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
-{% if vm.status != 'down' and not vm.physical %}
-<a href="/nuages/vms/console/?id={{ vm.id }}"><img src="/static/img/console.png"></a>
-{% elif vm.ipilo  %}
-<a href="https://{{ default.consoleip }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png"></a>
-{% else  %}
-<img src="/static/img/blank.png"/>
-{% endif %}
 {% if vm.profile.deletable  %}
 {% if vm.physical %}
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','');" />
