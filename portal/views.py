@@ -87,7 +87,6 @@ def checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain):
 def create(request):
 	username	  = request.user.username
 	username	  = User.objects.filter(username=username)[0]
-	logging.debug("prout")
 	if request.method == 'POST':
 		numvms  	  = request.POST.get('numvms')
 		name   		  = request.POST.get('name')
@@ -220,7 +219,6 @@ def create(request):
 
 @login_required
 def profiles(request):
-	logging.debug("prout")
 	username	  = request.user.username
 	username	  = User.objects.filter(username=username)[0]
 	groups		  = username.groups
@@ -259,7 +257,6 @@ def profiles(request):
 
 #@login_required
 def storage(request):
-	logging.debug("prout")
 	username	  = request.user.username
 	username	  = User.objects.filter(username=username)[0]
 	if request.is_ajax() and request.method == 'POST':
@@ -783,7 +780,6 @@ def console(request):
 
 @login_required
 def start(request):
-	logging.debug("prout")
 	if request.method == 'POST':
 		vmname = request.POST.get('name')
 		virtualprovider=request.POST.get('virtualprovider')
@@ -810,7 +806,6 @@ def start(request):
 
 @login_required
 def stop(request):
-	logging.debug("prout")
 	if request.method == 'POST':
 		vmname = request.POST.get('name')
 		virtualprovider=request.POST.get('virtualprovider')
@@ -902,7 +897,6 @@ def hostgroups(request):
 
 @login_required
 def customforms(request):
-	logging.debug("prout")
 	username	  = request.user.username
 	username          = User.objects.filter(username=username)[0]
 	if request.method == 'POST' and request.POST.has_key('type'):
@@ -939,7 +933,6 @@ def customforms(request):
 
 @login_required
 def customforminfo(request):
-        logging.debug("prout")
         username          = request.user.username
         username          = User.objects.filter(username=username)[0]
         if request.method == 'POST':
@@ -956,7 +949,6 @@ def customforminfo(request):
 
 @login_required
 def customformedit(request):
-	logging.debug("prout")
 	username	  = request.user.username
 	username          = User.objects.filter(username=username)[0]
 	if request.method == 'POST' and request.POST.has_key('type'):
@@ -997,7 +989,6 @@ def customformedit(request):
 
 @login_required
 def customformcreate(request):
-	logging.debug("prout")
 	if request.method == 'POST' and request.POST.has_key('type'):
 		type = request.POST['type'].capitalize()
 		if not os.path.exists("portal/customtypes.py") or not  open("portal/customtypes.py").readlines():
@@ -1032,7 +1023,6 @@ def customformcreate(request):
 
 @login_required
 def customformupdate(request):
-	logging.debug("prout")
 	if request.method == 'POST' and request.POST.has_key('parameters') and request.POST.has_key('type'):
 		type = request.POST['type'].capitalize()
 		parameters = request.POST['parameters']
@@ -1108,7 +1098,6 @@ def customformupdate(request):
 
 @login_required
 def customformdelete(request):
-	logging.debug("prout")
 	if request.method == 'POST' and request.POST.has_key('type'):
 		type = request.POST['type'].capitalize()
 		if os.path.exists("portal/customtypes.py.lock"):
@@ -1212,7 +1201,7 @@ def invoicepdf(request):
 				now      = datetime.now()
 				nowday   = now.strftime("%d")
 				nowmonth = now.strftime("%Y-%m")
-				total = str(int(nowday)*price)+currency
+				total = str((int(nowday)-int(day))*price)+currency
 				p.drawString(30,y,"%s" % nowmonth)
 				p.drawString(120,y,total)
 				y = y -20
@@ -1269,14 +1258,13 @@ def invoice(request):
 				now      = datetime.now()
 				nowday   = now.strftime("%d")
 				nowmonth = now.strftime("%Y-%m")
-				total = int(nowday)*price
-				details.append({ 'month': nowmonth , 'total' : nowday  })
+				total = (int(nowday)-int(day))*price
+				details.append({ 'month': nowmonth , 'total' : total  })
                 	return render(request, 'invoice.html', { 'vm': vm , 'username': username  , 'details': details , 'default': default } )
 
 
 @login_required
 def profilecopy(request):
-        logging.debug("prout")
         username          = request.user.username
         username          = User.objects.filter(username=username)[0]
         groups            = username.groups

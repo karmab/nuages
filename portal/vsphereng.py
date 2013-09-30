@@ -27,6 +27,36 @@ class Vsphere:
 
  def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False):
 	s = self.s
+	memory = int(memory)
+        numcpu = int(numcpu)
+        disksize1 = int(disksize1)
+        if disksize2:
+                disksize2 = int(disksize2)
+        numinterfaces = int(numinterfaces)
+        if guestid in guests.keys():
+                guestid = guests[guestid]
+        disksize1 = disksize1*1048576
+        disksizeg1 = convert(1000*disksize1)
+        if disksize2:
+                disksize2 = disksize2*1048576
+                disksizeg2 = convert(1000*disksize2)
+        dclist = {}
+        dslist = {}
+        networklist = {}
+        guestlist = []
+        si = self.si
+	rootFolder = si.getRootFolder()
+        dc = self.dc
+	clu = self.clu
+ 	#get datacenter
+	dcmor = s._get_datacenters()[datacentername]
+	dcprops = VIProperty(s, dcmor)
+ 	#get host folder
+	hfmor = dcprops.hostFolder._obj
+ 	#get computer resources
+	crmors = s._retrieve_properties_traversal(property_names=['name','host'], from_node=hfmor, obj_type='ComputeResource') 
+
+
 
 
  def start(self, name):
