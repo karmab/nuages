@@ -392,7 +392,11 @@ class VM(models.Model):
                 if physical and physicalprovider.type == 'oa':
                         oa=Oa(ipoa,physicalprovider.user,physicalprovider.password)
 			bladeid = oa.getid(name)
-                        oa.pxe(bladeid)
+			status = oa.status(bladeid)
+			if status == 'up':
+                        	oa.rebootpxe(bladeid)
+			else:
+                        	oa.startpxe(bladeid)
                 if not physical and virtualprovider.type == 'ovirt':
                         ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                         ovirt.start(name)

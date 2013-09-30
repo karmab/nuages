@@ -43,7 +43,7 @@ class Oa:
         s.close()
         return 0
 
-    def pxe(self,bladeid):
+    def rebootpxe(self,bladeid):
         host, username, password = self.host, self.username, self.password
         s = paramiko.SSHClient()
         s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
