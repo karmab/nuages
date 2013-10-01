@@ -117,7 +117,6 @@ class Foreman:
  		postdata['host'] = {'name':name}
 		if not ip or not mac or not ptableid or not osid:
   			postdata['host']['managed'] = False
-			print "biloute"
  		if osid:
      			postdata['host']['operatingsystem_id'] = osid
  		if envid:
@@ -143,7 +142,7 @@ class Foreman:
   			postdata['host']['ptable_id'] = ptableid
  		result = foremando(url=url, actiontype="POST", postdata=postdata, user=user, password=password)
  		if not result.has_key('errors'):
-			print result
+			#print result
   			print "%s created in Foreman" % name
  		else:
   			print "%s not created in Foreman because %s" % (name, result["errors"][0])

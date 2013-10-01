@@ -359,6 +359,7 @@ def types(request):
 
 @login_required
 def profileinfo(request):
+	logging.debug("prout")
 	if request.method == 'POST' or request.is_ajax():
 		physical = False
 		profile = request.POST.get('profile')
@@ -581,7 +582,7 @@ def yourvms(request):
 					ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
 					status = ilo.status()
 				elif physicalprovider.type =='oa':
-					oa=Oa(ipilo,physicalprovider.user,physicalprovider.password)
+					oa=Oa(ipoa,physicalprovider.user,physicalprovider.password)
 					bladeid =oa.getid(name)
 					status = oa.status(bladeid)
 				vm.status = status

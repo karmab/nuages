@@ -29,8 +29,11 @@ class Oa:
         stdin, stdout, stderr = s.exec_command('show server info %s' % bladeid)
         for line in stdout:
             if 'Ethernet'  in line and 'NIC' in line:
-		matchmac=re.search('.*\((NIC.*)\).* (..:..:..:..:..:..).*',line)
-		macs.append("%s=%s" % ( matchmac.group(1), matchmac.group(2) ))
+		#matchmac=re.search('.*\((NIC.*)\).* (..:..:..:..:..:..).*',line)
+		#macs.append("%s=%s" % ( matchmac.group(1), matchmac.group(2) ))
+		#matchmac=re.search('.*\(LOM.*:.-.\).* \(..:..:..:..:..:..\).*',line)
+		matchmac=re.search('.*(..:..:..:..:..:..).*',line)
+		macs.append("%s=%s" % ( matchmac.group(1), matchmac.group(1) ))
         s.close()
         return macs
 

@@ -52,19 +52,24 @@ wait...
 
 <td>
 {% if ajax %}
+
 {% if vm.status != 'N/A' and vm.status != 'NotFound'%}
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
 <img src="/static/img/down.png"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
+{% endif %}
+
 {% if vm.profile.deletable  %}
+
 {% if vm.physical %}
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','');" />
 {% else  %}
 <img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
+
 {% if vm.unmanaged %}
 <img src="/static/img/unmanaged.png" onclick="dbremove('{{vm.id}}','{{vm.name}}');" />
 {% endif %}
-{% endif %}
+
 {% endif %}
 
 {% else  %}
