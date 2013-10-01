@@ -10,7 +10,6 @@ import socket
 class LdapBackend(object):
 	def authenticate(self, username=None, password=None):
 		success = False
-		#logging.debug("prout")
 		ldap.set_option(ldap.OPT_NETWORK_TIMEOUT , 10 )
 		ldap.set_option ( ldap.OPT_REFERRALS , 0 )
 		ldapproviders=LdapProvider.objects.all()

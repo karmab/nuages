@@ -55,7 +55,7 @@ def createnicspec(nicname, netname, guestid):
  return nicspec
 
 
-def creatediskspec(name,disksize,ds,diskmode,thin=False,ckey=1000):
+def creatediskspecold(disksize,ds,diskmode,thin=False,ckey=1000):
  #SCSISPEC
  scsispec = VirtualDeviceConfigSpec()
  scsispec.setOperation(VirtualDeviceConfigSpecOperation.add)
@@ -70,12 +70,11 @@ def creatediskspec(name,disksize,ds,diskmode,thin=False,ckey=1000):
  vd = VirtualDisk()
  vd.setCapacityInKB(disksize)
  diskspec.setDevice(vd)
- vd.setKey(0)
+ #vd.setKey(0)
  vd.setUnitNumber(0)
  vd.setControllerKey(ckey)
  diskfilebacking = VirtualDiskFlatVer2BackingInfo()
  filename = "["+ ds.getName() +"]"
- #filename = "[%s] %s/%s_Disk1.vmdk" % (ds.getName(),name,name)
  diskfilebacking.setFileName(filename)
  diskfilebacking.setDiskMode(diskmode)
  if thin:
@@ -85,19 +84,32 @@ def creatediskspec(name,disksize,ds,diskmode,thin=False,ckey=1000):
  vd.setBacking(diskfilebacking)
  return scsispec, diskspec, filename
 
+def createscsispec():
+ ckey = 1000
+ #SCSISPEC
+ scsispec = VirtualDeviceConfigSpec()
+ scsispec.setOperation(VirtualDeviceConfigSpecOperation.add)
+ scsictrl = VirtualLsiLogicController()
+ scsictrl.setKey(ckey)
+ scsictrl.setBusNumber(0)
+ scsictrl.setSharedBus(VirtualSCSISharing.noSharing)
+ scsispec.setDevice(scsictrl)
+ return scsispec
 
-def creatediskspec2(name,disksize,ds,diskmode,thin=False,ckey=1000):
+def creatediskspec(number, disksize, ds, diskmode, thin=False):
+ ckey = 1000
  diskspec = VirtualDeviceConfigSpec()
  diskspec.setOperation(VirtualDeviceConfigSpecOperation.add)
  diskspec.setFileOperation(VirtualDeviceConfigSpecFileOperation.create)
  vd = VirtualDisk()
  vd.setCapacityInKB(disksize)
  diskspec.setDevice(vd)
- vd.setKey(1)
- vd.setUnitNumber(1)
+ #vd.setKey(1)
+ vd.setUnitNumber(number)
  vd.setControllerKey(ckey)
  diskfilebacking = VirtualDiskFlatVer2BackingInfo()
- filename = "[%s] %s/%s_Disk2.vmdk" % (ds.getName(),name,name)
+ filename = "["+ ds.getName() +"]"
+ #filename = "[%s] %s/%s_%s.vmdk" % (ds.getName(),name,name,number)
  diskfilebacking.setFileName(filename)
  diskfilebacking.setDiskMode(diskmode)
  if thin:
@@ -106,7 +118,6 @@ def creatediskspec2(name,disksize,ds,diskmode,thin=False,ckey=1000):
   diskfilebacking.setThinProvisioned(False)
  vd.setBacking(diskfilebacking)
  return diskspec
-
 
 
 def createcdspec():
@@ -212,11 +223,10 @@ class Vsphere:
 #	self.best = host	
 
 
- def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,diskmode2=None,disksize2=None,vnc=False,iso=None):
+ def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,disksize2=None,diskmode2=None,vnc=False,iso=None):
 	memory = int(memory)
 	numcpu = int(numcpu)
 	disksize1 = int(disksize1)
-	disksize2 = 10
 	if disksize2:
 		disksize2 = int(disksize2)
 	numinterfaces = int(numinterfaces)
@@ -263,13 +273,14 @@ class Vsphere:
 		opt2.setValue("TRUE");
 		confspec.setExtraConfig([opt1,opt2])
 
-	#scsispec, diskspec, filename = creatediskspec(disksize1, datastore, diskmode1, thin)
-	scsispec1, diskspec1, filename1 = creatediskspec(name,disksize1, datastore, diskmode1, thin)
+	#scsispec1, diskspec1, filename1 = creatediskspec(disksize1, datastore, diskmode1, thin)
+	scsispec1 = createscsispec()
+	diskspec1 = creatediskspec(0, disksize1, datastore, diskmode1, thin)
 	devconfspec = [scsispec1, diskspec1]
 
-	#if disksize2:
-	#diskspec2 = creatediskspec2(name,disksize2, datastore, diskmode2, thin)
-	#devconfspec.append(diskspec2)
+	if disksize2:
+		diskspec2 = creatediskspec(1, disksize2, datastore, diskmode2, thin)
+		devconfspec.append(diskspec2)
 
 	#NICSPEC
 	if numinterfaces >= 1:
@@ -286,16 +297,12 @@ class Vsphere:
  		nicspec4 = createnicspec(nicname4, net4, guestid)
 
 	if numinterfaces ==1:
- 		#devconfspec = [scsispec, diskspec, nicspec1]
 		devconfspec.append(nicspec1)
 	if numinterfaces ==2:
- 		#devconfspec = [scsispec, diskspec, nicspec1, nicspec2]
 		devconfspec.append(nicspec2)
 	if numinterfaces ==3:
- 		#devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3]
 		devconfspec.append(nicspec3)
 	if numinterfaces ==4:
- 		#devconfspec = [scsispec, diskspec, nicspec1, nicspec2, nicspec3, nicspec4]
 		devconfspec.append(nicspec4)
 
 	if iso:
@@ -307,7 +314,8 @@ class Vsphere:
 
 	confspec.setDeviceChange(devconfspec)
 	vmfi = VirtualMachineFileInfo()
-	vmfi.setVmPathName(filename1)
+ 	filename = "["+ ds +"]"
+	vmfi.setVmPathName(filename)
 	confspec.setFiles(vmfi)
 
 	t = vmfolder.createVM_Task(confspec,pool,None)
@@ -567,19 +575,24 @@ if __name__ == '__main__':
  		print vsphere.console(name)
 	elif action == 'create':
 		net1, net2, net3, net4 = None, None, None, None
-		name, numcpu, numinterfaces, diskmode1, disksize1, ds, memory, guestid, vnc, iso, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16], sys.argv[17]
-		diskmode1 = 'persistent'
+		name, numcpu, numinterfaces, disksize1, diskmode1, disksize2 , diskmode2, ds, memory, guestid, vnc, iso, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16], sys.argv[17], sys.argv[18], sys.argv[19]
+		diskmode1, diskmode2 = 'persistent'
+		diskmode2 = diskmode1
 		numcpu, numinterfaces, disksize1 = int(numcpu), int(numinterfaces), int(disksize1)
 		if numinterfaces >= 2:
-			net2 = sys.argv[18]
+			net2 = sys.argv[20]
 		if numinterfaces >= 3:
-			net3 = sys.argv[19]
+			net3 = sys.argv[21]
 		if numinterfaces >= 4:
-			net4 = sys.argv[20]
+			net4 = sys.argv[22]
 		if 'rue' in vnc or 'RUE' in vnc:
 			vnc = True
 		else:
 			vnc = False
 		if iso == '':
 			iso  = None
- 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1,disksize1=disksize1, ds=ds, memory=memory, guestid=guestid, vnc=vnc, iso=iso, net1=net1, net2=net2, net3=net3,net4=net4)
+		if disksize2 == '':
+			disksize2  = None
+		if diskmode2 == '':
+			diskmode2  = None
+ 		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1, disksize1=disksize1, diskmode2=diskmode2, disksize2=disksize2, ds=ds, memory=memory, guestid=guestid, vnc=vnc, iso=iso, net1=net1, net2=net2, net3=net3,net4=net4)

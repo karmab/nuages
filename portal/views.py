@@ -155,8 +155,8 @@ def create(request):
 			parameters = "type=%s %s" % (type, parameters)
 		
 		#CHECK SECTION
-		if not physical and virtualprovider.type =='vsphere' and disksize2:
-			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Multiple disks arent supported at the moment for vsphere...<p><p</div>")
+		#if not physical and virtualprovider.type =='vsphere' and disksize2:
+		#	return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Multiple disks arent supported at the moment for vsphere...<p><p</div>")
 		#MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
 		vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
 		if len(vms) > 0:
@@ -832,7 +832,6 @@ def stop(request):
 
 @login_required
 def kill(request):
-	logging.debug("prout")
 	if request.method == 'POST':
 		name     = request.POST.get('name')
 		provider = request.POST.get('provider')
