@@ -592,6 +592,7 @@ function createvm(){
   var ip2_10            = $('#id_ip2_10').val();
   var ip3_10            = $('#id_ip3_10').val();
   var ip4_10            = $('#id_ip4_10').val();
+  var create            = $('#create').html();
   custom 		=  $('#custom').html() ;
   var typeslist = $('#id_type').val();
   var type     = $('#id_type').val().toString();
@@ -626,7 +627,7 @@ function createvm(){
   				}
 	}
  }	
-  var details = { 'name' : name , 'physicalprovider' : virtualprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'ipoa' : ipoa , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain , 'type' : type };
+  var details = { 'name' : name , 'physicalprovider' : virtualprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'ipoa' : ipoa , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain , 'type' : type , 'create' : create };
   	$.ajax({  
 		type: 'POST',
 		url: '/nuages/vms/',
@@ -641,4 +642,64 @@ function createvm(){
 		}
  		});
 
+}
+
+function findvm() {
+  var name              = $('#id_name').val();
+  var mac1              = $('#id_mac1');
+  var mac1label         = $('label[for="id_mac1"]');
+  var mac2              = $('#id_mac2');
+  var mac2label         = $('label[for="id_mac2"]');
+  var mac3              = $('#id_mac3');
+  var mac3label         = $('label[for="id_mac3"]');
+  var mac4              = $('#id_mac4');
+  var mac4label         = $('label[for="id_mac4"]');
+  var profile           = $('#id_profile').val();
+  if (  ( name == '' ) ||  ( profile == '' ) ) {
+	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Fill name and profile first</div>");
+	$("#result").show(400);
+	return;
+ }
+ $.ajax({  
+	type: 'POST',
+	url: '/nuages/vms/findvm/',
+	data: { 'name' : name , 'profile' : profile } ,
+	success: function(data) {
+		if ( data == null ) {
+		$("#create").replaceWith('<div id="create" class="hidden">1</div>');
+		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>VM not found</div>");
+		$("#result").show(400);
+		return;
+		}
+		$("#result").html("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>VM found</div>");
+		$("#result").show(400)
+		$("#create").html('0');
+   		$.each(data, function(index, parameter) {
+    		if ( index == 0  )  {	
+		$('#id_mac1').replaceWith('<input id="id_mac1" name="mac1" value="'+parameter+'" type="text"><p>');
+        	$('#id_mac1').show(400);
+        	mac1label.show(400);
+	
+		}
+    		if ( index == 1  )  {	
+		$('#id_mac2').replaceWith('<input id="id_mac2" name="mac2" value="'+parameter+'" type="text"><p>');
+        	$('#id_mac2').show(400);
+        	mac2label.show(400);
+		}
+    		if ( index == 2  )  {	
+		$('#id_mac3').replaceWith('<input id="id_mac3" name="mac3" value="'+parameter+'" type="text"><p>');
+        	$('#id_mac3').show(400);
+        	mac3label.show(400);
+		}
+    		if ( index == 3  )  {	
+		$('#id_mac4').replaceWith('<input id="id_mac4" name="mac4" value="'+parameter+'" type="text"><p>');
+        	$('#id_mac4').show(400);
+        	mac4label.show(400);
+		}
+		});
+		},
+		error: function(jqXHR, textStatus, errorThrown) {
+  			alert(errorThrown);
+		}
+ 		});
 }

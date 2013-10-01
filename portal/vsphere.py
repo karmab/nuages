@@ -374,6 +374,20 @@ class Vsphere:
 	self.macaddr = macaddr
 	return macaddr
 
+
+ def getmacs(self,name):
+	rootFolder = self.rootFolder
+        vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine",name)
+        if not vm:
+                return None
+        devices = vm.getConfig().getHardware().getDevice()
+        macs = []
+        for dev in devices:
+                if "addressType" in dir(dev):
+                        macs.append(dev.getMacAddress())
+        return macs
+
+
  def start(self, name):
 	rootFolder = self.rootFolder
 	vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
@@ -567,6 +581,9 @@ if __name__ == '__main__':
 	elif action == 'remove':
 		name = sys.argv[7]
  		print vsphere.remove(name)
+	elif action == 'getmacs':
+		name = sys.argv[7]
+ 		print vsphere.getmacs(name)
 	elif action == 'html5console':
 		name, fqdn, sha1 = sys.argv[7], sys.argv[8], sys.argv[9]
  		print vsphere.hmtl5console(name, fqdn, sha1)

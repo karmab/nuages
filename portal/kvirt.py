@@ -195,6 +195,28 @@ class Kvirt:
 		else:
 			self.macaddr.append(macs[net])
 
+
+
+ def getmacs(self,name):
+	conn = self.conn
+	try:
+		vm = conn.lookupByName(name)
+	except:
+		return None
+	xml = vm.XMLDesc(0)
+        root = ET.fromstring(xml)
+	macs=[]
+        for element in root.getiterator('interface'):
+                mac = element.find('mac').get('address')
+                #network = element.find('source').get('network')
+                #bridge = element.find('source').get('bridge')
+                #if bridge:
+                #        macs[bridge]=mac
+                #else:
+                #        macs[network]=mac
+		macs.append(mac)
+	return macs
+
  def start(self,name):
     conn = self.conn
     status = {0:'down',1:'up'}

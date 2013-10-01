@@ -273,6 +273,7 @@ class VM(models.Model):
 	price             = models.IntegerField(blank=True,null=True)
 	unmanaged         = models.BooleanField(default=False)
 	status  	  = models.CharField(max_length=20, default='N/A')
+	create            = models.BooleanField(default=True)
 	def __unicode__(self):
 		if self.virtualprovider:
 			return "%s : %s" % (self.virtualprovider.name,self.name)
@@ -283,7 +284,7 @@ class VM(models.Model):
 			#super(VM, self).save(*args, **kwargs)
 			#return
 		self.createdwhen=datetime.now()
-		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,puppetclasses,parameters,createdby,iso,ipilo,ipoa,hostgroup = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.puppetclasses,self.parameters,self.createdby,self.iso,self.ipilo,self.ipoa,self.hostgroup
+		name,storagedomain,physicalprovider,virtualprovider,physical,cobblerprovider,foremanprovider,profile,ip1,mac1,ip2,mac2,ip3,mac3,ip4,mac4,puppetclasses,parameters,createdby,iso,ipilo,ipoa,hostgroup,create = self.name,self.storagedomain,self.physicalprovider,self.virtualprovider,self.physical,self.cobblerprovider,self.foremanprovider,self.profile,self.ip1,self.mac1,self.ip2,self.mac2,self.ip3,self.mac3,self.ip4,self.mac4,self.puppetclasses,self.parameters,self.createdby,self.iso,self.ipilo,self.ipoa,self.hostgroup,self.create
 		clu,guestid,memory,numcpu,disksize1,diskformat1,disksize2,diskformat2,diskinterface,numinterfaces,net1,subnet1,net2,subnet2,net3,subnet3,net4,subnet4,netinterface,dns,foreman,cobbler,foremanparameters,cobblerparameters,vnc=profile.clu,profile.guestid,profile.memory,profile.numcpu,profile.disksize1,profile.diskformat1,profile.disksize2,profile.diskformat2,profile.diskinterface,profile.numinterfaces,profile.net1,profile.subnet1,profile.net2,profile.subnet2,profile.net3,profile.subnet3,profile.net4,profile.subnet4,profile.netinterface,profile.dns,profile.foreman,profile.cobbler,profile.foremanparameters,profile.cobblerparameters,profile.vnc
 		if profile.price:
 			self.price = profile.price
@@ -296,15 +297,15 @@ class VM(models.Model):
 		if physical:
 			provider=physicalprovider
 			connection=checkconn(ipilo,22)
-		else:
+		elif create:
 			provider=virtualprovider
 			connection=checkconn(virtualprovider.host,virtualprovider.port)
-		if not connection:
-			return "Connectivity issue with provider!"
+			if not connection:
+				return "Connectivity issue with virtual provider %s!" % virtualprovider.name
 		if cobbler and cobblerprovider:
 			connection = checkconn(cobblerprovider.host, COBBLERPORT)
 			if not connection:
-				return "Connectivity issue with %s!" % cobblerprovider.host
+				return "Connectivity issue with cobbler provider %s!" % cobblerprovider.name
                         cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
                         cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
 			cobblerfound = cobbler.exists(name)
@@ -313,7 +314,7 @@ class VM(models.Model):
 		if foreman and foremanprovider:
 			connection = checkconn(foremanprovider.host, foremanprovider.port)
 			if not connection:
-				return "Connectivity issue with %s!" % foremanprovider.host
+				return "Connectivity issue with foreman provider %s!" % foremanprovider.name
                         foremanhost, foremanport,foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.user, foremanprovider.password
                         foreman=Foreman(host=foremanhost,port=foremanport, user=foremanuser, password=foremanpassword)
 			foremanfound = foreman.exists("%s.%s" %  (name,dns) )
@@ -328,15 +329,15 @@ class VM(models.Model):
 		if physical and profile.console:
 				cmdline="%s console=ttyS0" % (cmdline)
                 #VM CREATION
-                if not physical and virtualprovider.type == 'ovirt':
+                if not physical and create and virtualprovider.type == 'ovirt':
                         ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                         ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
                         ovirt.close()
-                if not physical and virtualprovider.type == 'kvirt':
+                if not physical and create and virtualprovider.type == 'kvirt':
 			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
                         kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
                         kvirt.close()
-                if not physical and virtualprovider.type == 'vsphere':
+                if not physical and create and virtualprovider.type == 'vsphere':
                         pwd = os.environ["PWD"]
                         #get best datastore
                         storagecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (pwd,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
@@ -351,11 +352,11 @@ class VM(models.Model):
                         vspheremacaddr = os.popen(createcommand).read()
                         vspheremacaddr = ast.literal_eval(vspheremacaddr)
                 if cobbler and cobblerprovider:
-                        if not physical and virtualprovider.type == 'ovirt':
+                        if not physical and create and virtualprovider.type == 'ovirt':
                                 macaddr=ovirt.macaddr
-                        if not physical and virtualprovider.type == 'kvirt':
+                        if not physical and create and virtualprovider.type == 'kvirt':
                                 macaddr=kvirt.macaddr
-                        if not physical and virtualprovider.type == 'vsphere':
+                        if not physical and create and virtualprovider.type == 'vsphere':
                                 macaddr=vspheremacaddr
                         if not physical and virtualprovider.type == 'fake':
 				if mac1:
@@ -365,7 +366,15 @@ class VM(models.Model):
                         if physical:
                                 macaddr=[mac1]
 				if mac2:
-                                	macaddr=[mac1,mac2]
+                                	macaddr.append(mac2)
+                        if not create:
+                                macaddr=[mac1]
+				if mac2:
+                                	macaddr.append(mac2)
+				if mac3:
+                                	macaddr.append(mac3)
+				if mac4:
+                                	macaddr.append(mac4)
                         cobblerprofile=profile.name
                         if profile.cobblerprofile:
                                 cobblerprofile=profile.cobblerprofile
@@ -397,15 +406,15 @@ class VM(models.Model):
                         	pxe = oa.rebootpxe(bladeid)
 			else:
                         	pxe = oa.startpxe(bladeid)
-                if not physical and virtualprovider.type == 'ovirt':
+                if not physical and create and virtualprovider.type == 'ovirt':
                         ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                         ovirt.start(name)
                         ovirt.close()
-                if not physical and virtualprovider.type == 'kvirt':
+                if not physical and create and virtualprovider.type == 'kvirt':
 			kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
                         kvirt.start(name)
                         kvirt.close()
-                if not physical and virtualprovider.type == 'vsphere':
+                if not physical and create and virtualprovider.type == 'vsphere':
                         startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (pwd,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                         os.popen(startcommand).read()
 		return 'OK'

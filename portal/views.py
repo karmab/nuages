@@ -113,10 +113,15 @@ def create(request):
                 ipoa              = request.POST.get('ipoa')
                 numvms            = int(request.POST.get('numvms'))
                 hostgroup         = request.POST.get('hostgroup')
+                create            = request.POST.get('create')
+		if create == '0':
+			create = False
+		else:
+			create = True
 		if physical == 'false':
 			physical = False
 		else:
-			physical= True
+			physical = True
 		#get associated profiles
 		#TODO:add tags to model
 		tags = None
@@ -166,7 +171,7 @@ def create(request):
 			if storageresult != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
 		#VM CREATION IN DB
-		newvm = VM(name=name, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=ip1, mac1=mac1, ip2=ip2, mac2=mac2, ip3=ip3, mac3=mac3, ip4=ip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
+		newvm = VM(name=name, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=ip1, mac1=mac1, ip2=ip2, mac2=mac2, ip3=ip3, mac3=mac3, ip4=ip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup, create=create)
 		success = newvm.save()
 		if success != 'OK':
 				return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
@@ -1304,6 +1309,25 @@ def profilecopy(request):
                 return render(request, 'profilecopy.html', { 'profiles': profiles , 'username': username } )
 
 
-
-
-
+@login_required
+def findvm(request):
+	if request.method == 'POST' and request.POST.has_key('name') and request.POST.has_key('profile'):
+		profile = request.POST.get('profile')
+		name = request.POST.get('name')
+		profile = Profile.objects.get(id=profile)
+		numinterfaces = profile.numinterfaces
+		virtualprovider = profile.virtualprovider
+                if virtualprovider.type =='ovirt':
+                                ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+                                macs = ovirt.getmacs(name)
+                                ovirt.close()
+                if virtualprovider.type =='kvirt':
+                                kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                                macs = kvirt.getmacs(name)
+                                kvirt.close()
+                if virtualprovider.type =='vsphere':
+                                macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+                                macscommand = os.popen(macscommand).read()
+                                macs = ast.literal_eval(macscommand)
+		macs = json.dumps(macs[:numinterfaces])
+		return HttpResponse(macs,mimetype='application/json')

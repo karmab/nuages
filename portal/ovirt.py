@@ -195,6 +195,17 @@ class Ovirt:
 	for nic in vm.nics.list():
 		self.macaddr.append(nic.mac.address)
 
+
+ def getmacs(self,name):
+	api=self.api
+	vm = api.vms.get(name=name)
+	if not vm:
+		return None
+	macs=[]
+	for nic in vm.nics.list():
+		macs.append(nic.mac.address)
+	return macs
+
  def start(self,name):
 	api=self.api
  	while api.vms.get(name).status.state =="image_locked":
