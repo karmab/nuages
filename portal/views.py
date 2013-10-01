@@ -529,6 +529,7 @@ def virtualprovidertype(request):
 
 @login_required
 def yourvms(request):
+	logging.debug("prout")
 	ajax = False
 	if request.is_ajax():
 		ajax = True
