@@ -8,15 +8,18 @@
 </tr>
 {% for vm in vms|dictsort:"name" %}
 <tr>
-<td>{{ vm.name}}</td>
+<td>
+{% if console and vm.status != 'down' %}
+<a href="/nuages/vms/console/?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="/static/img/console.png">{{ vm.name}}</a>
+{% else %}
+{{ vm.name}}
+{% endif %}
+</td>
 <td><img src="/static/img/{{vm.status}}.png">{{vm.status}}</td>
 <!--a href="/nuages/console/?vm={{ vm.name }}&virtualprovider={{ vm.virtualprovider }}"><img src="/static/img/start.png"></a!-->
 <td>
 <img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
 <img src="/static/img/down.png" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
-{% if console and vm.status != 'down' %}
-<a href="/nuages/vms/console/?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="/static/img/console.png"></a>
-{% endif %}
 </td>
 </tr>
 {% endfor %}
