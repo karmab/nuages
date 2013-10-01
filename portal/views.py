@@ -567,22 +567,24 @@ def yourvms(request):
 			continue
 		#handle physical machines
 		if vm.physical:
-			ipilo=vm.ipilo
 			physicalprovider=vm.physicalprovider
 			if physicalprovider in inactives:
 				vm.status = 'N/A'
 				resultvms.append(vm)
 				continue
 			try:
+				if physicalprovider.type =='ilo':
+					iptocheck=vm.ipilo
+				if physicalprovider.type =='oa':
+					iptocheck=vm.ipoa
                 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 		sock.settimeout(2)
-                		sock.connect((ipilo, 22))
-				ipilo = vm.ipilo
+                		sock.connect((iptocheck, 22))
 				if physicalprovider.type =='ilo':
-					ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
+					ilo=Ilo(vm.ipilo,physicalprovider.user,physicalprovider.password)
 					status = ilo.status()
 				elif physicalprovider.type =='oa':
-					oa=Oa(ipoa,physicalprovider.user,physicalprovider.password)
+					oa=Oa(vm.ipoa,physicalprovider.user,physicalprovider.password)
 					bladeid =oa.getid(name)
 					status = oa.status(bladeid)
 				vm.status = status
@@ -642,7 +644,7 @@ def yourvms(request):
 		vm.status = status
 		resultvms.append(vm)
 	if ajax:
-		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default , 'ajax' : ajax } )
+		return render(request, 'yourvms2.html', { 'vms': resultvms, 'username': username , 'default' : default , 'ajax' : ajax } )
 	else:
 		return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
 

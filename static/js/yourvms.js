@@ -23,7 +23,11 @@ setInterval(function(){
         type: "POST",
         url: '/nuages/yourvms/',
         success: function(data) {
-            $("body").html(data);
+            //$("body").html(data);
+	    $("#yourvms").html(data);
+            $("#yourvms").show(400);
+	    $("#yourvmsinitial").replaceWith('<p id="yourvmsinitial"><p>');
+
 	    $("#refreshpending").replaceWith('<div id="refreshpending" class="hidden">0</div>');
 		}
 	});
