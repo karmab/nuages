@@ -7,7 +7,7 @@
 
 <div id="wheel"></div>
 <fieldset class="module aligned">
-<p class="alert alert-info" >Select virtual provider to get storage statistics</p>
+<p class="alert alert-info" ><button type='button' class='close' data-dismiss='alert'>&times;</button>Select virtual provider to get storage statistics</p>
 <select name="virtualprovider" id="id_virtualprovider">
 {% for vprovider in vproviders %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>
