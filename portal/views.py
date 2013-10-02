@@ -1344,7 +1344,7 @@ def findvm(request):
                                 macs = kvirt.getmacs(name)
                                 kvirt.close()
 			if virtualprovider.type =='vsphere':
-                                macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+                                macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'getmacs', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu, name)
                                 macscommand = os.popen(macscommand).read()
                                 macs = ast.literal_eval(macscommand)
 		results.append(macs)
