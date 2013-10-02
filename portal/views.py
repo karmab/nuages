@@ -364,71 +364,41 @@ def types(request):
 
 @login_required
 def profileinfo(request):
-	logging.debug("prout")
 	if request.method == 'POST' or request.is_ajax():
-		physical = False
 		profile = request.POST.get('profile')
 	    	profile = Profile.objects.filter(id=profile)[0]
 	    	datacenter = profile.datacenter
 		specific=[]
 		storages=[]
 		vlist=[]
-		if request.POST.has_key('physical') and request.POST.get('physical') == 'true':
-			physical = True
-			physicalprovider=profile.physicalprovider
-			if not physicalprovider:
-				physical=False
-				type='noilo'
-				provider = ''
-			else:
-				type=physicalprovider.type
-				provider = "%s,%s" % (physicalprovider.id, physicalprovider.name)
-		else:
-			virtualprovider=profile.virtualprovider
-			type=virtualprovider.type
-			if type != "fake":
-				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
-				storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
-				if profile.autostorage:	
-					#RETRIEVE BEST STORAGE DOMAIN
-					if type == 'ovirt':
- 						ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-						storages = [ovirt.beststorage(datacenter)]
-						ovirt.close()
-					elif type == 'kvirt':
-						kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-						storages = [kvirt.beststorage()]
-						kvirt.close()
-					elif type == 'vsphere': 
-						pwd = os.environ["PWD"]
-                        			beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
-                        			bestds = os.popen(beststoragecommand).read()
-						storages=[bestds]
-					else:
-						storages=["N/A"]
+		virtualprovider=profile.virtualprovider
+		type=virtualprovider.type
+		if type != "fake":
+			provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
+			storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
+			if profile.autostorage:	
+				#RETRIEVE BEST STORAGE DOMAIN
+				if type == 'ovirt':
+					ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+					storages = [ovirt.beststorage(datacenter)]
+					ovirt.close()
+				elif type == 'kvirt':
+					kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+					storages = [kvirt.beststorage()]
+					kvirt.close()
+				elif type == 'vsphere': 
+					pwd = os.environ["PWD"]
+					beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+					bestds = os.popen(beststoragecommand).read()
+					storages=[bestds]
 				else:
-					for stor in storagelist: 
-						storages.append(stor.name)
+					storages=["N/A"]
 			else:
-				provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
-				storages=['N/A']
-		if physical and request.POST.has_key('ipilo'):
-			if physicalprovider.type=='ilo':
-				type = 'ilo'
-				ipilo = request.POST.get('ipilo')
-				ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
-				macs = ilo.getmacs()
-				for mac in macs:
-					specific.append(mac)
-			elif physicalprovider.type=='oa' and request.POST.has_key('name'):
-				name = request.POST.get('name')
-				type = 'oa'
-				ipilo = request.POST.get('ipilo')
-				oa=Oa(ipilo,physicalprovider.user,physicalprovider.password)
-				bladeid = oa.getid(name)
-				macs = oa.getmacs(bladeid)
-				for mac in macs:
-					specific.append(mac)
+				for stor in storagelist: 
+					storages.append(stor.name)
+		else:
+			provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
+			storages=['N/A']
 		if type =='ovirt' and profile.iso:
 				type = 'iso'
 				specific=[]

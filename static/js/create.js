@@ -152,7 +152,6 @@ $( document ).ready(function() {
   var ipilo = $('#id_ipilo');
   var isolabel = $('label[for="id_iso"]');
   var profile = $('#id_profile').val();
-  var physical = $('#id_physical');
   var virtualprovider = $('#id_virtualprovider');
   var virtualproviderlabel = $('label[for="id_virtualprovider"]');
   var cobblerprovider = $('#id_cobblerprovider');
@@ -196,42 +195,23 @@ $( document ).ready(function() {
   storagedomainlabel.hide();
   result.hide();
   var profile = $('#id_profile').val();
-  var ipiloval = $('#id_ip1').val();
   var name = $('#id_name').val();
   var isoslist = '';
   var macslist = '';
   foreman = false;
   cobbler = false;
   hide    = false;
-  if ( ( physical.prop('checked') == true ) && ( ipiloval == '' ) ) {
-  	$("#result").hide();
-	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 is required to be set to Ilo or Oa ip if physical is checked!</div>");
-	$("#result").show(500);
-	return;
-  }
-  if ( ( physical.prop('checked') == true ) && ( name == '' ) ) {
-  	$("#result").hide();
-	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Name is required to be set if physical is checked!</div>");
-	$("#result").show(500);
-	return;
-  }
   $('#id_mac1').replaceWith('<input style="display: none;" id="id_mac1" name="mac1" maxlength="20" type="text"><p>');
   $('#id_iso').replaceWith('<select style="display: none;" name="iso" id="id_iso">');
   $.ajax({  
    type: 'POST',
    url: '/nuages/profileinfo/',
-   data: { 'profile' : profile , 'ipilo' : ipiloval , 'name': name , 'physical' : physical.prop('checked') } ,
+   data: { 'profile' : profile , 'name': name  } ,
    success: function(data) {
    profiletype = '' ;
    $.each(data, function(index, parameter) {
     if ( index == 0 )  {
 	profiletype = parameter ;
-	if ( profiletype == 'noilo' ) {
-  		$("#result").hide();
-		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Profile without physical provider associated.report to administrator!</div>");
-		$("#result").show(500);
-		return false;
-	}
 	}
     if ( ( index == 1 ) && ( parameter == true ) )  {
 	hide = true;
@@ -252,46 +232,6 @@ $( document ).ready(function() {
 	}
     if ( index == 3 ) {
 	switch (profiletype){
-	case 'ilo':
-		if ( parameter != "" ) {
-		$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
-		$.each(parameter, function(index, value){
-			macname = value.split('=')[0];
-			mac= value.split('=')[1];
-			mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
-        		macslist = macslist+mac;
-		});
-        	$('#id_mac1').html(macslist);
-        	$('#id_mac1').append('</select><p>');
-		}
-		ipilo.val( ipiloval );
-        	ipilolabel.show(400) ;
-        	ipilo.show(400) ;
-		ip1.val('');
-        	mac1label.show(400) ;
-        	$('#id_mac1').show(400);
-		break;	
-	case 'oa':
-		if ( parameter != "" ) {
-		$('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');	
-		$.each(parameter, function(index, value){
-			macname = value.split('=')[0];
-			mac= value.split('=')[1];
-			mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
-        		macslist = macslist+mac;
-		});
-        	$('#id_mac1').html(macslist);
-        	$('#id_mac1').append('</select><p>');
-		}
-        	ipilolabel.show(400) ;
-        	ipilo.show(400) ;
-		ipoa.val( ipiloval );
-        	ipoalabel.show(400) ;
-        	ipoa.show(400) ;
-		ip1.val('');
-        	mac1label.show(400) ;
-        	$('#id_mac1').show(400);
-		break;	
 	case 'fake':
 		$('#id_mac1').replaceWith('<input type="text" name="mac1" id="id_mac1"></input>');	
         	mac1label.show(400) ;
@@ -322,43 +262,22 @@ $( document ).ready(function() {
 	if ( parameter >= 2 ) {
  	ip2label.show(400);
  	ip2.show(400);
-	if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
-	if ( macslist != "" ) {
-		$('#id_mac2').replaceWith('<select name="mac2" id="id_mac2">');	
-        	$('#id_mac2').html(macslist);
-        	$('#id_mac2').append('</select><p>');
-			      }
  	mac2label.show(400);
         $('#id_mac2').show(400);
-	}
 	}
 	if ( parameter >= 3 ) {
  	ip3label.show(400);
  	ip3.show(400);
-	if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
-	if ( macslist != "" ) {
-	$('#id_mac3').replaceWith('<select name="mac3" id="id_mac3">');	
-        $('#id_mac3').html(macslist);
-        $('#id_mac3').append('</select><p>');
-	}
  	mac3label.show(400);
  	mac3.show(400);
         $('#id_mac3').show(400);
 	}
-	}
 	if ( parameter >= 4 ) {
  	ip4label.show(400);
  	ip4.show(400);
-	if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
-	if ( macslist != "" ) {
-	$('#id_mac4').replaceWith('<select name="mac4" id="id_mac4">');	
-        $('#id_mac4').html(macslist);
-        $('#id_mac4').append('</select><p>');
-	}
  	mac4label.show(400);
         $('#id_mac4').show(400);
 	}
- 	}
  	var numvms = $('#numvms').val();
 	if ( numvms > 1 ) {
   	extravmsfieldset.show(400);
@@ -374,12 +293,8 @@ $( document ).ready(function() {
 			var additionaliplabel = $('#id_iplabel'+String(numif)+"_"+String(numvm));
  			additionalip.show(400);
  			additionaliplabel.show(400);
-			if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
-			var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
-			var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
  			additionalmac.show(400);
  			additionalmaclabel.show(400);
-			}
 	}}
 	}
     if ( index == 7 )  {	
@@ -669,33 +584,33 @@ function findvm() {
         return;
   }
   if (  ( name == '' ) ||  ( profile == '' ) ) {
-	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Fill name and profile first</div>");
-	$("#result").show(400);
-	return;
+        $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Fill name and profile first</div>");
+        $("#result").show(400);
+        return;
  }
  $.ajax({  
-	type: 'POST',
-	url: '/nuages/vms/findvm/',
-	data: { 'name' : name , 'profile' : profile , 'physical' : physical.prop('checked') , 'ip' : ipval  } ,
-	success: function(data) {
-		//alert(data);
-		//return;
-		if ( data == null ) {
-		$("#create").replaceWith('<div id="create" class="hidden">1</div>');
-		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>System not found</div>");
-		$("#result").show(400);
-		return;
-		}
-		$("#result").html("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>System found</div>");
-		$("#result").show(400)
-		$("#create").html('0');
-   		$.each(data, function(index, parameter) {
-    		if ( index == 0  )  {	
-		numinterfaces = parseInt(parameter);
-		}
-    		if ( index == 1  )  {	
-    		if ( numinterfaces >= 1  ) {	
-  		var macslist = '';
+        type: 'POST',
+        url: '/nuages/vms/findvm/',
+        data: { 'name' : name , 'profile' : profile , 'physical' : physical.prop('checked') , 'ip' : ipval  } ,
+        success: function(data) {
+                //alert(data);
+                //return;
+                if ( data == null ) {
+                $("#create").replaceWith('<div id="create" class="hidden">1</div>');
+                $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>System not found</div>");
+                $("#result").show(400);
+                return;
+                }
+                $("#result").html("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>System found</div>");
+                $("#result").show(400)
+                $("#create").html('0');
+                $.each(data, function(index, parameter) {
+                if ( index == 0  )  {
+                numinterfaces = parseInt(parameter);
+                }
+                if ( index == 1  )  {
+                if ( numinterfaces >= 1  ) {
+                var macslist = '';
                 $('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');
                 $.each(parameter, function(index, value){
                         netname = value.split('=')[0];
@@ -705,11 +620,11 @@ function findvm() {
                 });
                 $('#id_mac1').html(macslist);
                 $('#id_mac1').append('</select><p>');
-        	$('#id_mac1').show(400);
-        	mac1label.show(400);
-		}
-    		if ( numinterfaces >= 2  ) {	
-  		var macslist = '';
+                $('#id_mac1').show(400);
+                mac1label.show(400);
+                }
+                if ( numinterfaces >= 2  ) {
+                var macslist = '';
                 $('#id_mac2').replaceWith('<select name="mac2" id="id_mac2">');
                 $.each(parameter, function(index, value){
                         macname = value.split('=')[0];
@@ -719,11 +634,11 @@ function findvm() {
                 });
                 $('#id_mac2').html(macslist);
                 $('#id_mac2').append('</select><p>');
-        	$('#id_mac2').show(400);
-        	mac2label.show(400);
-		}
-    		if ( numinterfaces >= 3  ) {	
-  		var macslist = '';
+                $('#id_mac2').show(400);
+                mac2label.show(400);
+                }
+                if ( numinterfaces >= 3  ) {
+                var macslist = '';
                 $('#id_mac3').replaceWith('<select name="mac3" id="id_mac3">');
                 $.each(parameter, function(index, value){
                         macname = value.split('=')[0];
@@ -733,11 +648,11 @@ function findvm() {
                 });
                 $('#id_mac3').html(macslist);
                 $('#id_mac3').append('</select><p>');
-        	$('#id_mac3').show(400);
-        	mac3label.show(400);
-		}
-    		if ( numinterfaces >= 4  ) {	
-  		var macslist = '';
+                $('#id_mac3').show(400);
+                mac3label.show(400);
+                }
+                if ( numinterfaces >= 4  ) {
+                var macslist = '';
                 $('#id_mac4').replaceWith('<select name="mac4" id="id_mac4">');
                 $.each(parameter, function(index, value){
                         macname = value.split('=')[0];
@@ -747,30 +662,31 @@ function findvm() {
                 });
                 $('#id_mac4').html(macslist);
                 $('#id_mac4').append('</select><p>');
-        	$('#id_mac4').show(400);
-        	mac4label.show(400);
-		}
-		}
-    		if ( index == 2  )  {	
-        	switch (parameter){
-        	case 'ilo':
+                $('#id_mac4').show(400);
+                mac4label.show(400);
+                }
+                }
+                if ( index == 2  )  {
+                switch (parameter){
+                case 'ilo':
                 ipilo.val( ipval );
                 ipilolabel.show(400) ;
                 ipilo.show(400) ;
                 ip1.val('');
-		break;
-        	case 'oa':
+                break;
+                case 'oa':
                 ipoa.val( ipval );
                 ipoalabel.show(400) ;
                 ipoa.show(400) ;
                 ip1.val('');
-		break;
-		}
-		}
-		});
-		},
-		error: function(jqXHR, textStatus, errorThrown) {
-  			alert(errorThrown);
-		}
- 		});
+                break;
+                }
+                }
+                });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                        alert(errorThrown);
+                }
+                });
 }
+
