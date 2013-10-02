@@ -1253,6 +1253,7 @@ def profilecopy(request):
 			profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)
 			oldname = profile.name
+			oldcobbler = profile.cobblerprofile
 			newprofile = request.POST['newprofile']
             		exist=Profile.objects.filter(name=newprofile)
 			if exist:
