@@ -1311,23 +1311,45 @@ def profilecopy(request):
 
 @login_required
 def findvm(request):
-	if request.method == 'POST' and request.POST.has_key('name') and request.POST.has_key('profile'):
+	logging.debug("prout")
+	if request.method == 'POST' and request.POST.has_key('name') and request.POST.has_key('profile') and request.POST.has_key('physical'):
 		profile = request.POST.get('profile')
 		name = request.POST.get('name')
+		physical = request.POST.get('physical')
 		profile = Profile.objects.get(id=profile)
-		numinterfaces = profile.numinterfaces
-		virtualprovider = profile.virtualprovider
-                if virtualprovider.type =='ovirt':
-                                ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+		results = [profile.numinterfaces]
+		if physical == 'false':
+			physical = False
+		else:
+			physical = True
+		if physical:
+			physicalprovider = profile.physicalprovider
+                        if physicalprovider.type=='ilo':
+                                ipilo = request.POST.get('ip')
+                                ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
+                                macs = ilo.getmacs()
+                        elif physicalprovider.type=='oa':
+                                ipilo = request.POST.get('ip')
+                                oa=Oa(ipilo,physicalprovider.user,physicalprovider.password)
+                                bladeid = oa.getid(name)
+                                macs = oa.getmacs(bladeid)
+		else:
+			virtualprovider = profile.virtualprovider
+                	if virtualprovider.type =='ovirt':
+				ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                                 macs = ovirt.getmacs(name)
                                 ovirt.close()
-                if virtualprovider.type =='kvirt':
+			if virtualprovider.type =='kvirt':
                                 kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
                                 macs = kvirt.getmacs(name)
                                 kvirt.close()
-                if virtualprovider.type =='vsphere':
+			if virtualprovider.type =='vsphere':
                                 macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                                 macscommand = os.popen(macscommand).read()
                                 macs = ast.literal_eval(macscommand)
-		macs = json.dumps(macs[:numinterfaces])
-		return HttpResponse(macs,mimetype='application/json')
+		results.append(macs)
+		if physical:
+			physicalprovider = profile.physicalprovider
+			results.append(physicalprovider.type)
+		results = json.dumps(results)
+		return HttpResponse(results,mimetype='application/json')

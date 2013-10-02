@@ -208,13 +208,13 @@ class Kvirt:
 	macs=[]
         for element in root.getiterator('interface'):
                 mac = element.find('mac').get('address')
-                #network = element.find('source').get('network')
-                #bridge = element.find('source').get('bridge')
-                #if bridge:
-                #        macs[bridge]=mac
-                #else:
-                #        macs[network]=mac
-		macs.append(mac)
+                network = element.find('source').get('network')
+                bridge = element.find('source').get('bridge')
+                if bridge:
+                        netname = bridge
+                else:
+                        netname = network
+		macs.append("%s=%s" % (netname, mac))
 	return macs
 
  def start(self,name):

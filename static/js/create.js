@@ -646,6 +646,8 @@ function createvm(){
 
 function findvm() {
   var name              = $('#id_name').val();
+  var ip1               = $('#id_ip1');
+  var ipval             = $('#id_ip1').val();
   var mac1              = $('#id_mac1');
   var mac1label         = $('label[for="id_mac1"]');
   var mac2              = $('#id_mac2');
@@ -655,6 +657,17 @@ function findvm() {
   var mac4              = $('#id_mac4');
   var mac4label         = $('label[for="id_mac4"]');
   var profile           = $('#id_profile').val();
+  var physical          = $('#id_physical');
+  var ipilo = $('#id_ipilo');
+  var ipilolabel = $('label[for="id_ipilo"]');
+  var ipoa = $('#id_ipoa');
+  var ipoalabel = $('label[for="id_ipoa"]');
+  if ( ( physical.prop('checked') == true ) && ( ipval == '' ) ) {
+        $("#result").hide();
+        $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 is required to be set to Ilo or Oa ip if physical is checked!</div>");
+        $("#result").show(500);
+        return;
+  }
   if (  ( name == '' ) ||  ( profile == '' ) ) {
 	$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Fill name and profile first</div>");
 	$("#result").show(400);
@@ -663,38 +676,96 @@ function findvm() {
  $.ajax({  
 	type: 'POST',
 	url: '/nuages/vms/findvm/',
-	data: { 'name' : name , 'profile' : profile } ,
+	data: { 'name' : name , 'profile' : profile , 'physical' : physical.prop('checked') , 'ip' : ipval  } ,
 	success: function(data) {
+		//alert(data);
+		//return;
 		if ( data == null ) {
 		$("#create").replaceWith('<div id="create" class="hidden">1</div>');
-		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>VM not found</div>");
+		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>System not found</div>");
 		$("#result").show(400);
 		return;
 		}
-		$("#result").html("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>VM found</div>");
+		$("#result").html("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>System found</div>");
 		$("#result").show(400)
 		$("#create").html('0');
    		$.each(data, function(index, parameter) {
     		if ( index == 0  )  {	
-		$('#id_mac1').replaceWith('<input id="id_mac1" name="mac1" value="'+parameter+'" type="text"><p>');
-        	$('#id_mac1').show(400);
-        	mac1label.show(400);
-	
+		numinterfaces = parseInt(parameter);
 		}
     		if ( index == 1  )  {	
-		$('#id_mac2').replaceWith('<input id="id_mac2" name="mac2" value="'+parameter+'" type="text"><p>');
+    		if ( numinterfaces >= 1  ) {	
+  		var macslist = '';
+                $('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');
+                $.each(parameter, function(index, value){
+                        netname = value.split('=')[0];
+                        mac= value.split('=')[1];
+                        mac = '<option value="' + mac +'">'+netname+' : '+mac+'</option>';
+                        macslist = macslist+mac;
+                });
+                $('#id_mac1').html(macslist);
+                $('#id_mac1').append('</select><p>');
+        	$('#id_mac1').show(400);
+        	mac1label.show(400);
+		}
+    		if ( numinterfaces >= 2  ) {	
+  		var macslist = '';
+                $('#id_mac2').replaceWith('<select name="mac2" id="id_mac2">');
+                $.each(parameter, function(index, value){
+                        macname = value.split('=')[0];
+                        mac= value.split('=')[1];
+                        mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
+                        macslist = macslist+mac;
+                });
+                $('#id_mac2').html(macslist);
+                $('#id_mac2').append('</select><p>');
         	$('#id_mac2').show(400);
         	mac2label.show(400);
 		}
-    		if ( index == 2  )  {	
-		$('#id_mac3').replaceWith('<input id="id_mac3" name="mac3" value="'+parameter+'" type="text"><p>');
+    		if ( numinterfaces >= 3  ) {	
+  		var macslist = '';
+                $('#id_mac3').replaceWith('<select name="mac3" id="id_mac3">');
+                $.each(parameter, function(index, value){
+                        macname = value.split('=')[0];
+                        mac= value.split('=')[1];
+                        mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
+                        macslist = macslist+mac;
+                });
+                $('#id_mac3').html(macslist);
+                $('#id_mac3').append('</select><p>');
         	$('#id_mac3').show(400);
         	mac3label.show(400);
 		}
-    		if ( index == 3  )  {	
-		$('#id_mac4').replaceWith('<input id="id_mac4" name="mac4" value="'+parameter+'" type="text"><p>');
+    		if ( numinterfaces >= 4  ) {	
+  		var macslist = '';
+                $('#id_mac4').replaceWith('<select name="mac4" id="id_mac4">');
+                $.each(parameter, function(index, value){
+                        macname = value.split('=')[0];
+                        mac= value.split('=')[1];
+                        mac = '<option value="' + mac +'">'+macname+' : '+mac+'</option>';
+                        macslist = macslist+mac;
+                });
+                $('#id_mac4').html(macslist);
+                $('#id_mac4').append('</select><p>');
         	$('#id_mac4').show(400);
         	mac4label.show(400);
+		}
+		}
+    		if ( index == 2  )  {	
+        	switch (parameter){
+        	case 'ilo':
+                ipilo.val( ipval );
+                ipilolabel.show(400) ;
+                ipilo.show(400) ;
+                ip1.val('');
+		break;
+        	case 'oa':
+                ipoa.val( ipval );
+                ipoalabel.show(400) ;
+                ipoa.show(400) ;
+                ip1.val('');
+		break;
+		}
 		}
 		});
 		},

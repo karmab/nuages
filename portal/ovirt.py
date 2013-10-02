@@ -203,7 +203,9 @@ class Ovirt:
 		return None
 	macs=[]
 	for nic in vm.nics.list():
-		macs.append(nic.mac.address)
+		address = nic.mac.address
+		net = api.networks.get(id=nic.network.id).get_name()
+		macs.append("%s=%s" % (net,address))
 	return macs
 
  def start(self,name):

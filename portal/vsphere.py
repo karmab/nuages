@@ -384,9 +384,10 @@ class Vsphere:
         macs = []
         for dev in devices:
                 if "addressType" in dir(dev):
-                        macs.append(dev.getMacAddress())
+			netname=dev.getBacking().getDeviceName()
+			macaddress = dev.getMacAddress()
+                        macs.append("%s=%s" % (netname,macaddress))
         return macs
-
 
  def start(self, name):
 	rootFolder = self.rootFolder
