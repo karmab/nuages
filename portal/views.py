@@ -530,7 +530,7 @@ def yourvms(request):
 			resultvms.append(vm)
 			continue
 		if vm.unmanaged:
-			vm.status = "Unmanaged"
+			vm.status = "unmanaged"
 			resultvms.append(vm)
 			continue
 		#handle physical machines
