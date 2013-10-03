@@ -4,13 +4,22 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User,Group
 import ast
 import os
-from django.http import HttpResponse
-from django.shortcuts import render
 import time
-from portal.ovirt import Ovirt
-from portal.kvirt import Kvirt
+
+try:
+	from portal.ovirt import Ovirt
+except:
+	print "Missing ovirt-engine-sdk package for ovirt support"
+try:
+	from portal.kvirt import Kvirt
+except:
+	print "Missing libvirt-python package for libvirt support"
+
 from portal.cobbler import Cobbler
-from portal.foreman import Foreman
+try:
+	from portal.foreman import Foreman
+except:
+	print "Missing python-requests package for foreman support"
 import django.utils.simplejson as json
 import time,datetime
 from random import choice
@@ -18,8 +27,14 @@ import json
 from django.contrib.auth.decorators import login_required
 import logging
 import random
-from portal.ilo import Ilo
-from portal.oa import Oa
+try:
+	from portal.ilo import Ilo
+except:
+	print "Missing python-paramiko package for ilo support"
+try:
+	from portal.oa import Oa
+except:
+	print "Missing python-paramiko package for oa support"
 import socket
 from django.forms import ModelForm
 from django.db.models import Q

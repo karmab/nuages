@@ -594,8 +594,7 @@ if __name__ == '__main__':
 	elif action == 'create':
 		net1, net2, net3, net4 = None, None, None, None
 		name, numcpu, numinterfaces, disksize1, diskmode1, disksize2 , diskmode2, ds, memory, guestid, vnc, iso, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16], sys.argv[17], sys.argv[18], sys.argv[19]
-		diskmode1, diskmode2 = 'persistent'
-		diskmode2 = diskmode1
+		diskmode1, diskmode2 = 'persistent', 'persistent'
 		numcpu, numinterfaces, disksize1 = int(numcpu), int(numinterfaces), int(disksize1)
 		if numinterfaces >= 2:
 			net2 = sys.argv[20]

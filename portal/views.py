@@ -1,22 +1,14 @@
 # Views here.
-import ast
 import fileinput
-import os
 from django.http import HttpResponse
 from django.shortcuts import render,redirect
 from portal.models import *
-from portal.ovirt import Ovirt
-from portal.kvirt import Kvirt
-from portal.cobbler import Cobbler
-from portal.foreman import Foreman
 import django.utils.simplejson as json
 from portal.forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 import logging
 import random
-from portal.ilo import Ilo
-from portal.oa import Oa
 import socket
 from django.db.models import Q
 from datetime import datetime
