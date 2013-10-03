@@ -593,14 +593,6 @@ function findvm() {
         url: '/nuages/vms/findvm/',
         data: { 'name' : name , 'profile' : profile , 'physical' : physical.prop('checked') , 'ip' : ipval  } ,
         success: function(data) {
-                //alert(data);
-                //return;
-                if ( data == null ) {
-                $("#create").replaceWith('<div id="create" class="hidden">1</div>');
-                $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>System not found</div>");
-                $("#result").show(400);
-                return;
-                }
                 $("#result").html("<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>System found</div>");
                 $("#result").show(400)
                 $("#create").html('0');
@@ -609,6 +601,12 @@ function findvm() {
                 numinterfaces = parseInt(parameter);
                 }
                 if ( index == 1  )  {
+		if ( parameter ==null ) {
+                $("#create").replaceWith('<div id="create" class="hidden">1</div>');
+                $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>System not found</div>");
+                $("#result").show(400);
+                return;
+                }
                 if ( numinterfaces >= 1  ) {
                 var macslist = '';
                 $('#id_mac1').replaceWith('<select name="mac1" id="id_mac1">');
