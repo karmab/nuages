@@ -234,7 +234,7 @@ def profiles(request):
 	    profiles = Profile.objects.all()
 	    if not profiles:
         	information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
-            return render(request, 'information.html', { 'information' : information  } )
+		return render(request, 'information.html', { 'information' : information , 'username': username } )
 	    else:
 	    	return render(request, 'profiles.html', { 'profiles': profiles , 'username': username } )
 	else:
