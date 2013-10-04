@@ -3,7 +3,7 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-PWD = '/usr/share/nuages'
+PWD = '/home/djangodev/nuages'
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),

@@ -6,6 +6,8 @@ import logging
 import sys
 import os
 import socket
+from django.conf import settings
+
 
 class LdapBackend(object):
 	def authenticate(self, username=None, password=None):
@@ -19,7 +21,7 @@ class LdapBackend(object):
 			ldapuri="ldap://%s" % (host)
 			if secure:
 				port = 636
-				pwd = os.environ["PWD"]
+				pwd = settings.PWD
 				cert="%s/%s" % (pwd,certname)
 				ldapuri="ldaps://%s" % (host)
 				ldap.set_option( ldap.OPT_X_TLS_CACERTFILE , cert )
