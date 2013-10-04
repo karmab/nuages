@@ -1245,14 +1245,13 @@ def profilecopy(request):
 		if request.POST.has_key('newprofile'):
 			profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)
-			oldname = profile.name
 			oldcobbler = profile.cobblerprofile
 			newprofile = request.POST['newprofile']
             		exist=Profile.objects.filter(name=newprofile)
 			if exist:
             			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile allready existing</div>")
 			profile.name = newprofile
-			profile.cobblerprofile = oldname
+			profile.cobblerprofile = oldcobbler
 			profile.pk = None
 			profile.save()
 			profileid = profile.id
