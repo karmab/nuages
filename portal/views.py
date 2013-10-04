@@ -13,11 +13,11 @@ import socket
 from django.db.models import Q
 from datetime import datetime
 from calendar import monthrange
+from django.conf import settings
 
-if os.path.exists("portal/customtypes.py"):
-	
+
+if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
 	from customtypes import *
-
 
 def getvspherecert(host):
 	try:
@@ -207,7 +207,7 @@ def create(request):
 	else:
 		vmform =  VMForm(request.user)
 		customforms=[]
-		if os.path.exists("portal/customtypes.py"):
+		if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
 			import customtypes
 			for element in dir(customtypes):
 				if not element.startswith("__") and element != "forms":
@@ -892,7 +892,7 @@ def customforms(request):
 		attributes = json.dumps(attributes)
        		return HttpResponse(attributes,mimetype='application/json')
 	else:
-		if not os.path.exists("portal/customtypes.py"):
+		if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ):
 			information = { 'title':'No customforms' , 'details':'No customforms found.' }
                 	return render(request, 'information.html', { 'information' : information ,  'username': username } )
 		types=[]
@@ -944,7 +944,7 @@ def customformedit(request):
 		attributes = json.dumps(attributes)
        		return HttpResponse(attributes,mimetype='application/json')
 	else:
-		if not os.path.exists("portal/customtypes.py"):
+		if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ):
                 	return render(request, 'customformedit.html', { 'username': username  } )
 		types=[]
 		import customtypes
@@ -963,16 +963,16 @@ def customformedit(request):
 def customformcreate(request):
 	if request.method == 'POST' and request.POST.has_key('type'):
 		type = request.POST['type'].capitalize()
-		if not os.path.exists("portal/customtypes.py") or not  open("portal/customtypes.py").readlines():
-			f=open("portal/customtypes.py","a")
+		if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ) or not  open("%s/portal/customtypes.py" % settings.PWD ).readlines():
+			f=open("%s%portal/customtypes.py" % settings.PWD ,"a")
 			f.write("from django import forms\n")
 			f.close()
-		if os.path.exists("portal/customtypes.py.lock"):
+		if os.path.exists("%s/portal/customtypes.py.lock" % settings.PWD ):
 			response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
 			return HttpResponse(response)
 		else:
 			#open lock file
-			open("portal/customtypes.py.lock", 'a').close()
+			open("%s/portal/customtypes.py.lock" % settings.PWD , 'a').close()
 			types=[]
 			import customtypes
                 	for element in dir(customtypes):
@@ -980,16 +980,16 @@ def customformcreate(request):
 					types.append(element)
 			#it s an existing type, we must first remove  along with all of its attribute
 			if type in types:
-				os.remove("portal/customtypes.py.lock")
+				os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
 				response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customform allready existing</div>"
 				return HttpResponse(response)
 			else:
-				f = open("portal/customtypes.py", 'a')
+				f = open("%s/portal/customtypes.py" % settings.PWD , 'a')
 				f.write("class %s(forms.Form):\n" % type)
 				f.write("\tpass\n")
 				f.close()
 				#remove lock file
-				os.remove("portal/customtypes.py.lock")
+				os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
 				response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s created</div>" % type
 				return HttpResponse(response)
 
@@ -998,16 +998,16 @@ def customformupdate(request):
 	if request.method == 'POST' and request.POST.has_key('parameters') and request.POST.has_key('type'):
 		type = request.POST['type'].capitalize()
 		parameters = request.POST['parameters']
-		if not os.path.exists("portal/customtypes.py") or not  open("portal/customtypes.py").readlines():
-			f=open("portal/customtypes.py","a")
+		if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ) or not  open("%s/portal/customtypes.py" % settings.PWD ).readlines():
+			f=open("%s/portal/customtypes.py" % settings.PWD ,"a")
 			f.write("from django import forms\n")
 			f.close()
-		if os.path.exists("portal/customtypes.py.lock"):
+		if os.path.exists("%s/portal/customtypes.py.lock" % settings.PWD ):
 			response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
 			return HttpResponse(response)
 		else:
 			#open lock file
-			open("portal/customtypes.py.lock", 'a').close()
+			open("%s/portal/customtypes.py.lock" % settings.PWD , 'a').close()
 			types=[]
 			import customtypes
                 	for element in dir(customtypes):
@@ -1021,7 +1021,7 @@ def customformupdate(request):
 					attributes.append(attr)
 				attributes.insert(0,type)
 				#NOW WE NEED TO PARSE THE FILE AND REMOVE ACCORDINGLY LINES!!!!
-				for line in fileinput.input("portal/customtypes.py", inplace=True):
+				for line in fileinput.input("%s/portal/customtypes.py" % settings.PWD, inplace=True):
 					found = False
 					for attribute in attributes:
 						if attribute in line:
@@ -1030,7 +1030,7 @@ def customformupdate(request):
 					if not found:
 						print line,
 			#now add it at the end of  customtypes.py
-			#completefile = open("portal/customtypes.py").readlines()
+			#completefile = open("%s/portal/customtypes.py" % settings.PWD).readlines()
 			parameters = parameters.split(' ')
 			#preliminary check for  uniqueness of parameters
 			#for parameter in parameters:
@@ -1040,7 +1040,7 @@ def customformupdate(request):
 			#	if len(indices) >1:
 			#		response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>parameter names need to be unique</div>"
 			#		return HttpResponse(response)
-			f = open("portal/customtypes.py", 'a')
+			f = open("%s/portal/customtypes.py" % settings.PWD , 'a')
 			f.write("class %s(forms.Form):\n" % type)
 			for parameter in parameters:
 				parameter=parameter.split(';')
@@ -1064,7 +1064,7 @@ def customformupdate(request):
 					f.write("\t%s\t= forms.%s()\n" % (name,fieldtype) )
 			f.close()
 			#remove lock file
-			os.remove("portal/customtypes.py.lock")
+			os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s updated</div>" % type
 			return HttpResponse(response)
 
@@ -1072,12 +1072,12 @@ def customformupdate(request):
 def customformdelete(request):
 	if request.method == 'POST' and request.POST.has_key('type'):
 		type = request.POST['type'].capitalize()
-		if os.path.exists("portal/customtypes.py.lock"):
+		if os.path.exists("%s/portal/customtypes.py.lock" % settings.PWD ):
 			response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
 			return HttpResponse(response)
 		else:
 			#open lock file
-			open("portal/customtypes.py.lock", 'a').close()
+			open("%s/portal/customtypes.py.lock" % settings.PWD, 'a').close()
 			types=[]
 			import customtypes
 			attributes=[]
@@ -1086,7 +1086,7 @@ def customformdelete(request):
 				attributes.append(attr)
 			attributes.insert(0,type)
 			#NOW WE NEED TO PARSE THE FILE AND REMOVE ACCORDINGLY LINES!!!!
-			for line in fileinput.input("portal/customtypes.py", inplace=True):
+			for line in fileinput.input("%s/portal/customtypes.py" % settings.PWD , inplace=True):
 				found = False
 				for attribute in attributes:
 					if attribute in line:
@@ -1095,7 +1095,7 @@ def customformdelete(request):
 				if not found:
 					print line,
 			#remove lock file
-			os.remove("portal/customtypes.py.lock")
+			os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
 			response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
 			return HttpResponse(response)
 

@@ -3,8 +3,7 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-import os 
-PWD = os.environ['PWD']
+PWD = '/usr/share/nuages'
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),

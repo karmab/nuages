@@ -2,7 +2,7 @@ import os
 import sys
 
 
-path = '/home/djangodev/nuages'
+path = '/usr/share/nuages'
 if path not in sys.path:
     sys.path.append(path)
 
