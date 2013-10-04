@@ -319,7 +319,7 @@ def storage(request):
 	    		query = Profile.objects.filter(query)
             		if not query:
         			information = { 'title':'Missing elements' , 'details':'Create Profiles first...' }
-        			return render(request, 'information.html', { 'information' : information } )
+        			return render(request, 'information.html', { 'information' : information ,  'username': username } )
 			vproviderslist = []
 			for profile in query:
 				if profile.virtualprovider and profile.virtualprovider.name not in vproviderslist:
@@ -331,7 +331,7 @@ def storage(request):
 			vproviders=vproviders.filter(vquery)
             	if not vproviders:
         		information = { 'title':'Missing elements' , 'details':'Create Virtual providers first...' }
-        		return render(request, 'information.html', { 'information' : information } )
+        		return render(request, 'information.html', { 'information' : information ,  'username': username } )
 		else:
 			form = StorageForm()
 			return render(request, 'storage.html', { 'vproviders' : vproviders ,'username': username } )
@@ -893,7 +893,7 @@ def customforms(request):
 	else:
 		if not os.path.exists("portal/customtypes.py"):
 			information = { 'title':'No customforms' , 'details':'No customforms found.' }
-                	return render(request, 'information.html', { 'information' : information } )
+                	return render(request, 'information.html', { 'information' : information ,  'username': username } )
 		types=[]
 		import customtypes
                 for element in dir(customtypes):
