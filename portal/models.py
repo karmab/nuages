@@ -7,7 +7,6 @@ import os
 import time
 from django.conf import settings
 
-
 try:
 	from portal.ovirt import Ovirt
 except:
@@ -99,7 +98,7 @@ class LdapProvider(models.Model):
 			if not self.certname:
         			raise ValidationError("Secure mode requires to set a cert name")
 			elif not os.path.exists("%s/%s" % (settings.PWD, self.certname) ):
-        			raise ValidationError("Secure mode requires to put %s in %s" % (self.certname, os.environ["PWD"]) )
+        			raise ValidationError("Secure mode requires to put %s in %s" % (self.certname, settings.PWD) )
 
 
 class PhysicalProvider(models.Model):
