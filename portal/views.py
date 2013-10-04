@@ -1260,7 +1260,6 @@ def profilecopy(request):
             		profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)
             		cobblerprofile=profile.name
-            		providers = ""
             		if profile.cobblerprofile:
                 		cobblerprofile=profile.cobblerprofile
             		return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Cobbler Profile: %s<p><p>Datacenter: %s<p>Cluster: %s<p>Number of cpus: %s<p>Memory: %sMo<p>Guestid: %s<p>Disksize first disk : %sGb<p>Number of network interfaces: %s<p>Foreman Enabled: %s<p>Cobbler Enabled:%s<p>Isos List Enabled: %s<p>Virtual Provider: %s<p>Physical Provider: %s<p></div>" % (cobblerprofile,profile.datacenter,profile.clu,profile.numcpu,profile.memory,profile.guestid,profile.disksize1,profile.numinterfaces,profile.foreman,profile.cobbler,profile.iso,profile.virtualprovider,profile.physicalprovider ))
@@ -1268,7 +1267,7 @@ def profilecopy(request):
             profiles = Profile.objects.all()
             if not profiles:
                 information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
-                return render(request, 'information.html', { 'information' : information } )
+                return render(request, 'information.html', { 'information' : information , 'username': username } )
             else:
                 return render(request, 'profilecopy.html', { 'profiles': profiles , 'username': username } )
 
