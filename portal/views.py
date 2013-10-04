@@ -15,6 +15,7 @@ from datetime import datetime
 from calendar import monthrange
 
 if os.path.exists("portal/customtypes.py"):
+	
 	from customtypes import *
 
 
@@ -65,7 +66,7 @@ def checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain):
 		else:
 			return 'OK'
 	elif virtualprovider.type == 'vsphere':
-		jythoncommand = "/usr/bin/jython /portal/vsphere.py/%s %s %s %s %s %s %s" % (os.environ['PWD'], 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
+		jythoncommand = "/usr/bin/jython /portal/vsphere.py/%s %s %s %s %s %s %s" % (settings.PWD, 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
 		storageinfo = os.popen(jythoncommand).read()
 		storageinfo= ast.literal_eval(storageinfo)	
 		remaining = int(storageinfo[storagedomain][1]) - size
@@ -291,7 +292,7 @@ def storage(request):
 			storageinfo = json.dumps(storageinfo)
         		return HttpResponse(storageinfo,mimetype='application/json')
 		elif virtualprovider.type == 'vsphere':
-			jythoncommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'], 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
+			jythoncommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
 			storageinfo = os.popen(jythoncommand).read()
 			storageinfo= ast.literal_eval(storageinfo)	
 			#add storage domains to DB if they dont exist
@@ -380,8 +381,8 @@ def profileinfo(request):
 					storages = [kvirt.beststorage()]
 					kvirt.close()
 				elif type == 'vsphere': 
-					pwd = os.environ["PWD"]
-					beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+					pwd = settings.PWD
+					beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
 					bestds = os.popen(beststoragecommand).read()
 					storages=[bestds]
 				else:
@@ -412,7 +413,7 @@ def profileinfo(request):
 					specific.append(iso)
 		if type =='vsphere' and profile.iso:
 				type = 'iso'
-				isocommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+				isocommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
 				isocommand = os.popen(isocommand).read()
 				isos = ast.literal_eval(isocommand)
 				for iso in isos: 
@@ -598,10 +599,10 @@ def yourvms(request):
 			else:
 				status = 'NotFound'
 		if not vm.physical and virtualprovider.type == 'vsphere':
-			pwd = os.environ["PWD"]
+			pwd = settings.PWD
 			if not allvms.has_key(virtualprovider.name):
-				pwd = os.environ["PWD"]
-				allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+				pwd = settings.PWD
+				allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
 				allvmscommand = os.popen(allvmscommand).read()
 				allvms[virtualprovider.name] = ast.literal_eval(allvmscommand)
 			if allvms[virtualprovider.name].has_key(name):
@@ -643,8 +644,8 @@ def allvms(request):
 				resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
 			return render(request, 'allvms2.html', { 'vms': resultvms , 'console' : True , 'username': username } )
 		if virtualprovider.type == 'vsphere':
-			pwd = os.environ["PWD"]
-			allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (os.environ['PWD'],'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+			pwd = settings.PWD
+			allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
 			results = os.popen(allvmscommand).read()
 			vms= ast.literal_eval(results)	
 			for vm in vms:
@@ -686,7 +687,7 @@ def console(request):
 		default = Default.objects.all()[0]
 		sockhost=default.consoleip
 		sockport = random.randint(10000,60000)
-		pwd = os.environ["PWD"]
+		pwd = settings.PWD
                 if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
 			if virtualprovider.type == 'ovirt':
                         	ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
@@ -705,13 +706,13 @@ def console(request):
 			information = { 'host' : sockhost , 'port' : sockport , 'ticket' : ticket }
 			vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
 			if protocol =="spice" and virtualprovider.type == 'ovirt':
-				pwd = os.environ["PWD"]
+				pwd = settings.PWD
 				cert="%s/%s.pem" % (pwd,virtualprovider.name)
 				websockifycommand = "websockify %s -D --timeout=30 --cert %s --ssl-target %s:%s" % (sockport,cert,host,port)
 				os.popen(websockifycommand)
 				return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 			if protocol =="spice" and virtualprovider.type == 'kvirt':
-				pwd = os.environ["PWD"]
+				pwd = settings.PWD
 				#cert="%s/%s.pem" % (pwd,virtualprovider.name)
 				#websockifycommand = "websockify %s -D --timeout=30 --cert %s --ssl-target %s:%s" % (sockport,cert,host,port)
 				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
@@ -722,11 +723,11 @@ def console(request):
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 		elif virtualprovider.type == 'vsphere':
-			consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
+			consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
 			consoledetails = os.popen(consolecommand).read()
 			host,port = ast.literal_eval(consoledetails)
 			if host != None:
-				pwd = os.environ["PWD"]
+				pwd = settings.PWD
 				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				information = { 'host' : sockhost , 'port' : sockport  }
@@ -740,8 +741,8 @@ def console(request):
                 				return render(request, 'information.html', { 'information' : information } )
 					virtualprovider.save()
 				fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
-				pwd = os.environ["PWD"]
-				consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (os.environ['PWD'],'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
+				pwd = settings.PWD
+				consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (settings.PWD,'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
 				consoleurl = os.popen(consolecommand).read()
 				print consoleurl
 				return redirect(consoleurl)
@@ -767,8 +768,8 @@ def start(request):
 			kvirt.close()
 			return HttpResponse(results)
 		elif virtualprovider.type == 'vsphere':
-			pwd = os.environ["PWD"]
-			startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
+			pwd = settings.PWD
+			startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
 			startinfo = os.popen(startcommand).read()
 			#startinfo= ast.literal_eval(startinfo)	
 			print startinfo
@@ -793,8 +794,8 @@ def stop(request):
 			kvirt.close()
 			return HttpResponse(results)
 		elif virtualprovider.type == 'vsphere':
-			pwd = os.environ["PWD"]
-			stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
+			pwd = settings.PWD
+			stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
 			stopinfo = os.popen(stopcommand).read()
 			#stopinfo= ast.literal_eval(stopinfo)	
 			print stopinfo
@@ -834,8 +835,8 @@ def kill(request):
 			r=kvirt.remove(name)
 			kvirt.close()
 		elif virtualprovider and virtualprovider.type == 'vsphere':
-			pwd = os.environ["PWD"]
-			removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+			pwd = settings.PWD
+			removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
 			remove = os.popen(removecommand).read()
 			#removeinfo= ast.literal_eval(remove)	
 			r='VM killed in vsphere'
@@ -1308,7 +1309,7 @@ def findvm(request):
                                 macs = kvirt.getmacs(name)
                                 kvirt.close()
 			if virtualprovider.type =='vsphere':
-                                macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'getmacs', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu, name)
+                                macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'getmacs', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu, name)
                                 macscommand = os.popen(macscommand).read()
                                 macs = ast.literal_eval(macscommand)
 		results.append(macs)
