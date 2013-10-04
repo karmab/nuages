@@ -66,7 +66,7 @@ def checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain):
 		else:
 			return 'OK'
 	elif virtualprovider.type == 'vsphere':
-		jythoncommand = "/usr/bin/jython /portal/vsphere.py/%s %s %s %s %s %s %s" % (settings.PWD, 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
+		jythoncommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
 		storageinfo = os.popen(jythoncommand).read()
 		storageinfo= ast.literal_eval(storageinfo)	
 		remaining = int(storageinfo[storagedomain][1]) - size
