@@ -13,7 +13,7 @@ nuages repository
     -Authentication can use remote ldap providers
     -You get some basic billing/invoice
 
-What s that name?
+What s that name,man?
 ------------
     well it s a django project with a feel of cloud, and django reinhardt most famous song is "nuages", which means cloud in french...Get it :) ?
 
@@ -61,6 +61,13 @@ Ovirt SDK Installation
 
     from epel:
     yum -y install ovirt-engine-sdk
+
+
+libvirt installation
+--------
+    if you re not running on rhel/centos,please create the following link
+    ln -s /usr/bin/qemu-kvm /usr/libexec/qemu-kvm /usr/bin/kvm
+
 
 
 VMware VI (vSphere) Java API Installation

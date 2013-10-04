@@ -47,8 +47,23 @@ class Kvirt:
 	self.conn=None
 
 
- def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None):
+ def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None,vnc=False):
+	if vnc:
+		display='vnc'
+	else:
+		display='spice'
 	conn=self.conn
+        networks=[]
+        bridges=[]
+        for net in conn.listNetworks():
+                networks.append(net)
+        for net in conn.listInterfaces():
+                if net != 'lo':
+                        bridges.append(net)
+	if net1 in bridges:
+		sourcenet1 = 'bridge'
+	else:
+		sourcenet1 = 'network'
 	type,machine,emulator = 'kvm','pc','/usr/libexec/qemu-kvm'
 	memory = memory*1024
 	disksize1 = disksize1*GB
@@ -99,9 +114,6 @@ class Kvirt:
 		diskdev2,diskbus2 = 'hdb','ide'
 	if not iso:
 		iso = ''
-	else:
-		iso= "%s/%s" % (storagepath,iso)
-	
 	#create xml
         vmxml = """<domain type='%s'>
                   <name>%s</name>
@@ -144,37 +156,49 @@ class Kvirt:
                       <target dev='hdc' bus='ide'/>
                       <readonly/>
                   </disk>
-		 <interface type='network'>
-                  <source network='%s'/>
+		 <interface type='%s'>
+                  <source %s='%s'/>
 		<model type='virtio'/>
-		</interface>"""% (vmxml,iso,net1)
+		</interface>"""% (vmxml,iso,sourcenet1,sourcenet1,net1)
 	if net2:
+		if net2 in bridges:
+			sourcenet2 = 'bridge'
+		else:
+			sourcenet2 = 'network'
 		vmxml="""%s
-		 <interface type='network'>
-                  <source network='%s'/>
+		 <interface type='%s'>
+                  <source %s='%s'/>
 		<model type='virtio'/>
-		</interface>"""% (vmxml,net2)
+		</interface>"""% (vmxml,sourcenet2,sourcenet2,net2)
 	if net3:
+		if net3 in bridges:
+			sourcenet3 = 'bridge'
+		else:
+			sourcenet3 = 'network'
 		vmxml="""%s
-		 <interface type='network'>
-                  <source network='%s'/>
+		 <interface type='%s'>
+                  <source %s='%s'/>
 		<model type='virtio'/>
-		</interface>"""% (vmxml,net3)
+		</interface>"""% (vmxml,sourcenet3,sourcenet3,net3)
 	if net4:
+		if net4 in bridges:
+			sourcenet4 = 'bridge'
+		else:
+			sourcenet4 = 'network'
 		vmxml="""%s
-		 <interface type='network'>
-                  <source network='%s'/>
+		 <interface type='%s'>
+                  <source %s='%s'/>
 		<model type='virtio'/>
-		</interface>"""% (vmxml,net4)
+		</interface>"""% (vmxml,sourcenet4,sourcenet4,net4)
 	vmxml="""%s
 		<input type='tablet' bus='usb'/>
                  <input type='mouse' bus='ps2'/>
-                <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'>
+                <graphics type='%s' port='-1' autoport='yes' listen='0.0.0.0'>
                  <listen type='address' address='0.0.0.0'/>
                 </graphics>
                 <memballoon model='virtio'/>
                 </devices>
-                </domain>""" % (vmxml)
+                </domain>""" % (vmxml,display)
 	conn.defineXML(vmxml)
         vm = conn.lookupByName(name)
         vm.setAutostart(1)
@@ -251,16 +275,16 @@ class Kvirt:
     bestsize = 0
     beststoragedomain = ''
     conn = self.conn
-    for storage in conn.listStoragePools():
-        storagename = storage
-        storage = conn.storagePoolLookupByName(storage) 
+    for stor in conn.listStoragePools():
+        storagename = stor
+        storage = conn.storagePoolLookupByName(stor) 
         s= storage.info()
         used = float(s[2])/1024/1024/1024
         available = float(s[3])/1024/1024/1024
         if available > bestsize:
             beststoragedomain = storagename
             bestsize = available
-	return beststoragedomain
+    return beststoragedomain
 
  def status(self,name):
     conn = self.conn
@@ -304,9 +328,14 @@ class Kvirt:
     conn = self.conn
     for storage in conn.listStoragePools():
         storage = conn.storagePoolLookupByName(storage) 
+        storagexml = storage.XMLDesc(0)
+        root = ET.fromstring(storagexml)
+	for element in root.getiterator('path'):
+		storagepath = element.text
+		break
         for volume in storage.listVolumes():
             if volume.endswith('iso'):
-                isos.append(volume)
+                isos.append("%s/%s" % (storagepath,volume))
     return isos
 
  def remove(self,name):

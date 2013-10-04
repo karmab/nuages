@@ -120,7 +120,7 @@ var that           = {},  // Public API methods
 
     test_mode        = false,
 
-    def_con_timeout  = Websock_native ? 2 : 5,
+    def_con_timeout  = Websock_native ? 5 : 15,
 
     /* Mouse state */
     mouse_buttonMask = 0,
@@ -140,7 +140,7 @@ Util.conf_defaults(conf, that, defaults, [
     ['view_only',          'rw', 'bool', false, 'Disable client mouse/keyboard'],
 
     ['connectTimeout',     'rw', 'int', def_con_timeout, 'Time (s) to wait for connection'],
-    ['disconnectTimeout',  'rw', 'int', 3,    'Time (s) to wait for disconnection'],
+    ['disconnectTimeout',  'rw', 'int', 5,    'Time (s) to wait for disconnection'],
 
     // UltraVNC repeater ID to connect to
     ['repeaterID',         'rw', 'str',  '',    'RepeaterID to connect to'],
