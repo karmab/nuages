@@ -717,7 +717,7 @@ def console(request):
 				os.popen(websockifycommand)
 				return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 			elif protocol =="vnc":
-				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
+				websockifycommand = "websockify %s -D --record=/tmp/prout --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 		elif virtualprovider.type == 'vsphere':
