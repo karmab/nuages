@@ -196,7 +196,8 @@ def create(request):
 					successes[newname]=success
 		if request.is_ajax():
 			if numvms ==1:
-				return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!</div>" % name )
+				vmid = newvm.id
+				return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!access its console <a href='/nuages/vms/console/?id=%s'>here</a></div>" % (name,vmid) )
 			else:
 				return HttpResponse("<div class='alert alert-info' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % " ".join(successes.values()) )
 				
@@ -835,7 +836,6 @@ def kill(request):
 		elif virtualprovider and virtualprovider.type == 'vsphere':
 			pwd = os.environ["PWD"]
 			removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (os.environ['PWD'],'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
-			print removecommand
 			remove = os.popen(removecommand).read()
 			#removeinfo= ast.literal_eval(remove)	
 			r='VM killed in vsphere'
@@ -1254,7 +1254,8 @@ def profilecopy(request):
 			profile.cobblerprofile = oldname
 			profile.pk = None
 			profile.save()
-            		return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied</div>")
+			profileid = profile.id
+            		return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied. edit it <a href=/admin/portal/profile/%s>here</a></div>" % profileid)
 		else:
             		profile = request.POST['profile']
             		profile=Profile.objects.get(name=profile)

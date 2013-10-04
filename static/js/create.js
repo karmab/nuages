@@ -142,6 +142,7 @@ $( document ).ready(function() {
  $('#id_profile').change(function(){
   var result = $("#result");
   var ip1 = $('#id_ip1');
+  var ip1label = $('label[for="id_ip1"]');
   var mac1 = $('#id_mac1');
   var mac1label = $('label[for="id_mac1"]');
   var ipilo = $('#id_ipilo');
@@ -259,6 +260,12 @@ $( document ).ready(function() {
 	parameterslabel.show(400) ;
          }
     if ( index == 6 )  {
+	if ( parameter >= 1 ) {
+ 	ip1label.show(400);
+ 	ip1.show(400);
+ 	mac1label.show(400);
+        $('#id_mac1').show(400);
+	}
 	if ( parameter >= 2 ) {
  	ip2label.show(400);
  	ip2.show(400);
