@@ -17,7 +17,7 @@ class LdapBackend(object):
 		ldapproviders=LdapProvider.objects.all()
 		for provider in ldapproviders:
 			port = 389
-			host,basedn,binddn,bindpassword,secure,userfield,filter,certname=provider.host,provider.basedn,provider.binddn,provider.bindpassword,provider.secure,provider.userfield,provider.filter,provider.certname
+			host,basedn,binddn,bindpassword,secure,userfield,filter1,certname=provider.host,provider.basedn,provider.binddn,provider.bindpassword,provider.secure,provider.userfield,provider.filter1,provider.certname
 			ldapuri="ldap://%s" % (host)
 			if secure:
 				port = 636
@@ -34,8 +34,8 @@ class LdapBackend(object):
 				print "unreachable host %s, continuing" % host
 				continue
 			userfilter = "%s=%s" % (userfield,username)
-			if filter:
-				userfilter="(&(%s)(%s))" % (userfilter,filter)
+			if filter1:
+				userfilter="(&(%s)(%s))" % (userfilter,filter1)
 			attrs = [str(userfield)]
 			try:
 				c = ldap.initialize(ldapuri)
@@ -61,6 +61,10 @@ class LdapBackend(object):
 			user, created = User.objects.get_or_create(username=username)
 			if created:
 				print "created %s" % username
+				if len(provider.groups1.values()) >=1 and not provider.filter1:
+					for group in provider.groups1.values():
+						user.groups.add(group['id'])
+				user.save()
 			return user
 
 	def get_user(self, user_id):

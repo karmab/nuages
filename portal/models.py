@@ -89,8 +89,15 @@ class LdapProvider(models.Model):
 	bindpassword        = models.CharField(max_length=20)
 	secure      	    = models.BooleanField(default=True)
 	userfield	    = models.CharField(max_length=60)
-	filter              = models.CharField(max_length=160,blank=True, null=True)
 	certname	    = models.CharField(max_length=60,blank=True, null=True)
+	filter1             = models.CharField(max_length=160,blank=True, null=True)
+	filter2             = models.CharField(max_length=160,blank=True, null=True)
+	filter3             = models.CharField(max_length=160,blank=True, null=True)
+	filter4             = models.CharField(max_length=160,blank=True, null=True)
+	groups1             = models.ManyToManyField(Group,blank=True,null=True,related_name='groups1')
+	groups2             = models.ManyToManyField(Group,blank=True,null=True,related_name='groups2')
+	groups3             = models.ManyToManyField(Group,blank=True,null=True,related_name='groups3')
+	groups4             = models.ManyToManyField(Group,blank=True,null=True,related_name='groups4')
 	def __unicode__(self):
 		return self.name
 	def clean(self):
