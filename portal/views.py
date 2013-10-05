@@ -685,7 +685,7 @@ def console(request):
 	    	virtualprovider = VirtualProvider.objects.get(name=virtualprovidername)
 		default = Default.objects.all()[0]
 		sockhost=default.consoleip
-		sockport = random.randint(10000,60000)
+		sockport = random.randint(default.consoleminport,default.consolemaxport)
 		pwd = settings.PWD
                 if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
 			if virtualprovider.type == 'ovirt':
