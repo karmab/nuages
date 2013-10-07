@@ -65,7 +65,12 @@
        <li><a href="/admin"><i class="icon-white icon-wrench"></i>Configuration</a></li>
      </ul></li>
      {% endif %}
-     <li><a href="/logout/"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</a></li>
+     <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-user"></i>Your account<b class="caret"></b></a>
+      <ul class="dropdown-menu">
+       <li><a href="/admin/password_change"><i class="icon-white icon-pencil"></i>Change password</a></li>
+       <li><a href="/logout/"><i class="icon-white icon-tint"></i>Logout {{ username.username  }}</a></li>
+      </ul></li>
 </ul>
 </div></div>
 

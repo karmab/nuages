@@ -18,11 +18,12 @@ class LdapBackend(object):
 		for provider in ldapproviders:
 			port = 389
 			host, basedn, binddn, bindpassword, secure, userfield,certname, filter1, filter2, filter3, filter4, groups1, groups2, groups3, groups4 = provider.host, provider.basedn, provider.binddn, provider.bindpassword, provider.secure, provider.userfield, provider.certname, provider.filter1, provider.filter2, provider.filter3, provider.filter4, provider.groups1, provider.groups2, provider.groups3, provider.groups4
-			activefilters=[]
-			for filter in [filter1,filter2,filter3,filter4]:
-				if filter:
-					activefilters.append(filter)
-			ldapuri="ldap://%s" % (host)
+			activefilters = []
+			for f in [filter1, filter2, filter3, filter4]:
+				if f:
+					activefilters.append(f)
+			matchingfilter = None
+			ldapuri = "ldap://%s" % (host)
 			if secure:
 				port = 636
 				pwd = settings.PWD
@@ -37,24 +38,24 @@ class LdapBackend(object):
 			except socket.error:
 				print "unreachable host %s, continuing" % host
 				continue
-			userfilter = "%s=%s" % (userfield,username)
+			userfilter = "%s=%s" % (userfield, username)
 			try:
 				c = ldap.initialize(ldapuri)
-				c.simple_bind_s(binddn,bindpassword)
+				c.simple_bind_s(binddn, bindpassword)
 				if not activefilters:
 					res=c.search_s( basedn, ldap.SCOPE_SUBTREE, userfilter, attrs)
 				else:
-					for filter in activefilters:
-						userfilter="(&(%s)(%s))" % (userfilter,filter)
-						attrs = [str(userfield)]
-						res=c.search_s( basedn, ldap.SCOPE_SUBTREE, userfilter, attrs)
-						if res[0]:
-							activefilters = filter
+					for f in activefilters:
+						filter = "(&(%s)(%s))" % (userfilter, f)
+						attrs = [str(filter)]
+						res = c.search_s( basedn, ldap.SCOPE_SUBTREE, filter, attrs)
+						if res:
+							matchingfilter = f
 							break
 				c.unbind()
 			except:	
 				continue
-			if res[0]:
+			if res:
 				usercn=res[0][0]
 				try:
 					c = ldap.initialize(ldapuri)
@@ -75,19 +76,19 @@ class LdapBackend(object):
 					for group in groups1.values():
 						user.groups.add(group['id'])
 					user.save()
-				if filter and filter==filter1 and groups1.values():
+				if matchingfilter and matchingfilter==filter1 and groups1.values():
 					for group in groups1.values():
 						user.groups.add(group['id'])
 					user.save()
-				if filter and filter==filter2 and groups2.values():
+				if matchingfilter and matchingfilter==filter2 and groups2.values():
 					for group in groups2.values():
 						user.groups.add(group['id'])
 					user.save()
-				if filter and filter==filter3 and groups3.values():
+				if matchingfilter and matchingfilter==filter3 and groups3.values():
 					for group in groups3.values():
 						user.groups.add(group['id'])
 					user.save()
-				if filter and filter==filter4 and groups4.values():
+				if matchingfilter and matchingfilter==filter4 and groups4.values():
 					for group in groups4.values():
 						user.groups.add(group['id'])
 					user.save()
