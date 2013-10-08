@@ -136,25 +136,22 @@ def create(request):
 		if requireip and not ipamprovider and numinterfaces > 3 and not ip4:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip4 needed <p><p</div>")
 		if physical:
-			physicalprovider = PhysicalProvider.objects.filter(id=physicalprovider)[0]
 			virtualprovider = None
 		else:
-			virtualprovider = VirtualProvider.objects.filter(id=virtualprovider)[0]
+			virtualprovider = VirtualProvider.objects.get(id=virtualprovider)
 			physicalprovider = None
 		if cobbler and request.POST.get('cobblerprovider') != '':
-			cobblerprovider=CobblerProvider.objects.filter(id=cobblerprovider)[0]
+			cobblerprovider=CobblerProvider.objects.get(id=cobblerprovider)
 		else:
 			cobblerprovider=None
 		if foreman and request.POST.get('foremanprovider') != '':
-			foremanprovider=ForemanProvider.objects.filter(id=foremanprovider)[0]
+			foremanprovider=ForemanProvider.objects.get(id=foremanprovider)
 		else:
 			foremanprovider=None
 		if type:
 			parameters = "type=%s %s" % (type, parameters)
 		
 		#CHECK SECTION
-		#if not physical and virtualprovider.type =='vsphere' and disksize2:
-		#	return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Multiple disks arent supported at the moment for vsphere...<p><p</div>")
 		#MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
 		vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
 		if len(vms) > 0:

@@ -13,8 +13,8 @@ class Oa:
         stdin, stdout, stderr = s.exec_command('show server list')
 	id=None
         for line in stdout:
-            if  name in line:
-		matchid = re.search('([0-9]*) %s.*'% name , line)
+            if  name.lower() in line.lower():
+		matchid = re.search('([0-9]*) %s.*'% name.lower() , line.lower())
 		id = matchid.group(1)
 		break
         s.close()
