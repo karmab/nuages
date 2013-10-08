@@ -39,6 +39,7 @@ class LdapBackend(object):
 				print "unreachable host %s, continuing" % host
 				continue
 			userfilter = "%s=%s" % (userfield, username)
+			attrs = [str(userfield)]
 			try:
 				c = ldap.initialize(ldapuri)
 				c.simple_bind_s(binddn, bindpassword)
@@ -47,7 +48,6 @@ class LdapBackend(object):
 				else:
 					for f in activefilters:
 						filter = "(&(%s)(%s))" % (userfilter, f)
-						attrs = [str(filter)]
 						res = c.search_s( basedn, ldap.SCOPE_SUBTREE, filter, attrs)
 						if res:
 							matchingfilter = f
