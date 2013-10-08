@@ -239,7 +239,7 @@ $( document ).ready(function() {
         	$('#id_mac1').show(400);
 		break;	
 	case 'iso':
-		$('#id_iso').replaceWith('<select name="iso" id="id_iso">');	
+		$('#id_iso').replaceWith('<select name="iso" id="id_iso"><option value="" selected="selected">---------</option>');	
 		$.each(parameter, function(index, value){
 		newiso = '<option value="' + value +'">'+value+'</option>';
         	isoslist = isoslist+newiso;
@@ -348,7 +348,7 @@ $( document ).ready(function() {
 	}
 
     if ( ( index == 10 ) && ( foreman == true ) )  {	
- 	$('#id_hostgroup').replaceWith('<select name="hostgroup" id="id_hostgroup">');
+ 	$('#id_hostgroup').replaceWith('<select name="hostgroup" id="id_hostgroup"><option value="" selected="selected">---------</option>');
  	var hostgroupslist = '';
    	$.each(parameter, function(index, value) {
 	hostgroup = '<option value="' + value +'">'+value+'</option>';
