@@ -15,7 +15,7 @@
 {% if not vm.physical %}
 <a href="/nuages/vms/console/?id={{ vm.id }}"><img src="/static/img/console.png">
 {% elif vm.ipilo %}
-<a href="https://{{ default.consoleip }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png">
+<a href="https://{{ default.consoleip }}:{{default.consoleport }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png">
 {% endif %}
 {{ vm.name}}</a></td>
 <td>{{ vm.createdby }}</td>

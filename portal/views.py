@@ -203,7 +203,7 @@ def create(request):
 						default.save()
 					else:
 						default = Default.objects.all()[0]
-					consoleurl = "<a href='https://%s/?ssh=ssh://root@%s:22/'>" % (default.consoleip , newvm.ipilo ) 
+					consoleurl = "<a href='https://%s:%s/?ssh=ssh://root@%s:22/'>" % (default.consoleip , default.consoleport, newvm.ipilo ) 
 				else:
 					consoleurl = "<a href='/nuages/vms/console/?id=%s'>" % ( vmid )
 				return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!access its console %shere</a></div>" % (name, consoleurl) )

@@ -451,6 +451,7 @@ class Default(models.Model):
 	cobblerprovider   = models.ForeignKey(CobblerProvider,blank=True,null=True)
 	foremanprovider   = models.ForeignKey(ForemanProvider,blank=True,null=True)
 	consoleip         = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
+	consoleport       = models.IntegerField(default=443)
 	consoleminport    = models.IntegerField(default=6000)
 	consolemaxport    = models.IntegerField(default=7000)
 	currency          = models.CharField(max_length=20, default='$',choices=( ('$', '$'),('€', '€') ))
