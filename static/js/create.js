@@ -684,6 +684,8 @@ function findvm() {
                 ipoa.val( ipval );
                 ipoalabel.show(400) ;
                 ipoa.show(400) ;
+                ipilolabel.show(400) ;
+                ipilo.show(400) ;
                 ip1.val('');
                 break;
                 }

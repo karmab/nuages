@@ -195,7 +195,18 @@ def create(request):
 		if request.is_ajax():
 			if numvms ==1:
 				vmid = newvm.id
-				return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!access its console <a href='/nuages/vms/console/?id=%s'>here</a></div>" % (name,vmid) )
+				if newvm.physical and newvm.ipilo:
+					defaults = Default.objects.all()
+					if not defaults:
+						ip = socket.gethostbyname(socket.gethostname())
+						default = Default(name='default',consoleip=ip)
+						default.save()
+					else:
+						default = Default.objects.all()[0]
+					consoleurl = "<a href='https://%s/?ssh=ssh://root@%s:22/'>" % (default.consoleip , newvm.ipilo ) 
+				else:
+					consoleurl = "<a href='/nuages/vms/console/?id=%s'>" % ( vmid )
+				return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!access its console %shere</a></div>" % (name, consoleurl) )
 			else:
 				return HttpResponse("<div class='alert alert-info' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % " ".join(successes.values()) )
 				
