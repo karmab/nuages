@@ -136,6 +136,7 @@ def create(request):
 		if requireip and not ipamprovider and numinterfaces > 3 and not ip4:
 			return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip4 needed <p><p</div>")
 		if physical:
+			physicalprovider = PhysicalProvider.objects.get(id=physicalprovider)
 			virtualprovider = None
 		else:
 			virtualprovider = VirtualProvider.objects.get(id=virtualprovider)
