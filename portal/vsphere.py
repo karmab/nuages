@@ -606,10 +606,10 @@ if __name__ == '__main__':
 			vnc = True
 		else:
 			vnc = False
-		if iso == '':
+		if iso == '' or iso =='None':
 			iso  = None
-		if disksize2 == '':
+		if disksize2 == '' or disksize2 =='None':
 			disksize2  = None
-		if diskmode2 == '':
+		if diskmode2 == '' or diskmode2 =='None':
 			diskmode2  = None
  		print vsphere.create(name=name, numcpu=numcpu, numinterfaces=numinterfaces, diskmode1=diskmode1, disksize1=disksize1, diskmode2=diskmode2, disksize2=disksize2, ds=ds, memory=memory, guestid=guestid, vnc=vnc, iso=iso, net1=net1, net2=net2, net3=net3,net4=net4)
