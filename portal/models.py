@@ -364,7 +364,6 @@ class VM(models.Model):
                         kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
                         kvirt.close()
                 if not physical and create and virtualprovider.type == 'vsphere':
-                        pwd = os.environ["PWD"]
                         #get best datastore
                         storagecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (pwd,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
                         storageinfo = os.popen(storagecommand).read()

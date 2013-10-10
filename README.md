@@ -53,8 +53,18 @@ Requisites
     paramiko ( to connect to ILO through ssh)
     python-reportlab and python-dateutil( if you plan to generate invoices)
     gateone (from https://github.com/liftoff/GateOne ) (only if you want to connect to your physical machines ssh-ing to their ilo and then running vsp )
-    python-ssl and python-crypto if you plan to connect to vmware html5 consoles (another option is to directly set sha1 and fqdn for the virtualprovider in the admin portal)
+    openssl and python-crypto if you plan to connect to vmware html5 consoles (another option is to directly set sha1 and fqdn for the virtualprovider in the admin portal)
     optionally apache server  with mod_wsgi
+
+    if you plan to use cobbler/spacewalk/satellite5, be sure to set redhat_management_permissive: 1 in /etc/cobbler/settings to allow API access
+
+
+I want it all, i want it now ! 
+-----------------------------
+    
+    #if rhel/centos, subscribe to epel and optional channel
+    yum -y install jython ovirt-engine-sdk  python-requests  python-ldap libvirt-python python-lxml python-websockify python-paramiko python-reportlab python-dateutil  openssl python-crypto httpd  mod_wsgi postgresql-server python-psycopg2 Django14 Django-south
+
 
 Ovirt SDK Installation
 --------
@@ -131,6 +141,8 @@ App Installation
 
         python manage.py syncdb 
 
+        python manage.py migrate 
+
     create south stuff:
 
         python manage.py schemamigration portal --initial
@@ -146,14 +158,18 @@ Apache Integration
 ------------------    
     install apache and mod_wsgi
     
-    uncompress the tar where you plan to serve it from apache ( ex: /var/www/nuages )
+    uncompress the tar where you plan to serve it from apache ( defaults to /usr/share/nuages )
     
     edit $NUAGES_PATH/nuages/settings.py to reflect correct DB credentials
     
-    edit $NUAGES_PATH/django.wsgi to reflect correct location  (replace /var/www/nuages if necessary)                                                       
+    edit $NUAGES_PATH/django.wsgi to reflect correct location  (replace /usr/share/nuages if necessary)                                                       
     
     create a virtual host conf for apache. you can use the nuages.conf.apache  sample provided
 	
+    if using jython
+    mkdir  /var/www/.jython-cache
+    chown apache.root  /var/www/.jython-cache
+
     restart apache
 
  
