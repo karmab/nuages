@@ -775,7 +775,6 @@ def start(request):
 			kvirt.close()
 			return HttpResponse(results)
 		elif virtualprovider.type == 'vsphere':
-			pwd = settings.PWD
 			startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
 			startinfo = os.popen(startcommand).read()
 			#startinfo= ast.literal_eval(startinfo)	
@@ -801,7 +800,6 @@ def stop(request):
 			kvirt.close()
 			return HttpResponse(results)
 		elif virtualprovider.type == 'vsphere':
-			pwd = settings.PWD
 			stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
 			stopinfo = os.popen(stopcommand).read()
 			#stopinfo= ast.literal_eval(stopinfo)	
@@ -842,7 +840,6 @@ def kill(request):
 			r=kvirt.remove(name)
 			kvirt.close()
 		elif virtualprovider and virtualprovider.type == 'vsphere':
-			pwd = settings.PWD
 			removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
 			remove = os.popen(removecommand).read()
 			#removeinfo= ast.literal_eval(remove)	

@@ -365,7 +365,7 @@ class VM(models.Model):
                         kvirt.close()
                 if not physical and create and virtualprovider.type == 'vsphere':
                         #get best datastore
-                        storagecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (pwd,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
+                        storagecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
                         storageinfo = os.popen(storagecommand).read()
                         storageinfo= ast.literal_eval(storageinfo)
                         size=0
@@ -373,7 +373,7 @@ class VM(models.Model):
                                 if storageinfo[stor][1] > size:
                                         ds=stor
                                         size=storageinfo[stor][1]
-                        createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (pwd,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, ds, memory, guestid, vnc, iso, net1, net2, net3, net4)
+                        createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, ds, memory, guestid, vnc, iso, net1, net2, net3, net4)
                         vspheremacaddr = os.popen(createcommand).read()
                         vspheremacaddr = ast.literal_eval(vspheremacaddr)
                 if cobbler and cobblerprovider:
@@ -440,7 +440,7 @@ class VM(models.Model):
                         kvirt.start(name)
                         kvirt.close()
                 if not physical and create and virtualprovider.type == 'vsphere':
-                        startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (pwd,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+                        startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                         os.popen(startcommand).read()
 		return 'OK'
 
