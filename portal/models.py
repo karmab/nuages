@@ -364,16 +364,7 @@ class VM(models.Model):
                         kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
                         kvirt.close()
                 if not physical and create and virtualprovider.type == 'vsphere':
-                        #get best datastore
-                        storagecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'getstorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
-                        storageinfo = os.popen(storagecommand).read()
-                        storageinfo= ast.literal_eval(storageinfo)
-                        size=0
-                        for stor in storageinfo:
-                                if storageinfo[stor][1] > size:
-                                        ds=stor
-                                        size=storageinfo[stor][1]
-                        createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s '%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, ds, memory, guestid, vnc, iso, net1, net2, net3, net4)
+                        createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s \'%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, storagedomain, memory, guestid, vnc, iso, net1, net2, net3, net4)
                         vspheremacaddr = os.popen(createcommand).read()
                         vspheremacaddr = ast.literal_eval(vspheremacaddr)
                 if cobbler and cobblerprovider:

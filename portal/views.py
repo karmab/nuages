@@ -376,7 +376,6 @@ def profileinfo(request):
 		type=virtualprovider.type
 		if type != "fake":
 			provider = "%s,%s" % (virtualprovider.id, virtualprovider.name)
-			storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
 			if profile.autostorage:	
 				#RETRIEVE BEST STORAGE DOMAIN
 				if type == 'ovirt':
@@ -391,10 +390,11 @@ def profileinfo(request):
 					pwd = settings.PWD
 					beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
 					bestds = os.popen(beststoragecommand).read()
-					storages=[bestds]
+					storages=[bestds.strip()]
 				else:
 					storages=["N/A"]
 			else:
+				storagelist=Storage.objects.filter(provider=virtualprovider,datacenter=datacenter)
 				for stor in storagelist: 
 					storages.append(stor.name)
 		else:
