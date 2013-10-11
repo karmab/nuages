@@ -42,7 +42,10 @@ class LdapBackend(object):
 			attrs = [str(userfield)]
 			try:
 				c = ldap.initialize(ldapuri)
-				c.simple_bind_s(binddn, bindpassword)
+				if binddn is None or binddpassword is None:
+					c.simple_bind_s()
+				else:
+					c.simple_bind_s(binddn, bindpassword)
 				if not activefilters:
 					res=c.search_s( basedn, ldap.SCOPE_SUBTREE, userfilter, attrs)
 				else:
