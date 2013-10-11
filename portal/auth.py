@@ -42,7 +42,7 @@ class LdapBackend(object):
 			attrs = [str(userfield)]
 			try:
 				c = ldap.initialize(ldapuri)
-				if binddn is None or binddpassword is None:
+				if binddn is None or bindpassword is None:
 					c.simple_bind_s()
 				else:
 					c.simple_bind_s(binddn, bindpassword)
