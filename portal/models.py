@@ -136,7 +136,7 @@ class VirtualProvider(models.Model):
         		raise ValidationError("Host cant be blank")
 
 class ForemanProvider(models.Model):
-	name                = models.CharField(max_length=20)
+	name                = models.CharField(max_length=60)
 	host                = models.CharField(max_length=60,blank=True, null=True)
 	port                = models.IntegerField(default=FOREMANPORT)
 	user                = models.CharField(max_length=60, blank=True, null=True)
@@ -201,7 +201,7 @@ class Profile(models.Model):
 	diskinterface     = models.CharField(max_length=20, default=DISKINTERFACE)
 	netinterface      = models.CharField(max_length=20, default=NETINTERFACE)
 	cmdline           = models.CharField(max_length=100,blank=True)
-	dns               = models.CharField(max_length=20,blank=True,null=True)
+	dns               = models.CharField(max_length=60,blank=True,null=True)
 	autostorage       = models.BooleanField(default=False)
 	foreman           = models.BooleanField(default=True)
 	foremanparameters = models.BooleanField(default=True)
