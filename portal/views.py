@@ -444,8 +444,8 @@ def profileinfo(request):
 			except socket.error:
 				available=False
 			if available:
-				foremanhost, foremanport, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password , foremanprovider.envid
-				foreman= Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword)
+				foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password , foremanprovider.envid
+				foreman= Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
 				hostgroups = foreman.hostgroups(foremanenv)
 				results.append(hostgroups)
 				classes = foreman.classes(foremanenv)
@@ -828,8 +828,8 @@ def kill(request):
 			r=cobbler.remove(name)
 		if foremanprovider:
 			dns = vm.profile.dns
-                        foremanhost, foremanport, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.user, foremanprovider.password
-                        foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword)
+                        foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
+                        foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
 			r=foreman.delete(name=name,dns=dns)
                 if virtualprovider and virtualprovider.type == 'ovirt':
                         ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
@@ -865,8 +865,8 @@ def hostgroups(request):
 	if request.method == 'POST':
 		foremanprovider=request.POST.get('foremanprovider')
 	    	foremanprovider = ForemanProvider.objects.filter(id=foremanprovider)[0]
-		foremanhost, foremanport, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password
-		foreman= Foreman(host=foremanhost, user=foremanuser, password=foremanpassword)
+                foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
+                foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
 		hostgroups= foreman.hostgroups()
 		hostgroups = json.dumps(hostgroups)
        		return HttpResponse(hostgroups,mimetype='application/json')

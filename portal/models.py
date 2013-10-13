@@ -72,7 +72,7 @@ def checkconn(host,port):
                 return False
 
 class IpamProvider(models.Model):
-	name                = models.CharField(max_length=20)
+	name                = models.CharField(max_length=80)
 	host                = models.CharField(max_length=60)
 	port                = models.IntegerField(default=80)
 	user                = models.CharField(max_length=60)
@@ -82,7 +82,7 @@ class IpamProvider(models.Model):
 		return self.name
 
 class LdapProvider(models.Model):
-	name                = models.CharField(max_length=20)
+	name                = models.CharField(max_length=80)
 	host                = models.CharField(max_length=60,blank=True, null=True)
 	basedn              = models.CharField(max_length=160,blank=True, null=True)
 	binddn              = models.CharField(max_length=160,blank=True, null=True)
@@ -109,7 +109,7 @@ class LdapProvider(models.Model):
 
 
 class PhysicalProvider(models.Model):
-	name                = models.CharField(max_length=20)
+	name                = models.CharField(max_length=80)
 	user                = models.CharField(max_length=60)
 	password            = models.CharField(max_length=20)
 	type                = models.CharField(max_length=20, default='ilo',choices=( ('ilo', 'ilo'),('oa','oa'),('drac', 'drac'),('ssh', 'ssh'),('fake', 'fake') ))
@@ -117,7 +117,7 @@ class PhysicalProvider(models.Model):
 		return self.name
 
 class VirtualProvider(models.Model):
-	name                = models.CharField(max_length=20)
+	name                = models.CharField(max_length=80)
 	host                = models.CharField(max_length=60,blank=True, null=True)
 	port                = models.IntegerField(default=VIRTUALPORT)
 	user                = models.CharField(max_length=60)
@@ -136,9 +136,10 @@ class VirtualProvider(models.Model):
         		raise ValidationError("Host cant be blank")
 
 class ForemanProvider(models.Model):
-	name                = models.CharField(max_length=60)
+	name                = models.CharField(max_length=80)
 	host                = models.CharField(max_length=60,blank=True, null=True)
 	port                = models.IntegerField(default=FOREMANPORT)
+	secure        	    = models.BooleanField(default=False)
 	user                = models.CharField(max_length=60, blank=True, null=True)
 	password            = models.CharField(max_length=20, blank=True, null=True)
 	mac                 = models.CharField(max_length=20, blank=True, null=True)
@@ -154,7 +155,7 @@ class ForemanProvider(models.Model):
         		raise ValidationError("Host cant be blank")
 
 class CobblerProvider(models.Model):
-	name                = models.CharField(max_length=20)
+	name                = models.CharField(max_length=80)
 	host                = models.CharField(max_length=60,blank=True, null=True)
 	user                = models.CharField(max_length=60, blank=True)
 	password            = models.CharField(max_length=20, blank=True)
@@ -165,7 +166,7 @@ class CobblerProvider(models.Model):
         		raise ValidationError("Host cant be blank")
 
 class Storage(models.Model):
-	name              = models.CharField(max_length=50)
+	name              = models.CharField(max_length=80)
 	type              = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere' )))
 	provider	  = models.ForeignKey(VirtualProvider)
 	datacenter        = models.CharField(max_length=50,blank=True)
@@ -173,7 +174,7 @@ class Storage(models.Model):
 		return "%s %s" % (self.provider,self.name)
 
 class Profile(models.Model):
-	name              = models.CharField(max_length=40)
+	name              = models.CharField(max_length=80)
 	physicalprovider  = models.ForeignKey(PhysicalProvider,blank=True,null=True)
 	virtualprovider   = models.ForeignKey(VirtualProvider,blank=True,null=True)
 	cobblerprovider   = models.ForeignKey(CobblerProvider,blank=True,null=True)
@@ -269,8 +270,8 @@ class Profile(models.Model):
 				
 
 class VM(models.Model):
-	name              = models.CharField(max_length=20)
-	storagedomain     = models.CharField(max_length=60,blank=True,null=True)
+	name              = models.CharField(max_length=80)
+	storagedomain     = models.CharField(max_length=80,blank=True,null=True)
 	physicalprovider  = models.ForeignKey(PhysicalProvider,blank=True,null=True)
 	virtualprovider   = models.ForeignKey(VirtualProvider,blank=True,null=True)
 	physical          = models.BooleanField(default=False)
@@ -341,8 +342,8 @@ class VM(models.Model):
 			connection = checkconn(foremanprovider.host, foremanprovider.port)
 			if not connection:
 				return "Connectivity issue with foreman provider %s!" % foremanprovider.name
-                        foremanhost, foremanport,foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.user, foremanprovider.password
-                        foreman=Foreman(host=foremanhost,port=foremanport, user=foremanuser, password=foremanpassword)
+                        foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password
+                        foreman=Foreman(host=foremanhost,port=foremanport, user=foremanuser, password=foremanpassword, secure=foremansecure)
 			foremanfound = foreman.exists("%s.%s" %  (name,dns) )
 			if foremanfound:
 				return "Machine %s.%s allready exists within foreman!" % (name,dns)
@@ -404,8 +405,8 @@ class VM(models.Model):
                                 cobbler.simplecreate(name=name,profile=cobblerprofile,dns=dns, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline)
 
                 if foreman and foremanprovider:
-                        foremanhost, foremanport, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
-                        f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword)
+                        foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
+                        f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
                         f.create(name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
 			if foremanparameters and parameters != '':
                         	f.addparameters(name=name,dns=dns,parameters=parameters)
