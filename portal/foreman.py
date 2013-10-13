@@ -15,13 +15,13 @@ def foremando(url, actiontype=None, postdata=None, v2=False, user=None, password
   user     = user.encode('ascii')
   password = password.encode('ascii')
  if actiontype == 'POST':
- 	r = requests.post(url,headers=headers,auth=(user,password),data=json.dumps(postdata))
+ 	r = requests.post(url,verify=False, headers=headers,auth=(user,password),data=json.dumps(postdata))
  elif actiontype == 'DELETE':
- 	r = requests.delete(url,headers=headers,auth=(user,password),data=postdata)
+ 	r = requests.delete(url,verify=False, headers=headers,auth=(user,password),data=postdata)
  elif actiontype == 'PUT':
- 	r = requests.put(url,headers=headers,auth=(user,password),data=postdata)
+ 	r = requests.put(url,verify=False, headers=headers,auth=(user,password),data=postdata)
  else:
- 	r = requests.get(url,headers=headers,auth=(user,password))
+ 	r = requests.get(url,verify=False, headers=headers,auth=(user,password))
  try:
   result = r.json()
   result = eval(str(result))
