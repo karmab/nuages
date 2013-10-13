@@ -694,6 +694,10 @@ def console(request):
 		default = Default.objects.all()[0]
 		sockhost=default.consoleip
 		sockport = random.randint(default.consoleminport,default.consolemaxport)
+		if default.consolesecure:
+			sockprotocol = 'wss'
+		else:
+			sockprotocol = 'ws'
 		pwd = settings.PWD
                 if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
 			if virtualprovider.type == 'ovirt':
@@ -710,7 +714,7 @@ def console(request):
 				if not host:
 					information = { 'title':'Console not configured' , 'details':'the display of this vm doesnt listen on the host ip' }
                 			return render(request, 'information.html', { 'information' : information } )
-			information = { 'host' : sockhost , 'port' : sockport , 'ticket' : ticket }
+			information = { 'host' : sockhost , 'port' : sockport , 'protocol': sockprotocol, 'ticket' : ticket }
 			vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
 			if protocol =="spice" and virtualprovider.type == 'ovirt':
 				pwd = settings.PWD
@@ -720,13 +724,13 @@ def console(request):
 				return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 			if protocol =="spice" and virtualprovider.type == 'kvirt':
 				pwd = settings.PWD
-				#cert="%s/%s.pem" % (pwd,virtualprovider.name)
+				#cert="%s/%s.pem" % (settings.PWD,virtualprovider.name)
 				#websockifycommand = "websockify %s -D --timeout=30 --cert %s --ssl-target %s:%s" % (sockport,cert,host,port)
 				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 			elif protocol =="vnc":
-				websockifycommand = "websockify %s -D --record=/tmp/prout --timeout=30 %s:%s" % (sockport,host,port)
+				websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
 				os.popen(websockifycommand)
 				return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
 		elif virtualprovider.type == 'vsphere':

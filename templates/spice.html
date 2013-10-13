@@ -84,7 +84,8 @@
 
             function connect()
             {
-                var host, port, password, scheme = "ws://", uri;
+                //var host, port, password, scheme = "ws://", uri;
+                var host, port, password, scheme = "{{ information.protocol }}://", uri;
 
                 // By default, use the host and port of server that served this file
                 host = '{{ information.host }}';

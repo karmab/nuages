@@ -443,6 +443,7 @@ class Default(models.Model):
 	foremanprovider   = models.ForeignKey(ForemanProvider,blank=True,null=True)
 	consoleip         = models.CharField(max_length=60,blank=True, null=True)
 	consoleport       = models.IntegerField(default=443)
+	consolesecure     = models.BooleanField(default=False)
 	consoleminport    = models.IntegerField(default=6000)
 	consolemaxport    = models.IntegerField(default=7000)
 	currency          = models.CharField(max_length=20, default='$',choices=( ('$', '$'),('€', '€') ))
