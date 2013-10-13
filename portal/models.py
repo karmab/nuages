@@ -208,6 +208,7 @@ class Profile(models.Model):
 	foremanparameters = models.BooleanField(default=True)
 	cobbler           = models.BooleanField(default=True)
 	cobblerparameters = models.BooleanField(default=True)
+	nextserver        = models.CharField(max_length=80, blank=True)
 	iso               = models.BooleanField(default=False)
 	hide              = models.BooleanField(default=True)
 	console           = models.BooleanField(default=False)
@@ -310,7 +311,7 @@ class VM(models.Model):
 			return
 		self.createdwhen=datetime.now()
 		name, storagedomain, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, create = self.name, self.storagedomain, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup,self.create
-		clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc
+		clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver
 		if profile.price:
 			self.price = profile.price
 		if profile.ipamprovider:
@@ -400,9 +401,9 @@ class VM(models.Model):
 			if cobblerparameters:	
 				cobblerparameters=parameters
                         if ip1:
-                                cobbler.create(name=name,profile=cobblerprofile,numinterfaces=numinterfaces,dns=dns, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline)
+                                cobbler.create(name=name,profile=cobblerprofile,numinterfaces=numinterfaces,dns=dns, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline, nextserver=nextserver)
                         else:
-                                cobbler.simplecreate(name=name,profile=cobblerprofile,dns=dns, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline)
+                                cobbler.simplecreate(name=name,profile=cobblerprofile,dns=dns, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline, nextserver=nextserver)
 
                 if foreman and foremanprovider:
                         foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid

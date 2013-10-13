@@ -27,7 +27,7 @@ class Cobbler:
  		self.s = xmlrpclib.Server("http://%s/cobbler_api" % cobblerhost)
  		self.token = self.s.login(cobbleruser,cobblerpassword)
 
-	def create(self,name,profile, numinterfaces, dns=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, gwstatic=None, gwbackup=None, staticroutes=None, backuproutes=None,macaddr=None,parameters=None,cmdline=None):
+	def create(self,name,profile, numinterfaces, dns=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, gwstatic=None, gwbackup=None, staticroutes=None, backuproutes=None,macaddr=None,parameters=None,cmdline=None,nextserver=None):
 		if ip1:
 			ip1=ip1.encode('ascii')
 		if ip2:
@@ -55,8 +55,8 @@ class Cobbler:
 		s.modify_system(system, 'name', name, token)
 		s.modify_system(system, 'hostname', name, token)
 		s.modify_system(system, 'profile', profile, token)
-		#if nextserver:
-		# s.modify_system(system, 'server', nextserver, token)
+		if nextserver:
+			s.modify_system(system, 'server', nextserver, token)
 		if numinterfaces==1:
  			if staticroutes:
   				eth0 = {"macaddress-eth0":macaddr[0], "static-eth0":1, "ipaddress-eth0":ip1, "subnet-eth0":subnet1, "staticroutes-eth0":staticroutes}
@@ -110,7 +110,7 @@ class Cobbler:
 		s.sync(token)
 		print "%s created in Cobbler" % name
 
-	def simplecreate(self,name,profile,dns=None ,macaddr=None,parameters=None,cmdline=None):
+	def simplecreate(self,name,profile,dns=None ,macaddr=None,parameters=None,cmdline=None,nextserver=None):
 		if dns:
 			dns=dns.encode('ascii')
 		profile=profile.encode('ascii')
@@ -124,6 +124,8 @@ class Cobbler:
 		s.modify_system(system, 'name', name, token)
 		s.modify_system(system, 'hostname', name, token)
 		s.modify_system(system, 'profile', profile, token)
+		if nextserver:
+			s.modify_system(system, 'server', nextserver, token)
  		eth0 = {"macaddress-eth0":macaddr[0]}
 		if dns:
 			eth0["dnsname-eth0"] = "%s.%s" % (name, dns)
