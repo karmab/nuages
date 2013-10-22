@@ -3,10 +3,10 @@ import paramiko
 def checkstatus(stdout):
     for line in stdout:
         if 'status' in line:
-                result=line.split('=')[1].replace('\r\n','')
-                return int(result)
-    return 1        
-            
+            result=line.split('=')[1].replace('\r\n','')
+            return int(result)
+    return 1
+
 
 
 class Ilo:
@@ -22,7 +22,7 @@ class Ilo:
         stdin, stdout, stderr = s.exec_command('show system1/network1/Integrated_NICs')
         for line in stdout:
             if 'NIC_MACAddress' in line:
-                #macs.append(line.split('=')[1].replace('\r\n',''))
+            #macs.append(line.split('=')[1].replace('\r\n',''))
                 macs.append(line.split('=')[0].replace(' ','')+"="+line.split('=')[1].replace('\r\n',''))
         s.close()
         return macs
@@ -61,10 +61,10 @@ class Ilo:
         s.connect(host, username=username, password=password)
         stdin, stdout, stderr = s.exec_command('power')
         s.close()
-	if 'On' in stdout:
-		return 'down'
-	else:
-        	return 'up'
+        if 'On' in stdout:
+            return 'down'
+        else:
+            return 'up'
 
     def stop(self):
         host, username, password = self.host, self.username, self.password

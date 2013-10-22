@@ -2,8 +2,6 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 #specific stuff for auth
 from django.conf.urls.defaults import *
-from django.contrib.auth.decorators import login_required
-import django.contrib.auth
 
 
 
@@ -40,7 +38,6 @@ urlpatterns = patterns('portal.views',
       url(r'^nuages/customformdelete','customformdelete'),
       url(r'^nuages/invoicepdf','invoicepdf'),
       url(r'^nuages/invoice','invoice'),
-      #url(r'^nuages/addform', 'addform'),
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
@@ -50,6 +47,7 @@ urlpatterns = patterns('portal.views',
 
 urlpatterns += patterns('',
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'} ),
+    ##url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'} ),
+    url(r'^login/$', 'portal.views.customlogin', {'template_name': 'login.html'} ),
     url(r'^logout/$', 'django.contrib.auth.views.logout_then_login' ),
     )

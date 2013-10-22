@@ -208,7 +208,9 @@ common_scanmap[93]                 = 0xE05D; //KEY_Menu
 
 /* Firefox/Mozilla codes */
 var firefox_scanmap = [];
-firefox_scanmap[173]                = KEY_Minus;
+//firefox_scanmap[173]                = KEY_Minus;
+//spanish minus key
+firefox_scanmap[173]                  = 0x4a;
 firefox_scanmap[61]                   = KEY_Equal;
 firefox_scanmap[59]                   = KEY_SemiColon;
 

@@ -1,5 +1,5 @@
 #-*- coding: utf-8 -*-
-import os 
+import os
 from django.forms import ModelForm, PasswordInput
 from portal.models import *
 

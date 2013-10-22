@@ -11,12 +11,12 @@ class Oa:
         s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         s.connect(host, username=username, password=password)
         stdin, stdout, stderr = s.exec_command('show server list')
-	id=None
+        id=None
         for line in stdout:
             if  name.lower() in line.lower():
-		matchid = re.search('([0-9]*) %s.*'% name.lower() , line.lower())
-		id = matchid.group(1)
-		break
+                matchid = re.search('([0-9]*) %s.*'% name.lower() , line.lower())
+                id = matchid.group(1)
+                break
         s.close()
         return id
 
@@ -29,8 +29,8 @@ class Oa:
         stdin, stdout, stderr = s.exec_command('show server info %s' % bladeid)
         for line in stdout:
             if 'Ethernet'  in line and 'NIC' in line:
-		matchmac=re.search('.*(..:..:..:..:..:..).*',line)
-		macs.append("%s=%s" % ( matchmac.group(1), matchmac.group(1) ))
+                matchmac=re.search('.*(..:..:..:..:..:..).*',line)
+                macs.append("%s=%s" % ( matchmac.group(1), matchmac.group(1) ))
         s.close()
         return macs
 
@@ -71,23 +71,23 @@ class Oa:
         return 0
 
     def status(self,bladeid):
-	status='N/A'
+        status='N/A'
         host, username, password = self.host, self.username, self.password
         s = paramiko.SSHClient()
         s.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         s.connect(host, username=username, password=password)
         stdin, stdout, stderr = s.exec_command('show server status %s' % bladeid)
         for line in stdout:
-            if 'Power:'  in line:	
-		matchstatus = re.search('Power: (.*)',line)
-		status = matchstatus.group(1)
+            if 'Power:'  in line:
+                matchstatus = re.search('Power: (.*)',line)
+                status = matchstatus.group(1)
         s.close()
-	if status == 'On':
-		return 'up'
-	elif status =='Off':
-        	return 'down'
-	else:
-        	return 'N/A'
+        if status == 'On':
+            return 'up'
+        elif status =='Off':
+            return 'down'
+        else:
+            return 'N/A'
 
     def getilo(self,bladeid):
         host, username, password = self.host, self.username, self.password
@@ -96,12 +96,12 @@ class Oa:
         s.connect(host, username=username, password=password)
         stdin, stdout, stderr = s.exec_command('show server info %s' % bladeid)
         for line in stdout:
-            if 'IP Address:'  in line:	
-		matchip = re.search('IP Address: (.*)',line)
-		ipilo = matchip.group(1)
-		break
+            if 'IP Address:'  in line:
+                matchip = re.search('IP Address: (.*)',line)
+                ipilo = matchip.group(1)
+                break
         s.close()
-	return ipilo
+        return ipilo
 
     def stop(self,bladeid):
         host, username, password = self.host, self.username, self.password

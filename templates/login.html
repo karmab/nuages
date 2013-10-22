@@ -27,6 +27,10 @@
     <td>{{ form.password }}</td>
 </tr>
 <tr>
+    <td><label>Keyboard</label></td>
+    <td><select name="keyboard"><option value="us" selected >us(Default)</option><option value="es">es</option> </select></td>
+</tr>
+<tr>
     <td><input type="hidden" name="next" value="{{ next }}" /></td>
     <td><input type="submit" class="btn btn-info" value="login" data-loading-text="logging..." /></td>
 </tr>
