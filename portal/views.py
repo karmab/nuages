@@ -677,9 +677,9 @@ def console(request):
     username          = request.user.username
     username          = User.objects.get(username=username)
     usergroups        = username.groups
+    keyboard = request.session.get('keyboard')
     if request.method == 'GET':
         if request.GET.has_key('id'):
-            keyboard = request.session.get('keyboard')
             vmid = request.GET.get('id')
             vm = VM.objects.get(id=vmid)
             vmname = vm.name
