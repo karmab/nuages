@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 
+{% load staticfiles %}
 {% block title %}Nuages VM creation{% endblock %}
 
 {% block content %}
-<script src="/static/js/create.js"></script>
+<script src="{% static "js/create.js" %}"></script>
 
 <fieldset class="module aligned">
 <p id="allvms" class="alert alert-info" ><button type='button' class='close' data-dismiss='alert'>&times;</button>Enter name and profile of your vm, then information and press CreateSystem...<br>

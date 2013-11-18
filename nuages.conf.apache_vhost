@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+ 
+    ServerName portal
+    DocumentRoot /usr/share/nuages
+ 
+    <Directory /usr/share/nuages>
+        Order allow,deny
+        Allow from all
+    </Directory>
+    WSGIScriptAlias / /usr/share/nuages/django.wsgi
+</VirtualHost>
+
+Alias /static/ /usr/share/nuages/static/
+
+<Directory /usr/share/nuages/static>
+Order deny,allow
+Allow from all
+</Directory>

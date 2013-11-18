@@ -677,7 +677,7 @@ def console(request):
     username          = request.user.username
     username          = User.objects.get(username=username)
     usergroups        = username.groups
-    keyboard = request.session.get('keyboard')
+    keyboard          = request.session.get('keyboard')
     if request.method == 'GET':
         if request.GET.has_key('id'):
             vmid = request.GET.get('id')

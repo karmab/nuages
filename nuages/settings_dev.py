@@ -104,7 +104,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'nuages.urls'
+ROOT_URLCONF = 'nuages.urls_dev'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'nuages.wsgi.application'

@@ -151,7 +151,7 @@ App Installation
 
     launch integrated web server:
 
-        python manage.py runserver YOUR_IP:YOUR_PORT
+        python manage.py runserver --settings=nuages.settings_dev YOUR_IP:YOUR_PORT
 
 
 Apache Integration 

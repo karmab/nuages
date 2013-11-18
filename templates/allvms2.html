@@ -1,5 +1,5 @@
 <div id="spice-screen" class="spice-screen"></div>
-<!--table border="1" class="table table-bordered" -->
+{% load staticfiles %}
 <table  colspan="10"  border="1" class='alert alert-info' >
 <tr>
 <td>Vm Name</td>
@@ -10,16 +10,15 @@
 <tr>
 <td>
 {% if console and vm.status != 'down' %}
-<a href="/nuages/vms/console/?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="/static/img/console.png">{{ vm.name}}</a>
+<a href="{% url console %}?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="{% static "img/console.png" %}">{{ vm.name}}</a>
 {% else %}
 {{ vm.name}}
 {% endif %}
 </td>
-<td><img src="/static/img/{{vm.status}}.png">{{vm.status}}</td>
-<!--a href="/nuages/console/?vm={{ vm.name }}&virtualprovider={{ vm.virtualprovider }}"><img src="/static/img/start.png"></a!-->
+<td><img src="{% static "img/{{vm.status}}.png" %}">{{vm.status}}</td>
 <td>
-<img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
-<img src="/static/img/down.png" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
+    <img src="{% static "static/img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
+    <img src="{% static "img/down.png" %}" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
 </td>
 </tr>
 {% endfor %}

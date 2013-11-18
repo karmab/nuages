@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block title %}Nuages Profile copy{% endblock %}
 
 {% block content %}
-<script src="/static/js/profiles.js"></script>
+<script src="{% static "js/profiles.js" %}"></script>
 <p class="alert alert-info" >Select profile and enter name to copy it</p>
 <select name="profile" id="id_profile">
 {% for profile in profiles|dictsort:"name" %}

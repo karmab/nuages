@@ -1,13 +1,13 @@
-{% load admin_static %}{% load url from future %}<!DOCTYPE html>
+{% load staticfiles %}{% load admin_static %}{% load url from future %}<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
 <head>
 <title>{% block title %}{% endblock %}</title>
-<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "/static/css/admin.css" %}{% endblock %}" />
-<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
-<link rel="stylesheet" type="text/css" media="all" href="/static/css/bootstrap.css" />
+<link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "css/admin.css" %}{% endblock %}" />
+<link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
+<link rel="stylesheet" type="text/css" media="all" href="{% static "css/bootstrap.css" %}"/>
 
 {% block extrastyle %}{% endblock %}
-<!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
+<!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="/static/admin/css/ie.css" /><![endif]-->
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
 <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
 {% block extrahead %}{% endblock %}
@@ -16,35 +16,35 @@
 {% load i18n %}
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
-<script src="/static/js/jquery.js"></script>
-<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="{% static "js/jquery.js" %}"></script>
+<script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
 <!-- Container -->
 <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
-      <a class="brand"><img src="/static/img/nuages.png"></a>
+    <a class="brand"><img src="{% static "img/nuages.png" %}"></a>
       <li class="divider-vertical"></li>
-     <li><a href="/nuages/vms/"><div style="font-size:10pt"><i class="icon-white icon-shopping-cart"></i>Create</div></a></li>
+      <li><a href="{% url 'create' %}"><div style="font-size:10pt"><i class="icon-white icon-shopping-cart"></i>Create</div></a></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><div style="font-size:10pt"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></div></a>
       <ul class="dropdown-menu">
-     <li><a href="/nuages/storage/" ><div style="font-size:10pt"><i class="icon-white icon-hdd"></i>Storage</div></a></li>
-     <li><a href="/nuages/profiles/"><div style="font-size:10pt"><i class="icon-white icon-tasks"></i>Profiles</div></a></li>
-     <li><a href="/nuages/customforms"><div style="font-size:10pt"><i class="icon-white icon-thumbs-up"></i>CustomForms</div></a></li>
+          <li><a href="{% url 'storage' %}" ><div style="font-size:10pt"><i class="icon-white icon-hdd"></i>Storage</div></a></li>
+          <li><a href="{% url 'profiles' %}"><div style="font-size:10pt"><i class="icon-white icon-tasks"></i>Profiles</div></a></li>
+          <li><a href="{% url 'customforms' %}"><div style="font-size:10pt"><i class="icon-white icon-thumbs-up"></i>CustomForms</div></a></li>
      </ul></li>
-     <li><a href="/nuages/yourvms/"><div style="font-size:10pt"><i class="icon-white icon-list"></i>Your VMS</div></a></li>
+     <li><a href="{% url 'yourvms' %}"><div style="font-size:10pt"><i class="icon-white icon-list"></i>Your VMS</div></a></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><div style="font-size:10pt"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></div></a>
       <ul class="dropdown-menu">
-       <li><a href="/nuages/allvms/"><div style="font-size:10pt"><i class="icon-white icon-globe"></i>All VMS</div></a></li>
-       <li><a href="/nuages/customformedit"><div style="font-size:10pt"><i class="icon-white icon-leaf"></i>CustomForm Edit</div></a></li>
-       <li><a href="/nuages/profilecopy"><div style="font-size:10pt"><i class="icon-white icon-tag"></i>Profile Copy</div></a></li>
-       <li><a href="/admin"><div style="font-size:10pt"><i class="icon-white icon-wrench"></i>Configuration</div></a></li>
+          <li><a href="{% url 'allvms' %}"><div style="font-size:10pt"><i class="icon-white icon-globe"></i>All VMS</div></a></li>
+          <li><a href="{% url 'customformedit' %}"><div style="font-size:10pt"><i class="icon-white icon-leaf"></i>CustomForm Edit</div></a></li>
+          <li><a href="{% url 'profilecopy' %}"><div style="font-size:10pt"><i class="icon-white icon-tag"></i>Profile Copy</div></a></li>
+          <li><a href="{% url 'admin:index' %}"><div style="font-size:10pt"><i class="icon-white icon-wrench"></i>Configuration</div></a></li>
      </ul></li>
       <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-user"></i>Your account<b class="caret"></b></a>
       <ul class="dropdown-menu">
-       <li><a href="/admin/password_change"><i class="icon-white icon-pencil"></i>Change password</a></li>
-       <li><a href="/logout/"><i class="icon-white icon-tint"></i>Logout {{ username.username  }}</a></li>
+          <li><a href="{% url 'admin:password_change' %}"><i class="icon-white icon-pencil"></i>Change password</a></li>
+          <li><a href="{% url 'logout' %}"><i class="icon-white icon-tint"></i>Logout {{ username.username  }}</a></li>
       </ul></li>
 
 </ul>

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block title %}Invoice information for {{vm.name}}{% endblock %}
 
 {% block content %}
-<p class="alert alert-info" >Here s invoice information for vm: {{vm.name}} (Click here for a pdf report)<a href="/nuages/invoicepdf/?id={{ vm.id }}"><img src="/static/img/invoicepdf.png"></a></p>
+<p class="alert alert-info" >Here s invoice information for vm: {{vm.name}} (Click here for a pdf report)<a href="{% url invoicepdf %}?id={{ vm.id }}"><img src="{% static "img/invoicepdf.png" %}"></a></p>
 <fieldset class="module aligned">
 
 <table border="1" class='alert alert-info'>

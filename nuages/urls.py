@@ -3,51 +3,38 @@ from django.contrib import admin
 #specific stuff for auth
 from django.conf.urls.defaults import *
 
-
-
-# Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('portal.views',
-    # Examples:
-    # url(r'^$', 'nuages.views.home', name='home'),
-    # url(r'^nuages/', include('nuages.foo.urls')),
-      url(r'^nuages/$', 'create'),
-      url(r'^nuages/vms/$', 'create'),
-      url(r'^nuages/vms/findvm', 'findvm'),
-      url(r'^nuages/profiles/$', 'profiles'),
-      url(r'^nuages/profilecopy/$', 'profilecopy'),
-      url(r'^nuages/storage/$', 'storage'),
-      url(r'^nuages/profileinfo/', 'profileinfo'),
-      url(r'^nuages/virtualprovidertype/', 'virtualprovidertype'),
-      url(r'^nuages/types/', 'types'),
-      url(r'^nuages/hostgroups/', 'hostgroups'),
-      url(r'^nuages/yourvms/$', 'yourvms'),
-      url(r'^nuages/allvms/$', 'allvms'),
-      url(r'^nuages/vms/console', 'console'),
-      url(r'^nuages/vms/start', 'start'),
-      url(r'^nuages/vms/stop', 'stop'),
-      url(r'^nuages/vms/kill', 'kill'),
-      url(r'^nuages/vms/dbremove', 'dbremove'),
-      url(r'^nuages/customforms', 'customforms'),
-      url(r'^nuages/customformedit', 'customformedit'),
-      url(r'^nuages/customforminfo', 'customforminfo'),
-      url(r'^nuages/customformupdate','customformupdate'),
-      url(r'^nuages/customformcreate','customformcreate'),
-      url(r'^nuages/customformdelete','customformdelete'),
-      url(r'^nuages/invoicepdf','invoicepdf'),
-      url(r'^nuages/invoice','invoice'),
-    # Uncomment the admin/doc line below to enable admin documentation:
-    # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-
-    # Uncomment the next line to enable the admin:
-    #url(r'^admin/', include(admin.site.urls)),
+      url(r'^$', 'create', name='create'),
+      url(r'^vms/$', 'create'),
+      url(r'^vms/findvm', 'findvm', name='findvm'),
+      url(r'^profiles/$', 'profiles', name='profiles'),
+      url(r'^profilecopy/$', 'profilecopy', name='profilecopy'),
+      url(r'^storage/$', 'storage', name='storage'),
+      url(r'^profileinfo/', 'profileinfo', name='profileinfo'),
+      url(r'^virtualprovidertype/', 'virtualprovidertype', name='virtualprovidertype'),
+      url(r'^types/', 'types', name='types'),
+      url(r'^hostgroups/', 'hostgroups', name='hostgroups'),
+      url(r'^yourvms/$', 'yourvms', name='yourvms'),
+      url(r'^allvms/$', 'allvms', name='allvms'),
+      url(r'^vms/console', 'console', name='console'),
+      url(r'^vms/start', 'start', name='start'),
+      url(r'^vms/stop', 'stop', name='stop'),
+      url(r'^vms/kill', 'kill', name='kill'),
+      url(r'^vms/dbremove', 'dbremove', name='dbremove'),
+      url(r'^customforms', 'customforms', name='customforms'),
+      url(r'^customformedit', 'customformedit', name='customformedit'),
+      url(r'^customforminfo', 'customforminfo', name='customforminfo'),
+      url(r'^customformupdate','customformupdate', name='customformupdate'),
+      url(r'^customformcreate','customformcreate', name='customformcreate'),
+      url(r'^customformdelete','customformdelete', name='customformdelete'),
+      url(r'^invoicepdf','invoicepdf', name='invoicepdf'),
+      url(r'^invoice','invoice', name='invoice'),
 )
 
 urlpatterns += patterns('',
-    url(r'^admin/', include(admin.site.urls)),
-    ##url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'login.html'} ),
-    url(r'^login/$', 'portal.views.customlogin', {'template_name': 'login.html'} ),
-    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login' ),
+    url(r'^admin/', include(admin.site.urls), name='admin'),
+    url(r'^login/$', 'portal.views.customlogin', {'template_name': 'login.html'}, name='login'),
+    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', name='logout'),
     )

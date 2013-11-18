@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block title %}Nuages All VMS Information{% endblock %}
 
 {% block content %}
-<script src="/static/js/allvms.js"></script>
-<script src="/static/js/actions.js"></script>
+<script src="{% static "js/allvms.js"  %}"></script>
+<script src="{% static "js/actions.js" %}"></script>
 
 <div id="actionwheel"></div>
 <fieldset class="module aligned">

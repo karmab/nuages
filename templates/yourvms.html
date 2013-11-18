@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-
+{% load staticfiles %}
 {% block title %}Nuages VMS Information{% endblock %}
 
 {% block content %}
-<script src="/static/js/yourvms.js"></script>
-<script src="/static/js/actions.js"></script>
+<script src="{% static "js/yourvms.js" %}"></script>
+<script src="{% static "js/actions.js" %}"></script>
 
 <div id="actionwheel"></div>
 <fieldset class="module aligned">
@@ -31,9 +31,9 @@ Autorefresh info every 5s / Enable actions:<input id="refresh" type="checkbox"><
 <tr>
 <td>
 {% if not vm.physical %}
-<a href="/nuages/vms/console/?id={{ vm.id }}"><img src="/static/img/console.png">
+<a href="{% url console %}?id={{ vm.id }}"><img src="{% static "img/console.png" %}">
 {% elif vm.ipilo %}
-<a href="https://{{ default.consoleip }}:{{default.consoleport }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="/static/img/ssh.png">
+<a href="https://{{ default.consoleip }}:{{default.consoleport }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="{% static "img/ssh.png" %}">
 {% endif %}
 {{ vm.name}}</a></td>
 <td>{{ vm.createdby }}</td>
@@ -46,7 +46,7 @@ Autorefresh info every 5s / Enable actions:<input id="refresh" type="checkbox"><
 <td>{{vm.profile}}</td>
 <td>
 {% if ajax %}
-<img src="/static/img/{{vm.status}}.png">{{vm.status}}
+<img src="{% static "img/{{vm.status}}.png" %}">{{vm.status}}
 {% else %}
 wait...
 {% endif %}
@@ -56,20 +56,20 @@ wait...
 {% if ajax %}
 
 {% if vm.status != 'N/A' and vm.status != 'NotFound' and not vm.physical %}
-<img src="/static/img/start.png" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
-<img src="/static/img/down.png"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
+<img src="{% static "img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
+<img src="{% static "img/down.png" %}"  onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
 
 {% if vm.profile.deletable  %}
 
 {% if vm.physical %}
-<img src="/static/img/kill.png" onclick="kill('{{vm.name}}','');" />
+<img src="{% static "img/kill.png"  %}" onclick="kill('{{vm.name}}','');" />
 {% else  %}
-<img src="/static/img/kill.png" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
+<img src="{% static "img/kill.png" %}" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
 {% endif %}
 
 {% if vm.unmanaged %}
-<img src="/static/img/unmanaged.png" onclick="dbremove('{{vm.id}}','{{vm.name}}');" />
+<img src="{% static "img/unmanaged.png" %}" onclick="dbremove('{{vm.id}}','{{vm.name}}');" />
 {% endif %}
 
 {% endif %}
@@ -81,7 +81,7 @@ wait...
 
 
 {% if vm.price %}
-<td><a href="/nuages/invoice/?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
+<td><a href="{% url invoice %}?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
 {% else  %}
 <td>N/A</td>
 {% endif %}

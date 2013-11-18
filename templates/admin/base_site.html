@@ -1,12 +1,12 @@
 {% extends "admin/base.html" %}
+{% load staticfiles %}
 {% load i18n %}
 
 {% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
 
 {% block branding %}
-<a class="brand"><img src="/static/img/nuages.png"></a>
+<a class="brand"><img src="{% static "img/nuages.png" %}"></a>
 <li class="divider-vertical"></li>
-<!-- a href="https://github.com/karmab/nuages"><img src="/static/img/nuages.jpg"/></a> -->
 {% endblock %}
 
 {% block nav-global %}{% endblock %}
