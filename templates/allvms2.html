@@ -15,9 +15,9 @@
 {{ vm.name}}
 {% endif %}
 </td>
-<td><img src="{% static "img/{{vm.status}}.png" %}">{{vm.status}}</td>
+<td><img src="{% static 'img/'|add:vm.status|add:'.png' %}">{{vm.status}}</td>
 <td>
-    <img src="{% static "static/img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
+    <img src="{% static "img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
     <img src="{% static "img/down.png" %}" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>
 </td>
 </tr>

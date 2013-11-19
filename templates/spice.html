@@ -35,7 +35,7 @@
         <script src="{% static "spice/spicearraybuffer.js" %}"></script> 
         <script src="{% static "spice/enums.js" %}"></script> 
         <script src="{% static "spice/atKeynames.js" %}"></script> 
-        <script src="{% static "spice/utils.js.{{ information.keyboard }}" %}"></script> 
+        <script src="{% static 'spice/utils.js.'|add:information.keyboard %}"></script> 
         <script src="{% static "spice/png.js" %}"></script> 
         <script src="{% static "spice/lz.js" %}"></script> 
         <script src="{% static "spice/quic.js" %}"></script> 
@@ -181,7 +181,7 @@
 <tr>
 <td>{{ vm.name}}</td>
 <td>{{vm.virtualprovider }}</td>
-<td><img src="{% static "img/{{vm.status}}.png" %}">{{vm.status}}</td>
+<td><img src="{% static 'img/'|add:vm.status|add:'.png' %}">{{vm.status}}</td>
 <td>
     <img src="{% static "img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');"/>
     <img src="{% static "img/down.png" %}" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');"/>

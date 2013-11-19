@@ -29,7 +29,7 @@
 <td>{{vm.profile}}</td>
 <td>
 {% if ajax %}
-<img src="{% static "img/{{vm.status}}.png" %}">{{vm.status}}
+<img src="{% static 'img/'|add:vm.status|add:'.png' %}">{{vm.status}}
 {% else %}
 wait...
 {% endif %}
