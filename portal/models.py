@@ -448,8 +448,8 @@ class Default(models.Model):
     consoleminport    = models.IntegerField(default=6000)
     consolemaxport    = models.IntegerField(default=7000)
     currency          = models.CharField(max_length=20, default='$',choices=( ('$', '$'),('€', '€') ))
-    logo              = models.CharField(max_length=40,default='nuages.png')
-    color             = models.CharField(max_length=7,default='#ADD8E6')
+#   logo              = models.CharField(max_length=40,default='nuages.png')
+#   color             = models.CharField(max_length=7,default='#ADD8E6')
     def __unicode__(self):
         return self.name
     def clean(self):
