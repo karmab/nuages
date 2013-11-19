@@ -6,7 +6,7 @@
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/design.css" %}"/>
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
     <link href="{% static "css/bootstrap-combined.no-icons.min.css" %}" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" media="all" href="{% static "css/bootstrap.css" %}"/>
+    <link rel="stylesheet" type="text/css" media="all" href="{% static "css/colors.css" %}"/>
   </head>
   <body>
   <script src="{% static "js/jquery.js" %}"></script>
@@ -44,14 +44,14 @@
     {% endif %}
 
 
-<div class="navbar"><div class="navbar-inner">
+    <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
     <a class="brand"><img src="{% static "img/nuages.png" %}"></a>
       <li class="divider-vertical"></li>
       <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></a>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu" >
           <li><a href="{% url 'storage' %}" ><i class="icon-white icon-hdd"></i>Storage</a></li>
           <li><a href="{% url 'profiles' %}"><i class="icon-white icon-tasks"></i>Profiles</a></li>
           <li><a href="{% url 'customforms' %}"><i class="icon-white icon-thumbs-up"></i>CustomForms</a></li>
@@ -60,7 +60,7 @@
      {% if username.is_staff  %}
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></a>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu" >
           <li><a href="{% url 'allvms' %}"><i class="icon-white icon-globe"></i>All VMS</a></li>
           <li><a href="{% url 'customformedit' %}"><i class="icon-white icon-leaf"></i>CustomForm Edit</a></li>
           <li><a href="{% url 'profilecopy' %}"><i class="icon-white icon-tag"></i>Profile Copy</a></li>
@@ -69,9 +69,9 @@
      {% endif %}
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-user"></i>Your account<b class="caret"></b></a>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu" >
           <li><a href="{% url 'admin:password_change' %}"><i class="icon-white icon-pencil"></i>Change password</a></li>
-          <li><a href="{% url 'logout' %}"><i class="icon-white icon-tint"></i>Logout {{ username.username  }}</a></li>
+          <li><a href="{% url 'logout' %}"><i class="icon-white icon-tint"></i>Logout {{ auth.user.username  }}</a></li>
       </ul></li>
 </ul>
 </div></div>

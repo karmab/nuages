@@ -21,6 +21,16 @@ from django.contrib.auth.forms import AuthenticationForm
 if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
     from customtypes import *
 
+def getdefault():
+    defaults = Default.objects.all()
+    if not defaults:
+        ip = socket.gethostbyname(socket.gethostname())
+        default = Default(name='default',consoleip=ip)
+        default.save()
+    else:
+        default = Default.objects.all()[0]
+    return default
+
 def getvspherecert(host):
     try:
         import ssl
@@ -204,13 +214,7 @@ def create(request):
             if numvms ==1:
                 vmid = newvm.id
                 if newvm.physical and newvm.ipilo:
-                    defaults = Default.objects.all()
-                    if not defaults:
-                        ip = socket.gethostbyname(socket.gethostname())
-                        default = Default(name='default',consoleip=ip)
-                        default.save()
-                    else:
-                        default = Default.objects.all()[0]
+                    default = getdefault()
                     consoleurl = "<a href='https://%s:%s/?ssh=ssh://root@%s:22/'>" % (default.consoleip , default.consoleport, newvm.ipilo )
                 else:
                     consoleurl = "<a href='/nuages/vms/console/?id=%s'>" % ( vmid )
@@ -219,7 +223,7 @@ def create(request):
                 return HttpResponse("<div class='alert alert-info' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % " ".join(successes.values()) )
 
         else:
-            return render(request, 'create.html', { 'created': True,'name': name, 'username': username } )
+            return render(request, 'create.html', { 'created': True,'name': name, 'username': username  } )
     else:
         vmform =  VMForm(request.user)
         customforms=[]
@@ -229,7 +233,7 @@ def create(request):
                 if not element.startswith("__") and element != "forms":
                     exec("customform=%s()" % element)
                     customforms.append({'name':element,'form':customform})
-            return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms } )
+            return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms  } )
         else:
             return render(request, 'create.html', { 'vmform': vmform, 'username': username } )
 
@@ -513,7 +517,6 @@ def virtualprovidertype(request):
 
 @login_required
 def yourvms(request):
-    logging.debug("prout")
     ajax = False
     if request.is_ajax():
         ajax = True
@@ -530,13 +533,6 @@ def yourvms(request):
             if g in u.groups.all():
                 query=query|Q(createdby=u)
     vms = VM.objects.filter(query)
-    defaults = Default.objects.all()
-    if not defaults:
-        ip = socket.gethostbyname(socket.gethostname())
-        default = Default(name='default',consoleip=ip)
-        default.save()
-    else:
-        default = Default.objects.all()[0]
     resultvms=[]
     actives=[]
     inactives=[]
@@ -629,9 +625,9 @@ def yourvms(request):
         vm.status = status
         resultvms.append(vm)
     if ajax:
-        return render(request, 'yourvms2.html', { 'vms': resultvms, 'username': username , 'default' : default , 'ajax' : ajax } )
+        return render(request, 'yourvms2.html', { 'vms': resultvms, 'username': username , 'ajax' : ajax } )
     else:
-        return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username , 'default' : default  } )
+        return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username ,   } )
 
 @login_required
 def allvms(request):
@@ -669,7 +665,7 @@ def allvms(request):
     else:
         vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
         form = StorageForm()
-        return render(request, 'allvms.html', { 'vproviders' : vproviders , 'username': username} )
+        return render(request, 'allvms.html', { 'vproviders' : vproviders , 'username': username } )
 
 
 @login_required
@@ -700,7 +696,7 @@ def console(request):
             vmname = request.GET.get('name')
             virtualprovidername = request.GET.get('virtualprovider')
         virtualprovider = VirtualProvider.objects.get(name=virtualprovidername)
-        default = Default.objects.all()[0]
+        default = getdefault()
         sockhost=default.consoleip
         sockport = random.randint(default.consoleminport,default.consolemaxport)
         if default.consolesecure:
@@ -721,8 +717,8 @@ def console(request):
                 host,port,ticket,protocol = kvirt.console(vmname)
                 kvirt.close()
                 if not host:
-                    information = { 'title':'Console not configured' , 'details':'the display of this vm doesnt listen on the host ip' }
-                    return render(request, 'information.html', { 'information' : information } )
+                    information = { 'title':'Console not configured' , 'details':'No display found' }
+                    return render(request, 'information.html', { 'information' : information , 'default' : default } )
             information = { 'host' : sockhost , 'port' : sockport , 'protocol': sockprotocol, 'ticket' : ticket , 'keyboard' : keyboard }
             vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
             if protocol =="spice" and virtualprovider.type == 'ovirt':
@@ -737,11 +733,11 @@ def console(request):
                 #websockifycommand = "websockify %s -D --timeout=30 --cert %s --ssl-target %s:%s" % (sockport,cert,host,port)
                 websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
                 os.popen(websockifycommand)
-                return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username } )
+                return render(request, 'spice.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default } )
             elif protocol =="vnc":
                 websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
                 os.popen(websockifycommand)
-                return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
+                return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default } )
         elif virtualprovider.type == 'vsphere':
             consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
             consoledetails = os.popen(consolecommand).read()
@@ -752,13 +748,13 @@ def console(request):
                 os.popen(websockifycommand)
                 information = { 'host' : sockhost , 'port' : sockport  }
                 vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
-                return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username } )
+                return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default  } )
             else:
                 if not virtualprovider.sha1 or not virtualprovider.fqdn:
                     virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
                     if fqdn == None or sha1 == None:
                         information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to sysadmin" }
-                        return render(request, 'information.html', { 'information' : information } )
+                        return render(request, 'information.html', { 'information' : information , 'default' : default } )
                     virtualprovider.save()
                 fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
                 pwd = settings.PWD
@@ -768,7 +764,7 @@ def console(request):
                 return redirect(consoleurl)
     else:
         information = { 'title':'Wrong Console' , 'details':"something went wrong. Report to sysadmin" }
-        return render(request, 'information.html', { 'information' : information } )
+        return render(request, 'information.html', { 'information' : information  } )
 
 
 @login_required
@@ -1122,18 +1118,18 @@ def invoicepdf(request):
         from reportlab.pdfgen import canvas
     except:
         information = { 'title':'Missing library' , 'details':'python-reportlab missing.Contact administrator...' }
-        return render(request, 'information.html', { 'information' : information } )
+        return render(request, 'information.html', { 'information' : information   } )
     try:
         from dateutil.relativedelta import relativedelta
     except:
         information = { 'title':'Missing library' , 'details':'python-dateutil missing.Contact administrator...' }
-        return render(request, 'information.html', { 'information' : information } )
+        return render(request, 'information.html', { 'information' : information  } )
     if request.method == 'GET' and request.GET.has_key('id'):
         now      = datetime.now()
         nowday   = now.strftime("%d")
         nowmonth = now.strftime("%Y-%m")
         details = []
-        default = Default.objects.all()[0]
+        default = getdefault()
         currency = default.currency
         vmid = request.GET.get('id')
         vm = VM.objects.get(id=vmid)
@@ -1208,7 +1204,6 @@ def invoice(request):
         information = { 'title':'Missing library' , 'details':'python-dateutil missing.Contact administrator...' }
         return render(request, 'information.html', { 'information' : information } )
     if request.method == 'GET' and request.GET.has_key('id'):
-        default = Default.objects.all()[0]
         details = []
         vmid = request.GET.get('id')
         vm = VM.objects.get(id=vmid)
@@ -1249,7 +1244,7 @@ def invoice(request):
             nowmonth = now.strftime("%Y-%m")
             total = (int(nowday)-int(day))*price
             details.append({ 'month': nowmonth , 'total' : total  })
-        return render(request, 'invoice.html', { 'vm': vm , 'username': username  , 'details': details , 'default': default } )
+        return render(request, 'invoice.html', { 'vm': vm , 'username': username  , 'details': details  } )
 
 
 @login_required

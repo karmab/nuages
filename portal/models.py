@@ -5,7 +5,7 @@ from django.contrib.auth.models import User,Group
 import ast
 import os
 import time
-from django.conf import settings
+#from django.conf import settings
 
 try:
     from portal.ovirt import Ovirt
@@ -448,9 +448,31 @@ class Default(models.Model):
     consoleminport    = models.IntegerField(default=6000)
     consolemaxport    = models.IntegerField(default=7000)
     currency          = models.CharField(max_length=20, default='$',choices=( ('$', '$'),('€', '€') ))
+    logo              = models.CharField(max_length=40,default='nuages.png')
+    color             = models.CharField(max_length=7,default='#ADD8E6')
     def __unicode__(self):
         return self.name
     def clean(self):
         model = self.__class__
         if (model.objects.count() > 0 and self.id != model.objects.get().id):
             raise ValidationError("Can only create 1 %s instance" % model.__name__)
+#    def save(self, *args, **kw):
+#        if self.pk is not None:
+#            ori = Default.objects.get(pk=self.pk)
+#            if ori.color != self.color:
+#                content=""".navbar-inner
+#                {
+#                            background-color: %s;
+#                                background-image: none;
+#                                }   
+#
+#                .dropdown-menu
+#                {
+#                            background-color: %s;
+#                                background-image: none;
+#                                }""" % (self.color, self.color)
+#                colorfile = open("%s/static/css/colors.css" % settings.PWD , 'w')
+#                colorfile.write(content)
+#                colorfile.close()
+#
+#        super(Default, self).save(*args, **kw)
