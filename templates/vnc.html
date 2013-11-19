@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    {% load staticfiles %}
+{% load staticfiles %}{% load url from future %}
     <title>Nuages Console</title>
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/design.css" %}" />
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
@@ -15,26 +15,26 @@
 <ul class="nav">
     <a class="brand"><img src="{% static "img/nuages.png" %}"></a>
       <li class="divider-vertical"></li>
-      <li><a href="{% url create %}"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
+      <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></a>
       <ul class="dropdown-menu">
-          <li><a href="{% url storage %}" ><i class="icon-white icon-hdd"></i>Storage</a></li>
-          <li><a href="{% url profiles %}"><i class="icon-white icon-tasks"></i>Profiles</a></li>
-          <li><a href="{% url customforms %}"><i class="icon-white icon-thumbs-up"></i>CustomForms</a></li>
+          <li><a href="{% url 'storage' %}" ><i class="icon-white icon-hdd"></i>Storage</a></li>
+          <li><a href="{% url 'profiles' %}"><i class="icon-white icon-tasks"></i>Profiles</a></li>
+          <li><a href="{% url 'customforms' %}"><i class="icon-white icon-thumbs-up"></i>CustomForms</a></li>
      </ul></li>
-     <li><a href="{% url yourvms %}"><i class="icon-white icon-list"></i>Your VMS</a></li>
+     <li><a href="{% url 'yourvms' %}"><i class="icon-white icon-list"></i>Your VMS</a></li>
      {% if username.is_staff  %}
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></a>
       <ul class="dropdown-menu">
-          <li><a href="{% url allvms %}"><i class="icon-white icon-globe"></i>All VMS</a></li>
-          <li><a href="{% url customformedit %}"><i class="icon-white icon-leaf"></i>CustomForm Edit</a></li>
-          <li><a href="{% url profilecopy %}"><i class="icon-white icon-tag"></i>Profile Copy</a></li>
-          <li><a href="{% url admin:index %}"><i class="icon-white icon-wrench"></i>Configuration</a></li>
+          <li><a href="{% url 'allvms' %}"><i class="icon-white icon-globe"></i>All VMS</a></li>
+          <li><a href="{% url 'customformedit' %}"><i class="icon-white icon-leaf"></i>CustomForm Edit</a></li>
+          <li><a href="{% url 'profilecopy' %}"><i class="icon-white icon-tag"></i>Profile Copy</a></li>
+          <li><a href="{% url 'admin:index' %}"><i class="icon-white icon-wrench"></i>Configuration</a></li>
      </ul></li>
      {% endif %}
-     <li><a href="{% url logout %}"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</a></li>
+     <li><a href="{% url 'logout' %}"><i class="icon-white icon-user"></i>Logout {{ username.username  }}</a></li>
 </ul>
 </div></div>
 

@@ -1,5 +1,5 @@
 <div id="spice-screen" class="spice-screen"></div>
-{% load staticfiles %}
+{% load staticfiles %}{% load url from future %}
 <table  colspan="10"  border="1" class='alert alert-info' >
 <tr>
 <td>Vm Name</td>
@@ -10,7 +10,7 @@
 <tr>
 <td>
 {% if console and vm.status != 'down' %}
-<a href="{% url console %}?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="{% static "img/console.png" %}">{{ vm.name}}</a>
+<a href="{% url 'console' %}?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="{% static "img/console.png" %}">{{ vm.name}}</a>
 {% else %}
 {{ vm.name}}
 {% endif %}

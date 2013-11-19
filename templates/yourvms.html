@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load staticfiles %}
+{% load staticfiles %}{% load url from future %}
 {% block title %}Nuages VMS Information{% endblock %}
 
 {% block content %}
@@ -31,7 +31,7 @@ Autorefresh info every 5s / Enable actions:<input id="refresh" type="checkbox"><
 <tr>
 <td>
 {% if not vm.physical %}
-<a href="{% url console %}?id={{ vm.id }}"><img src="{% static "img/console.png" %}">
+<a href="{% url 'console' %}?id={{ vm.id }}"><img src="{% static "img/console.png" %}">
 {% elif vm.ipilo %}
 <a href="https://{{ default.consoleip }}:{{default.consoleport }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="{% static "img/ssh.png" %}">
 {% endif %}
@@ -81,7 +81,7 @@ wait...
 
 
 {% if vm.price %}
-<td><a href="{% url invoice %}?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
+<td><a href="{% url 'invoice' %}?id={{ vm.id }}">{{vm.price}}{{default.currency}}/day</a></td>
 {% else  %}
 <td>N/A</td>
 {% endif %}
