@@ -4,7 +4,8 @@
     <title>{% block title %}Nuages{% endblock %}</title>
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/login.css" %}"/> 
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
-    <link rel="stylesheet" type="text/css" media="all" href="{% static "css/bootstrap.css" %}"/>
+    <link rel="stylesheet" type="text/css" media="all" href="{% static "css/colors.custom.css" %}"/>
+    <link rel="stylesheet" type="text/css" media="all" href="{% static "css/colors.css" %}"/>
   </head>
   <body>
   <script src="{% static "js/jquery.js" %}"></script>
@@ -13,7 +14,7 @@
 
 <div class="navbar"><div class="navbar-inner"/>
 <ul class="nav">
-    <li><a href="https://github.com/karmab/nuages"><img src="{% static "img/nuages.png" %}"/></a></li>
+    <li><a href="https://github.com/karmab/nuages"><img src="{% static "img/nuages.custom.png" %}" onerror="this.onerror=null;this.src='{% static "img/nuages.png" %}'" /></a></li>
 </ul></div></div><p>
 <fieldset class="module aligned">
     <form method="post" action="{% url 'login' %}">

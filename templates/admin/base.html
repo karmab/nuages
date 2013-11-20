@@ -21,7 +21,7 @@
 <!-- Container -->
 <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
-    <a class="brand"><img src="{% static "img/nuages.png" %}"></a>
+    <a class="brand"><img src="{% static "img/nuages.custom.png" %}" onerror="this.onerror=null;this.src='{% static "img/nuages.png" %}'"  ></a>
       <li class="divider-vertical"></li>
       <li><a href="{% url 'create' %}"><div style="font-size:10pt"><i class="icon-white icon-shopping-cart"></i>Create</div></a></li>
      <li class="dropdown">

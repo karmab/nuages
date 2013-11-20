@@ -5,7 +5,7 @@ from django.contrib.auth.models import User,Group
 import ast
 import os
 import time
-#from django.conf import settings
+from django.conf import settings
 
 try:
     from portal.ovirt import Ovirt
@@ -448,8 +448,7 @@ class Default(models.Model):
     consoleminport    = models.IntegerField(default=6000)
     consolemaxport    = models.IntegerField(default=7000)
     currency          = models.CharField(max_length=20, default='$',choices=( ('$', '$'),('€', '€') ))
-#   logo              = models.CharField(max_length=40,default='nuages.png')
-#   color             = models.CharField(max_length=7,default='#ADD8E6')
+#    color             = models.CharField(max_length=7,default='#ADD8E6')
     def __unicode__(self):
         return self.name
     def clean(self):
@@ -471,7 +470,7 @@ class Default(models.Model):
 #                            background-color: %s;
 #                                background-image: none;
 #                                }""" % (self.color, self.color)
-#                colorfile = open("%s/static/css/colors.css" % settings.PWD , 'w')
+#                colorfile = open("%s/static/css/colors.custom.css" % settings.PWD , 'w')
 #                colorfile.write(content)
 #                colorfile.close()
 #

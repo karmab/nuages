@@ -2,7 +2,6 @@
   <head>
   {% load staticfiles %}{% load url from future %}
     <title>{% block title %}Nuages{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static "img/nuages.png" %}"/>
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/design.css" %}"/>
     <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
     <link href="{% static "css/bootstrap-combined.no-icons.min.css" %}" rel="stylesheet">
@@ -46,7 +45,7 @@
 
     <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
-    <a class="brand"><img src="{% static "img/nuages.png" %}"></a>
+    <a class="brand"><img src="{% static "img/nuages.custom.png" %}" onerror="this.onerror=null;this.src='{% static "img/nuages.png" %}'"  ></a>
       <li class="divider-vertical"></li>
       <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
      <li class="dropdown">
