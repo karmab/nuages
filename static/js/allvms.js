@@ -1,5 +1,6 @@
 $(document).ready(function() {
 setInterval(function(){
+  baseurl = '/'+location.pathname.split('/')[1];
   var refresh = $('#refresh');
   if ( refresh.prop('checked') == false ) {
    return;
@@ -19,7 +20,7 @@ setInterval(function(){
 
   $.ajax({  
         type: "POST",
-        url: '/nuages/allvms/',
+        url:  baseurl+'/allvms',
         data: data,
         success: function(data) {
             $("#allvms").html(data);
@@ -32,6 +33,7 @@ $.ajaxSetup({ cache: false });
 });
 
 function getvms(){
+  baseurl = '/'+location.pathname.split('/')[1];
   var virtualprovider = $('#id_virtualprovider').val();
   var data = { 'virtualprovider' : virtualprovider } ;
   var actionpending = $("#actionpending").html();
@@ -47,7 +49,7 @@ function getvms(){
   $("#actionwheel").show();
   $.ajax({
         type: "POST",
-        url: '/nuages/allvms/',
+        url:  baseurl+'/allvms/',
         data: data,
         success: function(data) {
   	    $("#actionwheel").hide();

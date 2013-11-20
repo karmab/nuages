@@ -1,17 +1,12 @@
 function getstorage(){
+  baseurl = '/'+location.pathname.split('/')[1];
   var virtualprovider = $('#id_virtualprovider').val();
   var data = { 'virtualprovider' : virtualprovider } ; 
   $.ajax({  
         type: "POST",
-        url: '/nuages/storage/',
+        url:  baseurl+'/storage/',
         data: data,
         success: function(data) {
-//            $("#storageinfo").hide();
-//            $("#storageinfo").html(data);
-//            $("#storageinfo").show(200);
-//		}
-//	});
-//}
 	$("#error").hide();
 	$("#storageinfo").hide();
 	$("#storageinfo0").hide();

@@ -1,4 +1,5 @@
 function start(vm,provider){
+  baseurl = '/'+location.pathname.split('/')[1];
   $("#results").replaceWith('<div id="results"></div>');
   $("#actionwheel").show();
   var actionpending = $("#actionpending");
@@ -7,7 +8,7 @@ function start(vm,provider){
   $.ajax({  
 	
        type: "POST",
-        url: '/nuages/vms/start',
+        url: baseurl+'/vms/start',
         data: data,
         success: function(data) {
             $("#actionwheel").hide();
@@ -23,6 +24,7 @@ function start(vm,provider){
 }
 
 function stop(vm,provider){
+  baseurl = '/'+location.pathname.split('/')[1];
   $("#results").replaceWith('<div id="results"></div>');
   $("#actionwheel").show();
   var actionpending = $("#actionpending");
@@ -31,7 +33,7 @@ function stop(vm,provider){
   $.ajax({  
 	
         type: "POST",
-        url: '/nuages/vms/stop',
+        url: baseurl+'/vms/stop',
         data: data,
         success: function(data) {
             $("#actionwheel").hide();
@@ -47,12 +49,12 @@ function stop(vm,provider){
 }
 
 function console(){
-
+  baseurl = '/'+location.pathname.split('/')[1];
   var virtualprovider = $('#id_virtualprovider').val();
   var data = { 'virtualprovider' : virtualprovider } ;
   $.ajax({
         type: "GET",
-        url: '/nuages/vms/console',
+        url: baseurl+'/vms/console',
         data: data,
         success: function(data) {
             $("#console").hide();
@@ -63,7 +65,8 @@ function console(){
 }
 
 function kill(vm,provider){
-  $("#results").replaceWith('<div id="results"></div>');
+baseurl = '/'+location.pathname.split('/')[1];
+$("#results").replaceWith('<div id="results"></div>');
 var sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
  $("#actionwheel").show();
@@ -72,7 +75,7 @@ if (sure) {
  data = { 'name': vm , 'provider' : provider } ;
  $.ajax({  
   type: "POST",
-  url: '/nuages/vms/kill',
+  url: baseurl+'/vms/kill',
   data: data,
   success: function(data) {
             $("#actionwheel").hide();
@@ -93,6 +96,7 @@ if (sure) {
 }
 
 function dbremove(vmid,vmname){
+baseurl = '/'+location.pathname.split('/')[1];
 var sure = confirm(vmname+" will be removed from db!!!Sure?");
 if (sure) {
  $("#actionwheel").show();
@@ -101,7 +105,7 @@ if (sure) {
  data = { 'id': vmid , 'name' : vmname } ;
  $.ajax({  
   type: "POST",
-  url: '/nuages/vms/dbremove',
+  url: baseurl+'/vms/dbremove',
   data: data,
   success: function(data) {
  	    $("#actionwheel").hide();

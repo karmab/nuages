@@ -56,6 +56,7 @@ function modifyparam(element) {
 }
 
 function customformget() {
+  baseurl = '/'+location.pathname.split('/')[1];
   $("#forminfo").hide();
   var type = $('#id_type').val();
   if ( type == '' ) {
@@ -63,7 +64,7 @@ function customformget() {
   }
   $.ajax({  
         type: "POST",
-        url: '/nuages/customforms/',
+        url: baseurl+'/customforms/',
         data: { 'type' : type },
         success: function(data) {
         $('#forminfo').replaceWith("<table id='forminfo' border='1' class='alert alert-info'><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>");
@@ -91,6 +92,7 @@ function customformget() {
 }
 
 function customformedit() {
+  baseurl = '/'+location.pathname.split('/')[1];
   $('#for_newtype').remove();
   $('#id_newtype').remove();
   $("#forminfo").hide();
@@ -100,7 +102,7 @@ function customformedit() {
   }
   $.ajax({  
         type: "POST",
-        url: '/nuages/customformedit/',
+        url: baseurl+'/customformedit/',
         data: { 'type' : type },
         success: function(data) {
         $('#forminfo').replaceWith("<table id='forminfo' border='1' class='alert alert-info'><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td><td>Actions</td></tr>");
@@ -133,6 +135,7 @@ function customformedit() {
 }
 
 function customformupdate() {
+ baseurl = '/'+location.pathname.split('/')[1];
  if ( ( $('#id_type').val() == "" ) && ( $('#id_newtype').length == 0 ) ) {
  return;
  }
@@ -148,7 +151,7 @@ function customformupdate() {
  if ( parameters == '' ) {
   	$.ajax({  
 	 type: "POST",
-         url: '/nuages/customformcreate/',
+         url: baseurl+'/customformcreate/',
          data: { 'type' : type  },
          success: function(data) {
    	 $("#result").html(data);
@@ -180,7 +183,7 @@ function customformupdate() {
  }
   $.ajax({  
         type: "POST",
-        url: '/nuages/customformupdate/',
+        url: baseurl+'/customformupdate/',
         data: { 'type' : type , 'parameters' : data  },
         success: function(data) {
    	$("#result").html(data);
@@ -194,6 +197,7 @@ function customformupdate() {
 
 
 function customformdelete() {
+ baseurl = '/'+location.pathname.split('/')[1];
  $("#forminfo").hide();
  if ( $('#id_type').val() == ""  ) {
   return;
@@ -201,7 +205,7 @@ function customformdelete() {
  type=$('#id_type').val();
  $.ajax({  
         type: "POST",
-        url: '/nuages/customformdelete/',
+        url: baseurl+'/customformdelete/',
         data: { 'type' : type  },
         success: function(data) {
    	$("#result").html(data);

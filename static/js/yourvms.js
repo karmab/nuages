@@ -1,5 +1,6 @@
 $(document).ready(function() {
 setInterval(function(){
+   baseurl = '/'+location.pathname.split('/')[1];
    var refresh = $('#refresh');
    if ( refresh.prop('checked') == false ) {
     return;
@@ -21,9 +22,8 @@ setInterval(function(){
    refreshpending.html('1');
   $.ajax({  
         type: "POST",
-        url: '/nuages/yourvms/',
+        url: baseurl+'/yourvms/',
         success: function(data) {
-            //$("body").html(data);
 	    $("#yourvms").html(data);
             $("#yourvms").show(400);
 	    $("#yourvmsinitial").replaceWith('<p id="yourvmsinitial"><p>');
