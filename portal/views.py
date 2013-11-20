@@ -17,7 +17,6 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm
 
-
 if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
     from customtypes import *
 
@@ -1266,7 +1265,8 @@ def profilecopy(request):
             profile.pk = None
             profile.save()
             profileid = profile.id
-            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied. edit it <a href=/admin/portal/profile/%s>here</a></div>" % profileid)
+            adminurl = request.REQUEST.get('page').replace('/profilecopy/','')
+            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied. edit it <a href=%s/admin/portal/profile/%s>here</a></div>" % (adminurl, profileid ) )
         else:
             profile = request.POST['profile']
             profile=Profile.objects.get(name=profile)

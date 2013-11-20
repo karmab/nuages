@@ -18,7 +18,7 @@
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
 <script src="{% static "js/jquery.js" %}"></script>
 <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
-<!-- Container -->
+<font color="#ffffff">
 <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
     <a class="brand"><img src="{% static "img/nuages.custom.png" %}" onerror="this.onerror=null;this.src='{% static "img/nuages.png" %}'"  ></a>
@@ -49,7 +49,7 @@
 
 </ul>
 </div></div>
-
+</font>
     {% if not is_popup %}
     {% block breadcrumbs %}
     <div class="breadcrumbs">
