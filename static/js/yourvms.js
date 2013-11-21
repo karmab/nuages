@@ -1,6 +1,10 @@
 $(document).ready(function() {
 setInterval(function(){
-   baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1]; 
+  }
    var refresh = $('#refresh');
    if ( refresh.prop('checked') == false ) {
     return;

@@ -1,5 +1,9 @@
 function getstorage(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1]; 
+  }
   var virtualprovider = $('#id_virtualprovider').val();
   var data = { 'virtualprovider' : virtualprovider } ; 
   $.ajax({  

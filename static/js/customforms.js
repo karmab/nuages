@@ -56,7 +56,11 @@ function modifyparam(element) {
 }
 
 function customformget() {
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
   $("#forminfo").hide();
   var type = $('#id_type').val();
   if ( type == '' ) {
@@ -92,7 +96,11 @@ function customformget() {
 }
 
 function customformedit() {
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
   $('#for_newtype').remove();
   $('#id_newtype').remove();
   $("#forminfo").hide();
@@ -135,7 +143,11 @@ function customformedit() {
 }
 
 function customformupdate() {
- baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
  if ( ( $('#id_type').val() == "" ) && ( $('#id_newtype').length == 0 ) ) {
  return;
  }
@@ -197,7 +209,11 @@ function customformupdate() {
 
 
 function customformdelete() {
- baseurl = '/'+location.pathname.split('/')[1];
+ baseurl = '';
+ path = location.pathname.split('/');
+ if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+    }
  $("#forminfo").hide();
  if ( $('#id_type').val() == ""  ) {
   return;

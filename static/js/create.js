@@ -1,5 +1,9 @@
 $( document ).ready(function() {
- baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
  var virtualprovider = $('#id_virtualprovider');
  var virtualproviderlabel = $('label[for="id_virtualprovider"]');
  var cobblerprovider = $('#id_cobblerprovider');
@@ -141,7 +145,11 @@ $( document ).ready(function() {
 
 
  $('#id_profile').change(function(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
   var result = $("#result");
   var ip1 = $('#id_ip1');
   var ip1label = $('label[for="id_ip1"]');
@@ -381,7 +389,11 @@ $( document ).ready(function() {
 	});
 
   $('#id_type').change(function(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
   var typeslist = $('#id_type').val(); 
   var types     = $('#id_type').val().toString(); 
   var newparms = '' ;
@@ -451,7 +463,11 @@ $( document ).ready(function() {
  });
 
 function createvm(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
   var storagedomain     = $('#id_storagedomain').val();
   var hostgroup         = $('#id_hostgroup').val();
   var cobblerparameters = $('#id_cobblerparameters').val();
@@ -572,7 +588,11 @@ function createvm(){
 }
 
 function findvm() {
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
   var name              = $('#id_name').val();
   var ip1               = $('#id_ip1');
   var ipval             = $('#id_ip1').val();

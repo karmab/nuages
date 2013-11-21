@@ -1,5 +1,9 @@
 function start(vm,provider){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+    }
   $("#results").replaceWith('<div id="results"></div>');
   $("#actionwheel").show();
   var actionpending = $("#actionpending");
@@ -24,7 +28,11 @@ function start(vm,provider){
 }
 
 function stop(vm,provider){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+    }
   $("#results").replaceWith('<div id="results"></div>');
   $("#actionwheel").show();
   var actionpending = $("#actionpending");
@@ -49,7 +57,11 @@ function stop(vm,provider){
 }
 
 function console(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+    }
   var virtualprovider = $('#id_virtualprovider').val();
   var data = { 'virtualprovider' : virtualprovider } ;
   $.ajax({
@@ -65,7 +77,11 @@ function console(){
 }
 
 function kill(vm,provider){
-baseurl = '/'+location.pathname.split('/')[1];
+baseurl = '';
+path = location.pathname.split('/');
+if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+}
 $("#results").replaceWith('<div id="results"></div>');
 var sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
@@ -96,7 +112,11 @@ if (sure) {
 }
 
 function dbremove(vmid,vmname){
-baseurl = '/'+location.pathname.split('/')[1];
+baseurl = '';
+path = location.pathname.split('/');
+if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+}
 var sure = confirm(vmname+" will be removed from db!!!Sure?");
 if (sure) {
  $("#actionwheel").show();

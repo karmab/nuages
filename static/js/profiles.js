@@ -1,5 +1,9 @@
 function getprofile(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+  }
   var profile = $('#id_profile').val();
   var data = { 'profile' : profile } ; 
   $.ajax({  
@@ -18,13 +22,17 @@ function getprofile(){
 }
 
 function profilecopy(){
-  baseurl = '/'+location.pathname.split('/')[1];
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+  }
   var profile = $('#id_profile').val();
   var newprofile = $('#id_newprofile').val();
   var data = { 'profile' : profile , 'newprofile' : newprofile} ;
   $.ajax({
         type: "POST",
-        url:  baseurl+'/profilecopy',
+        url:  baseurl+'/profilecopy/',
         data: data,
         success: function(data) {
                 $("#profileinfo").hide();
