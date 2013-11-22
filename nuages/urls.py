@@ -2,11 +2,14 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 #specific stuff for auth
 from django.conf.urls.defaults import *
+from django.views.generic import RedirectView
+from django.core.urlresolvers import reverse_lazy
 
 admin.autodiscover()
 
 urlpatterns = patterns('portal.views',
       #url(r'^$', 'create'),
+      url(r'^$', RedirectView.as_view(url=reverse_lazy('create'))),
       url(r'^vms/$', 'create', name='create'),
       url(r'^vms/findvm', 'findvm', name='findvm'),
       url(r'^profiles/$', 'profiles', name='profiles'),
