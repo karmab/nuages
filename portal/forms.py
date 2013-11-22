@@ -22,7 +22,7 @@ class VMForm(ModelForm):
             for group in usergroups[1:]:
                 query=query|Q(groups=group)
         query=Profile.objects.filter(query)
-        self.fields['profile'].queryset = query
+        self.fields['profile'].queryset = query.order_by('cobblerprofile')
     class Meta:
         model = VM
         fields = ['name', 'profile', 'physical', 'ipilo', 'ipoa', 'ip1','mac1', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'virtualprovider' ,'cobblerprovider', 'foremanprovider', 'hostgroup' , 'puppetclasses', 'parameters']

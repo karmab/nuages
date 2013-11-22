@@ -268,6 +268,8 @@ class Profile(models.Model):
                     net2found = ovirt.checknetwork(self.clu,self.net2)
                     if not net2found:
                         raise ValidationError("Invalid net2")
+    class Meta:
+        ordering  = ['name']
 
 
 class VM(models.Model):
