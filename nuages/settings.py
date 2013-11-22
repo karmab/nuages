@@ -162,7 +162,7 @@ LOGGING = {
 
 #login
 LOGIN_URL = '/nuages/login' # Failed auth
-LOGIN_REDIRECT_URL = '/nuages' # Successfull auth
+LOGIN_REDIRECT_URL = '/nuages/vms' # Successfull auth
 
 #AUTHENTICATION_BACKENDS = ( 'django.contrib.auth.backends.ModelBackend', 'portal.auth.LdapBackend',)
 AUTHENTICATION_BACKENDS = ( 'portal.auth.LdapBackend','django.contrib.auth.backends.ModelBackend',)

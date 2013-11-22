@@ -6,8 +6,8 @@ from django.conf.urls.defaults import *
 admin.autodiscover()
 
 urlpatterns = patterns('portal.views',
-      url(r'^$', 'create', name='create'),
-      url(r'^vms/$', 'create'),
+      #url(r'^$', 'create'),
+      url(r'^vms/$', 'create', name='create'),
       url(r'^vms/findvm', 'findvm', name='findvm'),
       url(r'^profiles/$', 'profiles', name='profiles'),
       url(r'^profilecopy/$', 'profilecopy', name='profilecopy'),

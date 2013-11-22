@@ -150,6 +150,7 @@ $( document ).ready(function() {
   if ( path.length == 4 ) {
           baseurl = '/'+location.pathname.split('/')[1];
   }
+  alert(location.pathname);
   var result = $("#result");
   var ip1 = $('#id_ip1');
   var ip1label = $('label[for="id_ip1"]');
