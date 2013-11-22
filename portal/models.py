@@ -202,7 +202,7 @@ class Profile(models.Model):
     subnet4           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
     diskinterface     = models.CharField(max_length=20, default=DISKINTERFACE)
     netinterface      = models.CharField(max_length=20, default=NETINTERFACE)
-    cmdline           = models.CharField(max_length=100,blank=True)
+    cmdline           = models.CharField(max_length=200,blank=True)
     dns               = models.CharField(max_length=60,blank=True,null=True)
     autostorage       = models.BooleanField(default=False)
     foreman           = models.BooleanField(default=True)
