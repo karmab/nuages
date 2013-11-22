@@ -219,7 +219,7 @@ def create(request):
                     default = getdefault()
                     consoleurl = "<a href='https://%s:%s/?ssh=ssh://root@%s:22/'>" % (default.consoleip , default.consoleport, newvm.ipilo )
                 else:
-                    consoleurl = "<a href='/%s/vms/console/?id=%s'>" % ( baseurl, vmid )
+                    consoleurl = "<a href='%s/vms/console/?id=%s'>" % ( baseurl, vmid )
                 return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Machine %s successfully created!!!access its console %shere</a></div>" % (name, consoleurl) )
             else:
                 return HttpResponse("<div class='alert alert-info' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % " ".join(successes.values()) )
