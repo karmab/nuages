@@ -1265,10 +1265,12 @@ def profilecopy(request):
             exist=Profile.objects.filter(name=newprofile)
             if exist:
                 return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile allready existing</div>")
+            profile.pk = None
+            profile.save()
             profile.name = newprofile
             profile.cobblerprofile = oldcobblerprofile
-            profile.groups = oldgroups
-            profile.pk = None
+            for group in oldgroups:
+                profile.groups.add(group)
             profile.save()
             profileid = profile.id
             return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied. edit it <a href=%s/admin/portal/profile/%s>here</a></div>" % (baseurl, profileid ) )
