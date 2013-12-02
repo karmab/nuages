@@ -1272,8 +1272,8 @@ def profilecopy(request):
             newprofile.name = newprofile
             newprofile.cobblerprofile = oldcobblerprofile
             for group in oldgroups:
-                profile.groups.add(group)
-            profile.save()
+                newprofile.groups.add(group)
+            newprofile.save()
             return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>profile successfully copied. edit it <a href=%s/admin/portal/profile/%s>here</a></div>" % (baseurl, profileid ) )
         else:
             profile = request.POST['profile']
