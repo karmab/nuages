@@ -1,0 +1,4 @@
+from django import forms
+
+class Test(forms.Form):
+        pass
