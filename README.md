@@ -75,9 +75,14 @@ Ovirt SDK Installation
 
 libvirt installation
 --------
-    if you re not running on rhel/centos,please create the following link
-    ln -s /usr/bin/qemu-kvm /usr/libexec/qemu-kvm /usr/bin/kvm
-
+        ensure that the user s running the portal (apache for instance ) can SSH the libvirt host without password
+        for instance, under apache, you might have to 
+        mkdir /var/www/.ssh
+        chown apache.apache /var/www/.ssh
+        su -s /bin/bash apache
+        ssh-keygen ( accept defaults and dont set a passphrase )
+        ssh-copy-id -i ~/.ssh/id_rsa.pub user@libvirt_host
+        ssh user@libvirt_host to accept the public key of the server
 
 
 VMware VI (vSphere) Java API Installation

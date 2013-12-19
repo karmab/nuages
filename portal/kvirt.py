@@ -64,7 +64,8 @@ class Kvirt:
             sourcenet1 = 'bridge'
         else:
             sourcenet1 = 'network'
-        type,machine,emulator = 'kvm','pc','/usr/libexec/qemu-kvm'
+        #type,machine,emulator = 'kvm','pc','/usr/libexec/qemu-kvm'
+        type,machine,emulator = 'kvm','pc','/usr/bin/qemu-system-x86_64'
         memory = memory*1024
         disksize1 = disksize1*GB
         #disksize1 = int(disksize1) * 1073741824
