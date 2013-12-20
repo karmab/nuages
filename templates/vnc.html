@@ -4,13 +4,12 @@
 {% load staticfiles %}{% load url from future %}
     <title>Nuages Console</title>
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/design.css" %}" />
-    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
-    <link href="{% static "css/bootstrap-combined.no-icons.min.css" %}" rel="stylesheet">
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen"/>
+    <link href="{% static "css/bootstrap-combined.no-icons.min.css" %}" rel="stylesheet"/>
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/bootstrap.css" %}" />
-    <script src="{% static "novnc/util.js" %}"></script>
+    <!--script src="{% static "novnc/util.js" %}"></script-->
 </head>
 <body>
-
 <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
     <a class="brand"><img src="{% static "img/nuages.png" %}"></a>
@@ -56,6 +55,7 @@
 </table>
 </div>
 
+<script src="{% static "novnc/util.js" %}"></script>
 <div id="noVNC_screen">
             <div id="noVNC_status_bar" class="noVNC_status_bar" style="margin-top: 0px;">
                 <table border=0 width="100%"><tr>
@@ -175,6 +175,5 @@
             rfb.connect(host, port, password, path);
         };
         </script>
-
 </body>
 </html>
