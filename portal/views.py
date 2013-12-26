@@ -98,6 +98,7 @@ def customlogin(request, *args, **kwargs):
 
 @login_required
 def create(request):
+    logging.debug('prout')
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
     if request.method == 'POST':
@@ -146,7 +147,7 @@ def create(request):
         if storagedomain == '' and not physical:
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>")
         #clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, requireip =profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.requireip
-        disksize1, disksize2, numinterfaces, requireip = profile.disksize1, profile.disksize2, profile.numinterfaces, profile.requireip
+        disksize1, disksize2, numinterfaces, requireip, cobbler, foreman = profile.disksize1, profile.disksize2, profile.numinterfaces, profile.requireip, profile.cobbler, profile.foreman
         ipamprovider = profile.ipamprovider
         if requireip and not ipamprovider and not ip1:
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 needed <p><p</div>")
