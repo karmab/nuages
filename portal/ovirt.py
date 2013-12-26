@@ -357,5 +357,17 @@ class Ovirt:
 
     def gettemplates(self):
         api=self.api
-        datacenters = api.datacenters.list()
-        print dir(api)
+        templates=[]
+        for template in api.templates.list():
+            if template.name == 'Blank':
+                continue
+            else:
+                templates.append(template.name)
+        return templates
+
+    def createfromtemplate(self, name, template):
+        api=self.api
+        template = api.templates.get(name=template)
+        cluster = template.get_cluster()
+        api.vms.add(params.VM(name=name,cluster=cluster,template=template))
+        return True

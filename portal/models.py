@@ -182,6 +182,7 @@ class Profile(models.Model):
     ipamprovider      = models.ForeignKey(IpamProvider,blank=True,null=True)
     cobblerprofile    = models.CharField(max_length=40,blank=True)
     datacenter        = models.CharField(max_length=50)
+    template          = models.CharField(max_length=80,blank=True,null=True)
     clu               = models.CharField(max_length=50,blank=True)
     guestid           = models.CharField(max_length=20, choices=( ('rhel_6x64', 'rhel_6x64'),('rhel_5x64', 'rhel_5x64'),('windows_xp', 'windows_xp') ))
     memory            = models.IntegerField(default=MEMORY)
@@ -268,6 +269,10 @@ class Profile(models.Model):
                     net2found = ovirt.checknetwork(self.clu,self.net2)
                     if not net2found:
                         raise ValidationError("Invalid net2")
+                if self.template != '':
+                    templates = ovirt.gettemplates()
+                    if self.template not in templates:
+                        raise ValidationError("Invalid template")
     class Meta:
         ordering  = ['name']
 
@@ -313,7 +318,7 @@ class VM(models.Model):
             return
         self.createdwhen=datetime.now()
         name, storagedomain, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, create = self.name, self.storagedomain, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup,self.create
-        clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver
+        clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template
         if profile.price:
             self.price = profile.price
         if profile.ipamprovider:
@@ -361,7 +366,10 @@ class VM(models.Model):
         #VM CREATION
         if not physical and create and virtualprovider.type == 'ovirt':
             ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
+            if template:
+                ovirt.createfromtemplate(name,template)
+            else:
+                ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
             ovirt.close()
         if not physical and create and virtualprovider.type == 'kvirt':
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')

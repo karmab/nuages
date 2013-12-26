@@ -20,6 +20,8 @@ datacenter = virtualprovider.datacenter
 
 
 o = Ovirt(ohost, oport, ouser, opassword, ossl)
+print o.gettemplates()
+sys.exit(0)
 print o.getisos()
 print o.getstorage()
 storagedomain = o.beststorage(datacenter)

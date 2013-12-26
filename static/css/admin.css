@@ -388,6 +388,7 @@ table thead th.sorted .sortoptions a.descending {
 table thead th.sorted .sortoptions a.descending:hover {
     background: url(../img/sorting-icons.gif) -5px -115px no-repeat;
 }
+*/
 
 /* ORDERABLE TABLES */
 
@@ -433,6 +434,7 @@ input[type=text], input[type=password], textarea, select, .vTextField {
     border: 1px solid #bbb;
     border-color: #ddd #aaa #aaa #ddd;
 }
+
 
 .button:active, input[type=submit]:active, input[type=button]:active {
     background-image: url(../img/nav-bg-reverse.gif);
@@ -543,6 +545,7 @@ ul.errorlist {
     margin: 0 !important;
     padding: 0 !important;
 }
+
 
 .errorlist li {
     font-size: 12px !important;
