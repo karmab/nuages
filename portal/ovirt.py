@@ -354,3 +354,8 @@ class Ovirt:
         api.vms.get(name).delete()
         print "VM %s killed" % name
         return True
+
+    def gettemplates(self):
+        api=self.api
+        datacenters = api.datacenters.list()
+        print dir(api)
