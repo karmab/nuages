@@ -5,15 +5,18 @@
 
 {% block content %}
 <script src="{% static "js/create.js" %}"></script>
+<script src="{% static "js/quickactions.js" %}"></script>
 
 <fieldset class="module aligned">
 <p id="allvms" class="alert alert-info" ><button type='button' class='close' data-dismiss='alert'>&times;</button>Enter name and profile of your vm, then information and press CreateSystem...<br>
-Use FindSystem to create system at cobbler and/or foreman only
+Use FindSystem to locate an existing vm and finish its creation<br>
+Use QuickAccess to quickly access previously created  vms
 </p>
 <div id="wheel"></div>
 <p id="result"></p>
+<p id="quickresults"></p>
 <div id="create" class="hidden">1</div>
-<input type="submit" value="CreateSystem" class="btn btn-info" onclick="createvm();"/>   <input type="submit" value="FindSystem" class="btn btn-success" onclick="findvm();"/><p><p>
+<input type="submit" value="CreateSystem" class="btn btn-info" onclick="createvm();"/>   <input type="submit" value="FindSystem" class="btn btn-success" onclick="findvm();"/>   <input type="submit" value="QuickAccess" class="btn btn-danger" onclick="quickvms();"/><p><p>
 <label id="id_storagedomainlabel">Storages</label><select id="id_storagedomain"></select><p><p>
 <label >NumVms</label><select id="numvms">
   <option value="1" selected="selected">1</option>

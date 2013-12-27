@@ -631,7 +631,7 @@ def yourvms(request):
     if ajax:
         return render(request, 'yourvms2.html', { 'vms': resultvms, 'username': username , 'ajax' : ajax } )
     else:
-        return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username ,   } )
+        return render(request, 'yourvms.html', { 'vms': resultvms, 'username': username  } )
 
 @login_required
 def allvms(request):
@@ -714,7 +714,7 @@ def console(request):
                 host,port,ticket,protocol = ovirt.console(vmname)
                 ovirt.close()
                 if not host:
-                    information = { 'title':'Console not accessible' , 'details':'Machine %s doesnt seem to be up' % vmname }
+                    information = { 'title' : 'Console not accessible' , 'details' : 'Machine %s doesnt seem to be up.Refresh page...' % vmname }
                     return render(request, 'information.html', { 'information' : information } )
             if virtualprovider.type == 'kvirt':
                 kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
@@ -1336,3 +1336,15 @@ def findvm(request):
             results.append(physicalprovider.type)
         results = json.dumps(results)
         return HttpResponse(results,mimetype='application/json')
+
+@login_required
+def quickvms(request):
+    results           = []
+    name              = request.POST.get('name')
+    default           = getdefault()
+    username          = User.objects.get(username=request.user.username)
+    vms               = VM.objects.filter(name__icontains=name, createdby=username)
+    if len(vms) > 0:
+        return render(request, 'quickvms.html', { 'vms': vms, 'username': username, 'default' : default  } )
+    else:
+        return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>No VM found</div>")

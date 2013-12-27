@@ -723,3 +723,25 @@ function findvm() {
                 });
 }
 
+function quickvms() {
+  var name = $('#id_name').val();
+  if ( name == '' ) {
+    $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>VM name is required</div>");
+    $("#result").show(400) ;
+    return ; 
+  }
+  $("#result").hide();
+  baseurl = '';
+  path = location.pathname.split('/');
+  if ( path.length == 4 ) {
+          baseurl = '/'+location.pathname.split('/')[1];
+  }
+  $.ajax({  
+        type: 'POST',
+        url: baseurl+'/vms/quickvms/',
+        data: { 'name' : name } ,
+        success: function(data) {
+			$("#result").html(data);
+            $("#result").show(400) ;
+ }});
+}

@@ -1,0 +1,33 @@
+<table border="1" class='alert alert-info'>
+<td>Vm Name</td>
+<td>Actions</td>
+{% load staticfiles %}{% load url from future %}
+{% for vm in vms|dictsort:"name" %}
+<tr>
+<td>
+{% if not vm.physical %}
+<a href="{% url 'console' %}?id={{ vm.id }}"><img src="{% static "img/console.png" %}">
+{% elif vm.ipilo %}
+<a href="https://{{ default.consoleip }}:{{default.consoleport }}/?ssh=ssh://root@{{ vm.ipilo }}:22/"><img src="{% static "img/ssh.png" %}">
+{% endif %}
+{{ vm.name}}</a></td>
+<td>
+{% if not vm.physical %}
+<img src="{% static "img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
+<img src="{% static "img/down.png" %}" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
+{% endif %}
+{% if vm.profile.deletable  %}
+    {% if vm.physical %}
+        <img src="{% static "img/kill.png" %}" onclick="kill('{{vm.name}}','');" />
+    {% else  %}
+        <img src="{% static "img/kill.png" %}" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
+    {% endif %}
+{% if vm.unmanaged %}
+    <img src="{% static "img/unmanaged.png"  %}" onclick="dbremove('{{vm.id}}','{{vm.name}}');" />
+{% endif %}
+{% endif %}
+</td>
+</tr>
+{% endfor %}
+</table>
+</fieldset>

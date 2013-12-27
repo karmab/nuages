@@ -559,6 +559,25 @@ class Vsphere:
         return isos
 
 
+    def gettemplates(self):
+        templates =  []
+        rootFolder = self.rootFolder
+        vms = InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine")
+        for vm in vms:
+            if vm.getConfig().isTemplate():
+                templates.append(vm.getName())
+        return templates
+
+    def createfromtemplate(self, name, template):
+        rootFolder = self.rootFolder
+        template = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", template)
+        clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource", self.clu)
+        pool = clu.getResourcePool()
+        clonespec = createclonespec(pool)
+        t = template.cloneVM_Task(template.getParent(),name,clonespec)
+        result=t.waitForMe()
+        return "%s on deploying %s from template" %(result, name)
+
 if __name__ == '__main__':
     action, vcip, vcuser, vcpassword, dc, clu = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6]
     vsphere = Vsphere(vcip, vcuser, vcpassword, dc, clu)
@@ -591,6 +610,12 @@ if __name__ == '__main__':
     elif action == 'console':
         name = sys.argv[7]
         print vsphere.console(name)
+    elif action == 'gettemplates':
+        print vsphere.gettemplates()
+    elif action == 'createfromtemplate':
+        name = sys.argv[7]
+        template = sys.argv[8]
+        print vsphere.createfromtemplate(name,template)
     elif action == 'create':
         net1, net2, net3, net4 = None, None, None, None
         name, numcpu, numinterfaces, disksize1, diskmode1, disksize2 , diskmode2, ds, memory, guestid, vnc, iso, net1 = sys.argv[7], sys.argv[8], sys.argv[9], sys.argv[10], sys.argv[11], sys.argv[12], sys.argv[13], sys.argv[14], sys.argv[15], sys.argv[16], sys.argv[17], sys.argv[18], sys.argv[19]

@@ -294,20 +294,20 @@ class Ovirt:
         return vms
 
 
-    def console(self,name):
-        api=self.api
-        vm =api.vms.get(name=name)
-        if not vm or vm.status.state=="down":
-            return None,None,None,None
+    def console(self, name):
+        api= self.api
+        vm = api.vms.get(name=name)
+        if not vm or vm.status.state == 'down' or vm.status.state == 'waitforlaunch':
+            return None, None, None, None
         else:
-            vm.ticket().set_ticket("")
+            vm.ticket().set_ticket('')
             ticket = vm.ticket().get_ticket().get_value()
-            host,port,sport=vm.get_display().get_address(),vm.get_display().get_port(),vm.get_display().get_secure_port()
-            protocol=vm.get_display().get_type()
-            if protocol=="spice":
-                return host,sport,ticket,protocol
-            elif protocol=="vnc":
-                return host,port,ticket,protocol
+            host, port, sport = vm.get_display().get_address(), vm.get_display().get_port(), vm.get_display().get_secure_port()
+            protocol = vm.get_display().get_type()
+            if protocol == 'spice':
+                return host, sport, ticket, protocol
+            elif protocol == 'vnc':
+                return host, port, ticket, protocol
 
 
     def getisos(self):
