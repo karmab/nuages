@@ -28,9 +28,10 @@
     <head>
     {% load staticfiles %}{% load url from future %}
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/design.css" %}" />
-    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen">
+    <link href="{% static "bootstrap/css/bootstrap.min.css" %}" rel="stylesheet" media="screen"/>
     <link rel="stylesheet" type="text/css" media="all" href="{% static "css/bootstrap.css" %}" />
         <title>Nuages console</title>
+    </head>
         <script src="{% static "js/quickactions.js" %}"></script>
         <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
         <script src="{% static "spice/spicearraybuffer.js" %}"></script> 
@@ -141,7 +142,7 @@
             connect();
         </script>
 
-    </head>
+        <!--/head> -->
 
     <body>
 
@@ -151,7 +152,7 @@
       <li class="divider-vertical"></li>
       <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
      <li class="dropdown">
-      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></a>
+      <a href="#"  class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></a>
       <ul class="dropdown-menu">
           <li><a href="{% url 'storage' %}" ><i class="icon-white icon-hdd"></i>Storage</a></li>
           <li><a href="{% url 'profiles' %}"><i class="icon-white icon-tasks"></i>Profiles</a></li>
