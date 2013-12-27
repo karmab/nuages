@@ -1348,3 +1348,39 @@ def quickvms(request):
         return render(request, 'quickvms.html', { 'vms': vms, 'username': username, 'default' : default  } )
     else:
         return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>No VM found</div>")
+
+@login_required
+def profiletemplate(request):
+    username          = User.objects.get(username=request.user.username)
+    #vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+    #return render(request, 'profiletemplate.html', { 'vproviders' : vproviders, 'username': username } )
+    if not username.is_staff:
+        information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
+        return render(request, 'information.html', { 'information' : information } )
+    if request.method == 'POST' and request.is_ajax():
+        templates = ['aa', 'bb', 'cc']
+        return render(request, 'profiletemplate.html', { 'templates': templates, 'username': username  } )
+    else:
+        vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+        return render(request, 'profiletemplate.html', { 'vproviders' : vproviders, 'username': username } )
+
+@login_required
+def gettemplates(request):
+    username          = User.objects.get(username=request.user.username)
+    virtualprovider   = request.POST.get('virtualprovider')
+    virtualprovider   = VirtualProvider.objects.get(name=virtualprovider)
+    if virtualprovider.type == 'ovirt':
+        ovirt     = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+        results   = ovirt.gettemplates()
+        ovirt.close()
+        return HttpResponse(results)
+    elif virtualprovider.type == 'kvirt':
+        kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+        results = kvirt.gettemplates()
+        kvirt.close()
+        return HttpResponse(results)
+    elif virtualprovider.type == 'vsphere':
+        gettemplatescommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'gettemplates', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+        gettemplatescommand = os.popen(gettemplatescommand).read()
+        results = ast.literal_eval(gettemplatescommand)
+        return HttpResponse(results)

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block title %}Nuages Profile from template{% endblock %}
+
+{% block content %}
+<script src="{% static "js/templates.js" %}"></script>
+
+<p class="alert alert-info" >Select virtual provider to get available templates and enter a name to deploy profile from it</p>
+<div id="wheel"></div>
+<fieldset class="module aligned">
+<div><input type="text" id="id_newprofile"/><p></div>
+<select name="virtualprovider" id="id_virtualprovider">
+{% for vprovider in vproviders %}
+<option value="{{vprovider.name }}" >{{vprovider.name }}</option>
+{% endfor %}
+</select></p>
+<div id="voila"><input name="voila" type="submit" class="btn btn-info"  value="Enter" onclick="gettemplates();"/></div>
+<p id="error"></p>
+</fieldset>
+
+<p id="results"></p>
+{% endblock content %}               

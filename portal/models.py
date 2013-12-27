@@ -272,7 +272,13 @@ class Profile(models.Model):
                 if self.template != '':
                     templates = ovirt.gettemplates()
                     if self.template not in templates:
-                        raise ValidationError("Invalid template")
+                        raise ValidationError("Invalid template. Use of the following ones:%s" % (','.join(templates) ) )
+            if virtualprovider.type == 'vsphere':
+                gettemplatescommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'gettemplates', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+                gettemplatescommand = os.popen(gettemplatescommand).read()
+                templates = ast.literal_eval(gettemplatescommand)
+                if self.template not in templates:
+                    raise ValidationError("Invalid template. Use of the following ones:%s" % (','.join(templates) ) )
     class Meta:
         ordering  = ['name']
 
@@ -368,6 +374,7 @@ class VM(models.Model):
             ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
             if template:
                 ovirt.createfromtemplate(name,template)
+                ovirt.macaddr = ovirt.getmacs(name)
             else:
                 ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
             ovirt.close()
@@ -376,9 +383,16 @@ class VM(models.Model):
             kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
             kvirt.close()
         if not physical and create and virtualprovider.type == 'vsphere':
-            createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s \'%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, storagedomain, memory, guestid, vnc, iso, net1, net2, net3, net4)
-            vspheremacaddr = os.popen(createcommand).read()
-            vspheremacaddr = ast.literal_eval(vspheremacaddr)
+            if template:
+                createfromtemplatecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s" % (settings.PWD,'createfromtemplate', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, template)
+                createfromtemplatecommand = os.popen(createfromtemplatecommand).read()
+                getmacscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'getmacs', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name)
+                vspheremacaddr = os.popen(getmacscommand).read()
+                vspheremacaddr = ast.literal_eval(vspheremacaddr)
+            else:
+                createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s \'%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, storagedomain, memory, guestid, vnc, iso, net1, net2, net3, net4)
+                vspheremacaddr = os.popen(createcommand).read()
+                vspheremacaddr = ast.literal_eval(vspheremacaddr)
         if cobbler and cobblerprovider:
             if not physical and create and virtualprovider.type == 'ovirt':
                 macaddr=ovirt.macaddr
