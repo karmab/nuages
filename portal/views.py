@@ -1350,7 +1350,7 @@ def quickvms(request):
         return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>No VM found</div>")
 
 @login_required
-def profiletemplate(request):
+def templateprofile(request):
     username          = User.objects.get(username=request.user.username)
     #vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
     #return render(request, 'profiletemplate.html', { 'vproviders' : vproviders, 'username': username } )
@@ -1359,13 +1359,13 @@ def profiletemplate(request):
         return render(request, 'information.html', { 'information' : information } )
     if request.method == 'POST' and request.is_ajax():
         templates = ['aa', 'bb', 'cc']
-        return render(request, 'profiletemplate.html', { 'templates': templates, 'username': username  } )
+        return render(request, 'templateprofile.html', { 'templates': templates, 'username': username  } )
     else:
         vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
-        return render(request, 'profiletemplate.html', { 'vproviders' : vproviders, 'username': username } )
+        return render(request, 'templateprofile.html', { 'vproviders' : vproviders, 'username': username } )
 
 @login_required
-def gettemplates(request):
+def templateslist(request):
     username          = User.objects.get(username=request.user.username)
     virtualprovider   = request.POST.get('virtualprovider')
     virtualprovider   = VirtualProvider.objects.get(name=virtualprovider)
@@ -1373,14 +1373,33 @@ def gettemplates(request):
         ovirt     = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
         results   = ovirt.gettemplates()
         ovirt.close()
-        return HttpResponse(results)
+        results = json.dumps(results)
+        return HttpResponse(results, mimetype='application/json')
     elif virtualprovider.type == 'kvirt':
         kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
         results = kvirt.gettemplates()
         kvirt.close()
-        return HttpResponse(results)
+        results = json.dumps(results)
+        return HttpResponse(results, mimetype='application/json')
     elif virtualprovider.type == 'vsphere':
         gettemplatescommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'gettemplates', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
         gettemplatescommand = os.popen(gettemplatescommand).read()
         results = ast.literal_eval(gettemplatescommand)
-        return HttpResponse(results)
+        results = json.dumps(results)
+        return HttpResponse(results, mimetype='application/json')
+
+@login_required
+def createtemplateprofile(request):
+    username          = User.objects.get(username=request.user.username)
+    if not username.is_staff:
+        information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
+        return render(request, 'information.html', { 'information' : information } )
+    elif request.method == 'POST':
+        name              = request.POST.get('name')
+        template          = request.POST.get('template')
+        virtualprovider   = request.POST.get('virtualprovider')
+        virtualprovider   = VirtualProvider.objects.get(name=virtualprovider)
+        newprofile = Profile(name=name, template=template, clu=virtualprovider.clu , datacenter=virtualprovider.datacenter, guestid='rhel_6x64', virtualprovider=virtualprovider, foreman=False, foremanparameters=False, cobbler=False, cobblerparameters=False, autostorage=True )
+        newprofile.save()
+        profileid = newprofile.id
+        return HttpResponse("profile successfully created from template. edit it <a href=%s/admin/portal/profile/%s>here</a></div>" % (baseurl, profileid ) )

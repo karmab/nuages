@@ -8,15 +8,15 @@
 <p class="alert alert-info" >Select virtual provider to get available templates and enter a name to deploy profile from it</p>
 <div id="wheel"></div>
 <fieldset class="module aligned">
-<div><input type="text" id="id_newprofile"/><p></div>
+<div><input type="text" id="name"/><p></div>
 <select name="virtualprovider" id="id_virtualprovider">
 {% for vprovider in vproviders %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>
 {% endfor %}
 </select></p>
-<div id="voila"><input name="voila" type="submit" class="btn btn-info"  value="Enter" onclick="gettemplates();"/></div>
-<p id="error"></p>
+<div><input type="submit" class="btn btn-info" value="ListTemplates" onclick="templateslist();"/>  <input type="submit" class="btn btn-success" value="CreateProfile" onclick="createtemplateprofile();"/></div><p>
 </fieldset>
 
-<p id="results"></p>
+<div id="id_template"></div>
+<div id="results"></div>
 {% endblock content %}               
