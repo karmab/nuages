@@ -38,6 +38,7 @@ urlpatterns = patterns('portal.views',
       url(r'^customformdelete','customformdelete', name='customformdelete'),
       url(r'^invoicepdf','invoicepdf', name='invoicepdf'),
       url(r'^invoice','invoice', name='invoice'),
+      url(r'^afterbuild/(?P<name>.*)$', 'afterbuild', name='afterbuild'),
 )
 
 urlpatterns += patterns('',

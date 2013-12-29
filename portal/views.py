@@ -1399,7 +1399,27 @@ def createtemplateprofile(request):
         template          = request.POST.get('template')
         virtualprovider   = request.POST.get('virtualprovider')
         virtualprovider   = VirtualProvider.objects.get(name=virtualprovider)
-        newprofile = Profile(name=name, template=template, clu=virtualprovider.clu , datacenter=virtualprovider.datacenter, guestid='rhel_6x64', virtualprovider=virtualprovider, foreman=False, foremanparameters=False, cobbler=False, cobblerparameters=False, autostorage=True )
+        newprofile = Profile(name=name, template=template, clu=virtualprovider.clu , datacenter=virtualprovider.datacenter, guestid='rhel_6x64', virtualprovider=virtualprovider )
         newprofile.save()
         profileid = newprofile.id
         return HttpResponse("profile successfully created from template. edit it <a href=%s/admin/portal/profile/%s>here</a></div>" % (baseurl, profileid ) )
+
+def afterbuild(request,name):
+    try:
+        vm = VM.objects.get(name=name)
+        afterbuild = vm.profile.hookafterbuild
+        if afterbuild:
+            env = os.environ
+            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = vm.name, nonone(vm.storagedomain), nonone(vm.physicalprovider), nonone(vm.virtualprovider), nonone(vm.physical), nonone(vm.cobblerprovider), nonone(vm.foremanprovider), nonone(vm.profile), nonone(vm.ip1), nonone(vm.mac1), nonone(vm.ip2), nonone(vm.mac2), nonone(vm.ip3), nonone(vm.mac3), nonone(vm.ip4), nonone(vm.mac4), nonone(vm.ipilo), nonone(vm.ipoa), nonone(vm.iso), nonone(vm.hostgroup), nonone(vm.puppetclasses), nonone(vm.parameters), nonone(vm.createdby), nonone(vm.createdwhen), nonone(vm.price), nonone(vm.unmanaged), nonone(vm.status), nonone(vm.create)
+            env['vm_mail'] = vm.createdby.email
+            scriptpath  = "%s/%s" % (hooks, afterbuild.name)
+            interpreter = afterbuild.type
+            if not os.path.exists(scriptpath):
+                content = afterbuild.content
+                f = open(scriptpath)
+                f.write(content)
+                f.close()
+            subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
+        return HttpResponse('OK')
+    except:
+        return HttpResponse('KO')

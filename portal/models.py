@@ -4,8 +4,11 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User,Group
 import ast
 import os
+import subprocess
 import time
 from django.conf import settings
+hooks = settings.PWD+'/hooks'
+
 
 try:
     from portal.ovirt import Ovirt
@@ -70,6 +73,17 @@ def checkconn(host,port):
         return True
     except socket.error:
         return False
+
+def nonone(variable):
+    if variable == None:
+        return ''
+    else:
+        return str(variable)
+        #try:
+        #    name= variable.name
+        #    return name
+        #except:
+        #    return str(variable)
 
 class IpamProvider(models.Model):
     name                = models.CharField(max_length=80)
@@ -173,6 +187,18 @@ class Storage(models.Model):
     def __unicode__(self):
         return "%s %s" % (self.provider,self.name)
 
+class Hook(models.Model):
+    name              = models.CharField(max_length=80)
+    type              = models.CharField(max_length=20, default='python',choices=( ('python', 'python'),('bash', 'bash'),('perl', 'perl'),('ruby', 'ruby') ))
+    content           = models.TextField()
+    def __unicode__(self):
+        return self.name
+    def save(self, *args, **kwargs):
+        f = open("%s/%s" % (hooks, self.name),'w')
+        f.write(self.content.replace('\r',''))
+        f.close()
+        super(Hook, self).save(*args, **kwargs)
+
 class Profile(models.Model):
     name              = models.CharField(max_length=80)
     physicalprovider  = models.ForeignKey(PhysicalProvider,blank=True,null=True)
@@ -205,11 +231,11 @@ class Profile(models.Model):
     netinterface      = models.CharField(max_length=20, default=NETINTERFACE)
     cmdline           = models.CharField(max_length=200,blank=True)
     dns               = models.CharField(max_length=60,blank=True,null=True)
-    autostorage       = models.BooleanField(default=False)
-    foreman           = models.BooleanField(default=True)
-    foremanparameters = models.BooleanField(default=True)
-    cobbler           = models.BooleanField(default=True)
-    cobblerparameters = models.BooleanField(default=True)
+    autostorage       = models.BooleanField(default=True)
+    foreman           = models.BooleanField(default=False)
+    foremanparameters = models.BooleanField(default=False)
+    cobbler           = models.BooleanField(default=False)
+    cobblerparameters = models.BooleanField(default=False)
     iso               = models.BooleanField(default=False)
     hide              = models.BooleanField(default=True)
     console           = models.BooleanField(default=False)
@@ -218,6 +244,11 @@ class Profile(models.Model):
     vnc               = models.BooleanField(default=False)
     price             = models.IntegerField(blank=True,null=True)
     maxvms            = models.IntegerField(blank=True,null=True)
+    hookbeforecreate  = models.ForeignKey(Hook,blank=True,null=True,related_name='hookbeforecreate')
+    hookaftercreate   = models.ForeignKey(Hook,blank=True,null=True,related_name='hookaftercreate')
+    hookbeforestart   = models.ForeignKey(Hook,blank=True,null=True,related_name='hookbeforestart')
+    hookafterstart    = models.ForeignKey(Hook,blank=True,null=True,related_name='hookafterstart')
+    hookafterbuild    = models.ForeignKey(Hook,blank=True,null=True,related_name='hookafterbuild')
     groups            = models.ManyToManyField(Group,blank=True,null=True)
     def __unicode__(self):
         return self.name
@@ -318,13 +349,25 @@ class VM(models.Model):
         else:
             return "physical:%s" % (self.name)
     def save(self, *args, **kwargs):
-        logging.debug("prout");
         if self.pk:
             super(VM, self).save(*args, **kwargs)
             return
         self.createdwhen=datetime.now()
-        name, storagedomain, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, create = self.name, self.storagedomain, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup,self.create
+        name, storagedomain, physicalprovider, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physicalprovider, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
         clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template
+        beforecreate, aftercreate, beforestart, afterstart, afterbuild = profile.hookbeforecreate, profile.hookaftercreate, profile.hookbeforestart, profile.hookafterstart, profile.hookafterbuild
+        if beforecreate:
+            env = os.environ
+            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = name, nonone(storagedomain), nonone(physicalprovider), nonone(virtualprovider), nonone(physical), nonone(cobblerprovider), nonone(foremanprovider), nonone(profile), nonone(ip1), nonone(mac1), nonone(ip2), nonone(mac2), nonone(ip3), nonone(mac3), nonone(ip4), nonone(mac4), nonone(ipilo), nonone(ipoa), nonone(iso), nonone(hostgroup), nonone(puppetclasses), nonone(parameters), nonone(createdby), nonone(createdwhen), nonone(price), nonone(unmanaged), nonone(status), nonone(create)
+            env['vm_mail'] = createdby.email
+            scriptpath  = "%s/%s" % (hooks, beforecreate.name)
+            interpreter = beforecreate.type
+            if not os.path.exists(scriptpath):
+                content = beforecreate.content
+                f = open(scriptpath)
+                f.write(content)
+                f.close()
+            subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
         if profile.price:
             self.price = profile.price
         if profile.ipamprovider:
@@ -436,6 +479,30 @@ class VM(models.Model):
             if foremanparameters and parameters != '':
                 f.addparameters(name=name,dns=dns,parameters=parameters)
         super(VM, self).save(*args, **kwargs)
+        if aftercreate:
+            env = os.environ
+            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = name, nonone(storagedomain), nonone(physicalprovider), nonone(virtualprovider), nonone(physical), nonone(cobblerprovider), nonone(foremanprovider), nonone(profile), nonone(ip1), nonone(mac1), nonone(ip2), nonone(mac2), nonone(ip3), nonone(mac3), nonone(ip4), nonone(mac4), nonone(ipilo), nonone(ipoa), nonone(iso), nonone(hostgroup), nonone(puppetclasses), nonone(parameters), nonone(createdby), nonone(createdwhen), nonone(price), nonone(unmanaged), nonone(status), nonone(create)
+            env['vm_mail'] = createdby.email
+            scriptpath  = "%s/%s" % (hooks, aftercreate.name)
+            interpreter = aftercreate.type
+            if not os.path.exists(scriptpath):
+                content = aftercreate.content
+                f = open(scriptpath)
+                f.write(content)
+                f.close()
+            subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
+        if beforestart:
+            env = os.environ
+            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = name, nonone(storagedomain), nonone(physicalprovider), nonone(virtualprovider), nonone(physical), nonone(cobblerprovider), nonone(foremanprovider), nonone(profile), nonone(ip1), nonone(mac1), nonone(ip2), nonone(mac2), nonone(ip3), nonone(mac3), nonone(ip4), nonone(mac4), nonone(ipilo), nonone(ipoa), nonone(iso), nonone(hostgroup), nonone(puppetclasses), nonone(parameters), nonone(createdby), nonone(createdwhen), nonone(price), nonone(unmanaged), nonone(status), nonone(create)
+            env['vm_mail'] = createdby.email
+            scriptpath  = "%s/%s" % (hooks, beforestart.name)
+            interpreter = beforestart.type
+            if not os.path.exists(scriptpath):
+                content = beforestart.content
+                f = open(scriptpath)
+                f.write(content)
+                f.close()
+            subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
         if physical and physicalprovider.type == 'ilo':
             ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
             ilo.pxe()
@@ -445,9 +512,9 @@ class VM(models.Model):
             bladeid = oa.getid(name)
             status = oa.status(bladeid)
             if status == 'up':
-                pxe = oa.rebootpxe(bladeid)
+                oa.rebootpxe(bladeid)
             else:
-                pxe = oa.startpxe(bladeid)
+                oa.startpxe(bladeid)
         if not physical and create and virtualprovider.type == 'ovirt':
             ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
             ovirt.start(name)
@@ -459,6 +526,18 @@ class VM(models.Model):
         if not physical and create and virtualprovider.type == 'vsphere':
             startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
             os.popen(startcommand).read()
+        if afterstart:
+            env = os.environ
+            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = name, nonone(storagedomain), nonone(physicalprovider), nonone(virtualprovider), nonone(physical), nonone(cobblerprovider), nonone(foremanprovider), nonone(profile), nonone(ip1), nonone(mac1), nonone(ip2), nonone(mac2), nonone(ip3), nonone(mac3), nonone(ip4), nonone(mac4), nonone(ipilo), nonone(ipoa), nonone(iso), nonone(hostgroup), nonone(puppetclasses), nonone(parameters), nonone(createdby), nonone(createdwhen), nonone(price), nonone(unmanaged), nonone(status), nonone(create)
+            env['vm_mail'] = createdby.email
+            scriptpath  = "%s/%s" % (hooks, afterstart.name)
+            interpreter = afterstart.type
+            if not os.path.exists(scriptpath):
+                content = afterstart.content
+                f = open(scriptpath)
+                f.write(content)
+                f.close()
+            subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
         return 'OK'
 
 class Default(models.Model):
