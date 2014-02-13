@@ -110,7 +110,7 @@ class Cobbler:
         s.sync(token)
         print "%s created in Cobbler" % name
 
-    def simplecreate(self,name,profile,dns=None ,macaddr=None,parameters=None,cmdline=None,nextserver=None):
+    def simplecreate(self,name,profile,numinterfaces,dns=None ,macaddr=None,parameters=None,cmdline=None,nextserver=None):
         if dns:
             dns=dns.encode('ascii')
         profile=profile.encode('ascii')
@@ -130,6 +130,15 @@ class Cobbler:
         if dns:
             eth0["dnsname-eth0"] = "%s.%s" % (name, dns)
         s.modify_system(system, 'modify_interface', eth0, token)
+        if numinterfaces >=2:
+            eth1 = {"macaddress-eth1":macaddr[1]}
+            s.modify_system(system, 'modify_interface', eth1, token)
+        if numinterfaces >=3:
+            eth2 = {"macaddress-eth2":macaddr[2]}
+            s.modify_system(system, 'modify_interface', eth2, token)
+        if numinterfaces >=4:
+            eth3 = {"macaddress-eth3":macaddr[3]}
+            s.modify_system(system, 'modify_interface', eth3, token)
         if parameters:
             s.modify_system(system,"ks_meta", parameters, token)
         if cmdline:

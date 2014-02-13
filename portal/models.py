@@ -466,12 +466,11 @@ class VM(models.Model):
             cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
             cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
             if cobblerparameters:
-                cobblerparameters=parameters
+                cobblerparameters = parameters
             if ip1:
-                cobbler.create(name=name,profile=cobblerprofile,numinterfaces=numinterfaces,dns=dns, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline, nextserver=nextserver)
+                cobbler.create(name=name, profile=cobblerprofile, numinterfaces=numinterfaces, dns=dns, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline, nextserver=nextserver)
             else:
-                cobbler.simplecreate(name=name,profile=cobblerprofile,dns=dns, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline, nextserver=nextserver)
-
+                cobbler.simplecreate(name=name, profile=cobblerprofile, numinterfaces=numinterfaces, dns=dns, macaddr=macaddr, parameters=cobblerparameters,cmdline=cmdline, nextserver=nextserver)
         if foreman and foremanprovider:
             foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
             f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
