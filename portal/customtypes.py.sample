@@ -1,0 +1,9 @@
+from django import forms
+
+class Test(forms.Form):
+        pass
+
+class Datagrid(forms.Form):
+    cachename           = forms.CharField(max_length=80)
+    clustered           = forms.BooleanField()
+

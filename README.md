@@ -204,7 +204,7 @@ Usage
      
      you can then begin creating vms or manage existing ones from the allvms tabs
 
-     to create custom types, you can go in /usr/share/nuages and copy customtypes.py.sample to customtypes.py
+     to create custom types, you can go in /usr/share/nuages/portal and copy customtypes.py.sample to customtypes.py
 
  
 Screenshots
@@ -219,6 +219,7 @@ Screenshots
 Caveeats?                                                                                                                                                                      
 ---------
     You will possibly need to tweak proxy settings for spice/novnc consoles to work,excluding your hypervisor display network from proxy
+    Restarting apache or django is necessary after editing customtypes.py...
 
 Problems?                                                                                                                                                                      
 ---------
