@@ -143,7 +143,7 @@ class Ovirt:
                     eth0ok=False
 
             if not eth0ok:
-                tempnic = "11:11:11:11:11:11"
+                tempnic = "00:11:11:11:11:11"
                 nic = api.vms.get(name).nics.get(name="eth0")
                 nic.mac.address = tempnic
                 nic.update()
