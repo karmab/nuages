@@ -236,8 +236,12 @@ class Foreman:
         url = "%s://%s:%s/api/puppetclasses?search=environment+=+%s" % (protocol, host, port, environment)
         res= foremando(url=url, user=user, password=password)
         results=[]
-        for  classe in res.keys():
-            results.append(classe)
+        for  module in res:
+            if len(res[module]) == 1:
+                results.append(module)
+            else:
+                for classe in res[module]:
+                    results.append(classe['puppetclass']['name'])
         return sorted(results)
 
     def exists(self, name):
@@ -250,3 +254,42 @@ class Foreman:
             if info["name"]== name:
                 return True
         return False
+
+    def classinfo(self, name ):
+        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
+        url = "%s://%s:%s/api/puppetclasses/%s" % (protocol, host, port, name)
+        res= foremando(url=url, user=user, password=password)
+        results={}
+        parameters = res['puppetclass']['smart_class_parameters']
+        for parameter in parameters:
+            parameterid = parameter['id']
+            parametername = parameter['parameter']
+            parameterurl = "%s://%s:%s/api/lookup_keys/%s-%s" % (protocol, host, port, parameterid, parametername)
+            res= foremando(url=parameterurl, user=user, password=password)
+            lookupkey = res['lookup_key'] 
+            required = lookupkey['required']
+            override = lookupkey['override']
+            defaultvalue = lookupkey['default_value']
+            results[parametername]=[defaultvalue, required]
+        return results
+
+    # not working on foreman1.3, try 1.4...
+    def override(self, name, parameter, parameterid=None ):
+        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
+        if not parameterid:
+            url = "%s://%s:%s/api/puppetclasses/%s" % (protocol, host, port, name)
+            res= foremando(url=url, user=user, password=password)
+            classparameters = res['puppetclass']['smart_class_parameters']
+            for param in classparameters:
+                if param['parameter'] == parameter:
+                    parameterid = param['id']
+                    break
+            if parameterid == None:
+                print "parameterid for parameter %s of class %s not found" % (parameter, name)
+                return False
+            parameterurl = "%s://%s:%s/api/lookup_keys/%s" % (protocol, host, port, parameterid)
+            postdata = {}
+            postdata['lookup_key'] = {'override': True }
+            res = foremando(url=parameterurl, actiontype="PUT", postdata=postdata, v2=True, user=user, password=password)
+            #print res 
+            print "parameter %s of class %s set as overriden" % (parameter, name)

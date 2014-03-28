@@ -47,7 +47,6 @@ from datetime import datetime
 
 #default values
 DISKSIZE = '10'
-DISKFORMAT = 'raw'
 MEMORY = 512
 CPUS = 1
 NUMINTERFACES = 1
@@ -214,9 +213,9 @@ class Profile(models.Model):
     memory            = models.IntegerField(default=MEMORY)
     numcpu            = models.IntegerField(default=CPUS)
     disksize1         = models.IntegerField(default=10)
-    diskformat1       = models.CharField(max_length=10, default=DISKFORMAT)
+    diskthin1         = models.BooleanField(default=True)
     disksize2         = models.IntegerField(blank=True,null=True)
-    diskformat2       = models.CharField(max_length=10, default=DISKFORMAT)
+    diskthin2         = models.BooleanField(default=True)
     nextserver        = models.CharField(max_length=80, blank=True)
     numinterfaces     = models.IntegerField(default=NUMINTERFACES)
     net1              = models.CharField(max_length=40, default=NET1)
@@ -230,7 +229,10 @@ class Profile(models.Model):
     diskinterface     = models.CharField(max_length=20, default=DISKINTERFACE)
     netinterface      = models.CharField(max_length=20, default=NETINTERFACE)
     cmdline           = models.CharField(max_length=200,blank=True)
+    rootpw            = models.CharField(max_length=60,blank=True,null=True)
     dns               = models.CharField(max_length=60,blank=True,null=True)
+    dns1              = models.CharField(max_length=60,blank=True,null=True)
+    cloudinit         = models.BooleanField(default=False)
     autostorage       = models.BooleanField(default=True)
     foreman           = models.BooleanField(default=False)
     foremanparameters = models.BooleanField(default=False)
@@ -273,6 +275,8 @@ class Profile(models.Model):
             raise ValidationError("Cobbler Parameters requires Cobbler to be set")
         if not self.physicalprovider and not self.virtualprovider:
             raise ValidationError("You need to assign at least one physical or virtual provider")
+        if self.cloudinit and not self.rootpw:
+            raise ValidationError("Cloudinit requires a rootpw to be set")
         if self.cobbler and self.cobblerprovider:
             cobblerprovider = self.cobblerprovider
             connection=checkconn(cobblerprovider.host,COBBLERPORT)
@@ -354,7 +358,7 @@ class VM(models.Model):
             return
         self.createdwhen=datetime.now()
         name, storagedomain, physicalprovider, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physicalprovider, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
-        clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template
+        clu, guestid, memory, numcpu, disksize1, diskthin1, disksize2, diskthin2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template, cloudinit, rootpw, dns1 = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskthin1, profile.disksize2, profile.diskthin2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template, profile.cloudinit, profile.rootpw, profile.dns1
         beforecreate, aftercreate, beforestart, afterstart, afterbuild = profile.hookbeforecreate, profile.hookaftercreate, profile.hookbeforestart, profile.hookafterstart, profile.hookafterbuild
         if beforecreate:
             env = os.environ
@@ -419,11 +423,11 @@ class VM(models.Model):
                 ovirt.createfromtemplate(name,template)
                 ovirt.macaddr = ovirt.getmacs(name)
             else:
-                ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
+                ovirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskthin1=diskthin1, disksize2=disksize2,diskthin2=diskthin2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
             ovirt.close()
         if not physical and create and virtualprovider.type == 'kvirt':
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskformat1=diskformat1, disksize2=disksize2,diskformat2=diskformat2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
+            kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskthin1=diskthin1, disksize2=disksize2,diskthin2=diskthin2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
             kvirt.close()
         if not physical and create and virtualprovider.type == 'vsphere':
             if template:
@@ -433,7 +437,7 @@ class VM(models.Model):
                 vspheremacaddr = os.popen(getmacscommand).read()
                 vspheremacaddr = ast.literal_eval(vspheremacaddr)
             else:
-                createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s \'%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskformat1, disksize2 , diskformat2, storagedomain, memory, guestid, vnc, iso, net1, net2, net3, net4)
+                createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s \'%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskthin1, disksize2 , diskthin2, storagedomain, memory, guestid, vnc, iso, net1, net2, net3, net4)
                 vspheremacaddr = os.popen(createcommand).read()
                 vspheremacaddr = ast.literal_eval(vspheremacaddr)
         if cobbler and cobblerprovider:
@@ -516,7 +520,10 @@ class VM(models.Model):
                 oa.startpxe(bladeid)
         if not physical and create and virtualprovider.type == 'ovirt':
             ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            ovirt.start(name)
+            if cloudinit:
+                ovirt.cloudinit(name, numinterfaces=numinterfaces, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, rootpw=rootpw, dns=dns1, dns1=dns1)
+            else:
+                ovirt.start(name)
             ovirt.close()
         if not physical and create and virtualprovider.type == 'kvirt':
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')

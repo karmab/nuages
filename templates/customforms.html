@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+
 {% load staticfiles %}
-{% block title %}Nuages CustomForms Information{% endblock %}
+{% block title %}Nuages CustomForms information{% endblock %}
 
 {% block content %}
-<script src="{% static "/js/customforms.js" %}"></script>
+<script src="{% static "js/customforms.js" %}"></script>
 
 <div id="wheel"></div>
 <fieldset class="module aligned">
@@ -13,9 +14,8 @@
 {% for type in types %}
 <option value="{{type }}" >{{type }}</option>
 {% endfor %}
-</select></p>
+</select>  <input name="voila" type="submit" class="btn btn-info"  value="Enter" onclick="customformget();"/><hr>
 
-<div id="voila"><input name="voila" type="submit" class="btn btn-info"  value="Enter" onclick="customformget();"/></div>
 <p id="error"></p>
 <table><p id="forminfo"></p></table>
 </fieldset>

@@ -47,22 +47,6 @@ def checkiso(api, iso=None):
             elif f.get_id()==iso:
                 return f
 
-######OVIRT PARAMETERS
-#ohost
-#oport
-#ouser
-#opassword
-#ossl
-#clu
-#numcpu
-#diskformat
-#diskinterface
-#disksize (*GB)
-#memory ( *MB)
-#storagedomain
-#numinterfaces
-#netinterface
-
 class Ovirt:
     def __init__(self,ohost,oport,ouser,opassword,ossl):
         if ossl:
@@ -77,7 +61,7 @@ class Ovirt:
         api.disconnect()
         self.api=None
 
-    def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None,vnc=False):
+    def create(self, name, clu, numcpu, numinterfaces, netinterface, diskthin1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskthin2=None, disksize2=None,vnc=False):
         boot1,boot2='hd','network'
         if iso in ["","xx","yy"]:
             iso=None
@@ -90,11 +74,14 @@ class Ovirt:
             disksize2 = disksize2*GB
         #VM CREATION IN OVIRT
         #TODO check that clu and storagedomain exist and that there is space there
-        sparse = True
-        if diskformat1=="raw":
-            sparse1=False
-        if diskformat2 and diskformat2=="raw":
-            sparse2=False
+        diskformat1, diskformat2 = 'raw', 'raw'
+        sparse1, sparse2 = False, False
+        if diskthin1:
+            diskformat1 = 'cow'
+            sparse1 = True
+        if disksize2 and diskthin2:
+            diskformat2 = 'cow'
+            sparse2 =True
         vm = api.vms.get(name=name)
         if vm:
             return "VM %s allready existing.Leaving...\n" % name
@@ -208,21 +195,87 @@ class Ovirt:
             macs.append("%s=%s" % (net,address))
         return macs
 
-    def start(self,name):
+    def start(self, name):
+        api=self.api
+        while api.vms.get(name).status.state == 'image_locked':
+            time.sleep(5)
+        if api.vms.get(name).status.state == 'up':
+            return "%s started" % name
+        api.vms.get(name).start()
+        return "%s started" % name
+
+    def cloudinit(self, name, numinterfaces=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, rootpw=None, dns=None, dns1=None):
         api=self.api
         while api.vms.get(name).status.state =="image_locked":
             time.sleep(5)
-        launched = False
-        api.vms.get(name).start()
-        return "%s started" % name
-        #while not launched:
-        #       try:
-        #               api.vms.get(name).start()
-        #               launched = True
-        #               return "%s started" % name
-        #       except:
-        #               time.sleep(5)
-        #               continue
+        action = params.Action()
+        hostname = params.Host(address=name)
+        nic1, nic2, nic3, nic4 = None, None, None, None
+        if ip1 and subnet1:
+            ip = params.IP(address=ip1, netmask=subnet1)
+            network=params.Network(ip=ip)
+            nic1 = params.NIC(name='eth0', boot_protocol= 'STATIC', network=network, on_boot=True)
+        else:
+            nic1 = params.NIC(name='eth0', boot_protocol= 'DHCP', on_boot=True)
+        if numinterfaces > 1:
+            if ip2 and subnet2:
+                ip = params.IP(address=ip2, netmask=subnet2)
+                network=params.Network(ip=ip)
+                nic2 = params.NIC(name='eth1', boot_protocol= 'STATIC', network=network, on_boot=True)
+            else:
+                nic2 = params.NIC(name='eth1', boot_protocol= 'DHCP', on_boot=True)
+        if numinterfaces > 2:
+            if ip3 and subnet3:
+                ip = params.IP(address=ip3, netmask=subnet3)
+                network=params.Network(ip=ip)
+                nic3 = params.NIC(name='eth2', boot_protocol= 'STATIC', network=network, on_boot=True)
+            else:
+                nic3 = params.NIC(name='eth2', boot_protocol= 'DHCP', on_boot=True)
+        if numinterfaces > 3:
+            if ip4 and subnet4:
+                ip = params.IP(address=ip4, netmask=subnet4)
+                network=params.Network(ip=ip)
+                nic4 = params.NIC(name='eth3', boot_protocol= 'STATIC', network=network, on_boot=True)
+            else:
+                nic4 = params.NIC(name='eth3', boot_protocol= 'DHCP', on_boot=True)
+        nics = params.Nics()
+        nics.add_nic(nic1)
+        if numinterfaces > 1:
+            nics.add_nic(nic3)
+        if numinterfaces > 2:
+            nics.add_nic(nic3)
+        if numinterfaces > 3:
+            nics.add_nic(nic4)
+        networkconfiguration = params.NetworkConfiguration(nics=nics)
+        users  = None
+        if rootpw:
+            user = params.User(user_name='root', password=rootpw)
+            users = params.Users()
+            users.add_user(user)
+#buggy at the moment  in ovirt
+#        if dns:
+#            domainhost = params.Host(address=dns)
+#            domainhosts = params.Hosts()
+#            domainhosts.add_host(domainhost)
+#            dns = params.DNS(search_domains=domainhosts)
+#            if dns1:
+#                resolvhost = params.Host(address=dns1)
+#                resolvhosts = params.Hosts()
+#                resolvhosts.add_host(resolvhost)
+#                dns.set_servers(resolvhosts)
+#            networkconfiguration.set_dns(dns)
+        files = None
+        if dns1 and dns1:
+            filepath, filecontent = '/etc/resolv.conf', "search %s\nnameserver %s" % (dns,dns1)
+            files = params.Files()
+            cifile = params.File(name=filepath, content=filecontent, type_='PLAINTEXT')
+            files = params.Files(file=[cifile])
+        cloudinit = params.CloudInit(host=hostname, network_configuration=networkconfiguration, regenerate_ssh_keys=True, users=users, files=files)
+        initialization = params.Initialization(cloud_init=cloudinit)
+        action.vm = params.VM(initialization=initialization)
+        api.vms.get(name).start(action=action)
+        return "%s started with cloudinit" % name
+
     def stop(self,name):
         api=self.api
         if api.vms.get(name).status.state=="down":
@@ -246,31 +299,13 @@ class Ovirt:
                     results[s.name ] = [used, available,ds.name]
         return results
 
-# def beststorage(self):
-#       results={}
-#       api=self.api
-#       datacenters = api.datacenters.list()
-#       bestsize = 0
-#       beststoragedomain = ''
-#       for ds in datacenters:
-#               for s in ds.storagedomains.list():
-#                       if s.get_status().get_state()=="active" and s.get_type()=="data":
-#                                       used = s.get_used()/1024/1024/1024
-#                                       available = float(s.get_available()/1024/1024/1024)
-#                                       if available > bestsize:
-#                                               beststoragedomain = s.name
-#                                               bestsize = available
-#       return beststoragedomain
-
     def beststorage(self,datacenter):
-        results={}
         api=self.api
         datacenter = api.datacenters.get(name=datacenter)
         bestsize = 0
         beststoragedomain = ''
         for s in datacenter.storagedomains.list():
             if s.get_status().get_state()=="active" and s.get_type()=="data":
-                used = s.get_used()/1024/1024/1024
                 available = float(s.get_available()/1024/1024/1024)
                 if available > bestsize:
                     beststoragedomain = s.name

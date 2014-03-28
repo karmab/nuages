@@ -22,6 +22,8 @@ from nuages.settings import LOGIN_REDIRECT_URL as baseurl
 
 if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
     from customtypes import *
+    import customtypes
+
 
 def getdefault():
     defaults = Default.objects.all()
@@ -146,7 +148,6 @@ def create(request):
                 return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Exceeded maximum vms for this profile<p</div>")
         if storagedomain == '' and not physical:
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>")
-        #clu, guestid, memory, numcpu, disksize1, diskformat1, disksize2, diskformat2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, netinterface, dns, foreman, cobbler, requireip =profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskformat1, profile.disksize2, profile.diskformat2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.requireip
         disksize1, disksize2, numinterfaces, requireip, cobbler, foreman = profile.disksize1, profile.disksize2, profile.numinterfaces, profile.requireip, profile.cobbler, profile.foreman
         ipamprovider = profile.ipamprovider
         if requireip and not ipamprovider and not ip1:
@@ -233,9 +234,10 @@ def create(request):
         customforms=[]
         if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
             import customtypes
+            reload(customtypes)
             for element in dir(customtypes):
                 if not element.startswith("__") and element != "forms":
-                    exec("customform=%s()" % element)
+                    exec("customform=customtypes.%s()" % element)
                     customforms.append({'name':element,'form':customform})
             return render(request, 'create.html', { 'vmform': vmform, 'username': username , 'customforms' : customforms  } )
         else:
@@ -249,7 +251,7 @@ def profiles(request):
     profiles=Profile.objects.all()
     if request.method == 'POST' and request.is_ajax():
         profile = request.POST['profile']
-        profile=Profile.objects.filter(name=profile)[0]
+        profile=Profile.objects.get(name=profile)
         cobblerprofile=profile.name
         if profile.cobblerprofile:
             cobblerprofile=profile.cobblerprofile
@@ -368,6 +370,7 @@ def types(request):
         types= request.POST.get('types').split(',')
         otherclasses=[]
         import customtypes
+        reload(customtypes)
         for element in dir(customtypes):
             if element in types:
                 exec("type=%s()" % element)
@@ -614,9 +617,7 @@ def yourvms(request):
             else:
                 status = 'NotFound'
         if not vm.physical and virtualprovider.type == 'vsphere':
-            pwd = settings.PWD
             if not allvms.has_key(virtualprovider.name):
-                pwd = settings.PWD
                 allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                 allvmscommand = os.popen(allvmscommand).read()
                 allvms[virtualprovider.name] = ast.literal_eval(allvmscommand)
@@ -711,14 +712,14 @@ def console(request):
         if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
             if virtualprovider.type == 'ovirt':
                 ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-                host,port,ticket,protocol = ovirt.console(vmname)
+                host, port, ticket, protocol = ovirt.console(vmname)
                 ovirt.close()
                 if not host:
                     information = { 'title' : 'Console not accessible' , 'details' : 'Machine %s doesnt seem to be up.Refresh page...' % vmname }
                     return render(request, 'information.html', { 'information' : information } )
             if virtualprovider.type == 'kvirt':
                 kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-                host,port,ticket,protocol = kvirt.console(vmname)
+                host, port, ticket, protocol = kvirt.console(vmname)
                 kvirt.close()
                 if not host:
                     information = { 'title':'Console not configured' , 'details':'No display found' }
@@ -886,12 +887,18 @@ def hostgroups(request):
 
 @login_required
 def customforms(request):
+    logging.debug('prout')
+    if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ):
+        information = { 'title':'No customforms' , 'details':'No customforms found.' }
+        return render(request, 'information.html', { 'information' : information ,  'username': username } )
+    import customtypes
+    reload(customtypes)
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
     if request.method == 'POST' and request.POST.has_key('type'):
         type= request.POST.get('type')
         attributes=[]
-        exec("type=%s()" % type)
+        exec("type=customtypes.%s()" % type)
         for attr in type.fields:
             if 'max_length' in type.fields[attr].__dict__:
                 fieldname='CharField'
@@ -909,11 +916,7 @@ def customforms(request):
         attributes = json.dumps(attributes)
         return HttpResponse(attributes,mimetype='application/json')
     else:
-        if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ):
-            information = { 'title':'No customforms' , 'details':'No customforms found.' }
-            return render(request, 'information.html', { 'information' : information ,  'username': username } )
         types=[]
-        import customtypes
         for element in dir(customtypes):
             if not element.startswith('__') and element != "forms":
                 types.append(element)
@@ -931,6 +934,7 @@ def customforminfo(request):
     else:
         types=[]
         import customtypes
+        reload(customtypes)
         for element in dir(customtypes):
             if not element.startswith('__') and element != "forms":
                 types.append(element)
@@ -940,11 +944,18 @@ def customforminfo(request):
 def customformedit(request):
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
+    if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ):
+        return render(request, 'customformedit.html', { 'username': username  } )
+    import customtypes
+    reload(customtypes)
     if request.method == 'POST' and request.POST.has_key('type'):
         type= request.POST.get('type')
         attributes=[]
-        exec("type=%s()" % type)
+        #exec("type=%s()" % type)
+        exec("type=customtypes.%s()" % type)
         for attr in type.fields:
+            #required = type.fields[attr].required
+            required = False
             if 'max_length' in type.fields[attr].__dict__:
                 fieldname='CharField'
                 specific=type.fields[attr].initial
@@ -957,14 +968,11 @@ def customformedit(request):
             elif 'max_value' in type.fields[attr].__dict__:
                 fieldname='IntegerField'
                 specific=type.fields[attr].initial
-            attributes.append([attr,fieldname,specific,type.fields[attr].required])
+            attributes.append([attr,fieldname,specific,required])
         attributes = json.dumps(attributes)
         return HttpResponse(attributes,mimetype='application/json')
     else:
-        if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ):
-            return render(request, 'customformedit.html', { 'username': username  } )
         types=[]
-        import customtypes
         for element in dir(customtypes):
             if not element.startswith('__') and element != "forms":
                 types.append(element)
@@ -981,32 +989,32 @@ def customformcreate(request):
     if request.method == 'POST' and request.POST.has_key('type'):
         type = request.POST['type'].capitalize()
         if not os.path.exists("%s/portal/customtypes.py" % settings.PWD ) or not  open("%s/portal/customtypes.py" % settings.PWD ).readlines():
-            f=open("%s%portal/customtypes.py" % settings.PWD ,"a")
+            f=open("%s/portal/customtypes.py" % settings.PWD ,"a")
             f.write("from django import forms\n")
             f.close()
-        if os.path.exists("%s/portal/customtypes.py.lock" % settings.PWD ):
+        if os.path.exists('/tmp/customtypes.py.lock' ):
             response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
             return HttpResponse(response)
         else:
             #open lock file
-            open("%s/portal/customtypes.py.lock" % settings.PWD , 'a').close()
+            open('/tmp/customtypes.py.lock' , 'a').close()
             types=[]
             import customtypes
+            reload(customtypes)
             for element in dir(customtypes):
                 if not element.startswith('__') and element != "forms":
                     types.append(element)
-            #it s an existing type, we must first remove  along with all of its attribute
             if type in types:
-                os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
+                os.remove('/tmp/customtypes.py.lock' )
                 response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customform allready existing</div>"
                 return HttpResponse(response)
             else:
                 f = open("%s/portal/customtypes.py" % settings.PWD , 'a')
-                f.write("class %s(forms.Form):\n" % type)
+                f.write("\nclass %s(forms.Form):\n" % type)
                 f.write("\tpass\n")
                 f.close()
                 #remove lock file
-                os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
+                os.remove('/tmp/customtypes.py.lock' )
                 response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s created</div>" % type
                 return HttpResponse(response)
 
@@ -1019,14 +1027,15 @@ def customformupdate(request):
             f=open("%s/portal/customtypes.py" % settings.PWD ,"a")
             f.write("from django import forms\n")
             f.close()
-        if os.path.exists("%s/portal/customtypes.py.lock" % settings.PWD ):
+        if os.path.exists('/tmp/customtypes.py.lock' ):
             response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
             return HttpResponse(response)
         else:
             #open lock file
-            open("%s/portal/customtypes.py.lock" % settings.PWD , 'a').close()
+            open('/tmp/customtypes.py.lock' , 'a').close()
             types=[]
             import customtypes
+            reload(customtypes)
             for element in dir(customtypes):
                 if not element.startswith('__') and element != "forms":
                     types.append(element)
@@ -1058,17 +1067,21 @@ def customformupdate(request):
             #               response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>parameter names need to be unique</div>"
             #               return HttpResponse(response)
             f = open("%s/portal/customtypes.py" % settings.PWD , 'a')
-            f.write("class %s(forms.Form):\n" % type)
+            f.write("\nclass %s(forms.Form):\n" % type)
             for parameter in parameters:
                 parameter=parameter.split(';')
                 name=parameter[0]
                 fieldtype=parameter[1]
                 default=parameter[2]
                 required=parameter[3]
+                if required:
+                    required= ',blank=true, null=True'
+                else:    
+                    required = ''
                 if fieldtype == "IntegerField" and default != '':
-                    f.write("\t%s\t= forms.%s(initial=%s)\n" % (name,fieldtype,int(default) ) )
+                    f.write("\t%s\t= forms.%s(initial=%s%s)\n" % (name,fieldtype,int(default), required ) )
                 elif fieldtype == "CharField" and default != '':
-                    f.write("\t%s\t= forms.%s(initial=\"%s\")\n" % (name,fieldtype,default ) )
+                    f.write("\t%s\t= forms.%s(initial=\"%s\"%s)\n" % (name,fieldtype,default, required ) )
                 elif fieldtype == "ChoiceField" and default != '':
                     choices=''
                     for choice in default.split(','):
@@ -1076,12 +1089,14 @@ def customformupdate(request):
                             choices = "('%s', '%s')" % (choice,choice)
                         else:
                             choices = choices+",('%s', '%s')" % (choice,choice)
-                    f.write("\t%s\t= forms.%s(choices=(%s))\n" % (name,fieldtype,choices ) )
+                    f.write("\t%s\t= forms.%s(choices=(%s)%s)\n" % (name,fieldtype,choices, required ) )
                 else:
-                    f.write("\t%s\t= forms.%s()\n" % (name,fieldtype) )
+                    if len(required) >0:
+                        required= 'blank=true, null=True'
+                    f.write("\t%s\t= forms.%s(%s)\n" % (name,fieldtype) )
             f.close()
             #remove lock file
-            os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
+            os.remove('/tmp/customtypes.py.lock'  )
             response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s updated</div>" % type
             return HttpResponse(response)
 
@@ -1089,14 +1104,15 @@ def customformupdate(request):
 def customformdelete(request):
     if request.method == 'POST' and request.POST.has_key('type'):
         type = request.POST['type'].capitalize()
-        if os.path.exists("%s/portal/customtypes.py.lock" % settings.PWD ):
+        if os.path.exists('/tmp/customtypes.py.lock' ):
             response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
             return HttpResponse(response)
         else:
             #open lock file
-            open("%s/portal/customtypes.py.lock" % settings.PWD, 'a').close()
+            open('/tmp/customtypes.py.lock' , 'a').close()
             types=[]
             import customtypes
+            reload(customtypes)
             attributes=[]
             exec("form=%s()" % type)
             for attr in form.fields:
@@ -1112,7 +1128,7 @@ def customformdelete(request):
                 if not found:
                     print line,
             #remove lock file
-            os.remove("%s/portal/customtypes.py.lock" % settings.PWD )
+            os.remove('/tmp/customtypes.py.lock' )
             response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Custom form %s deleted</div>" % type
             return HttpResponse(response)
 
@@ -1339,7 +1355,6 @@ def findvm(request):
 
 @login_required
 def quickvms(request):
-    results           = []
     name              = request.POST.get('name')
     default           = getdefault()
     username          = User.objects.get(username=request.user.username)
@@ -1423,3 +1438,75 @@ def afterbuild(request,name):
         return HttpResponse('OK')
     except:
         return HttpResponse('KO')
+
+@login_required
+def customformforeman(request):
+    logging.debug('prout')
+    if os.path.exists('/tmp/customtypes.py.lock' ):
+        response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
+        return HttpResponse(response)
+    else:
+        allclasses = {}    
+        for foremanprovider in ForemanProvider.objects.all():
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(5)
+                sock.connect((foremanprovider.host, foremanprovider.port))
+                available = True
+            except socket.error:
+                available=False
+            if available:
+                foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password , foremanprovider.envid
+                foreman= Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
+                classes = foreman.classes(foremanenv)
+                for foremanclass in classes:
+                    if not foremanclass in allclasses.keys():
+                        classinfo = foreman.classinfo(foremanclass) 
+                        allclasses[foremanclass] = classinfo
+        if len(allclasses) == 0:
+            response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>no classes found, not doing anything</div>"
+            return HttpResponse(response)
+        if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
+            os.remove("%s/portal/customtypes.py" % settings.PWD )
+        f=open("%s/portal/customtypes.py" % settings.PWD , 'w')
+        f.write("from django import forms\n")
+        for puppetclass in sorted(allclasses):
+            f.write("class %s(forms.Form):\n" % puppetclass.replace('::', '__'))
+            parameters = allclasses[puppetclass]
+            if len(parameters) == 0:
+                f.write("\tpass\n")
+                continue
+            for parameter in sorted(parameters):
+                default, required = parameters[parameter][0], parameters[parameter][1]
+                if required:
+                    #TO FIX WITH CORRECT WAY TO SAY FIELD IS REQUIRED
+                    required= ''
+                else:    
+                    required = ''
+                if 'join' in dir(default):
+                    fieldtype = 'CharField'
+                elif 'real' in dir(default):    
+                    fieldtype = 'IntField'
+                else:    
+                    fieldtype = 'ChoiceField'
+                if fieldtype == "IntegerField" and default != None:
+                    f.write("\t%s\t= forms.%s(initial=%s%s)\n" % (parameter, fieldtype, int(default), required ) )
+                elif fieldtype == "CharField" and default != None:
+                    f.write("\t%s\t= forms.%s(initial=\"%s\"%s)\n" % (parameter, fieldtype, default, required ) )
+                elif fieldtype == "ChoiceField" and default != None:
+                    choices=''
+                    for choice in default:
+                        if choices == '':
+                            choices = "('%s', '%s')" % (choice,choice)
+                        else:
+                            choices = choices+",('%s', '%s')" % (choice, choice)
+                    f.write("\t%s\t= forms.%s(choices=(%s)%s)\n" % (parameter, fieldtype, choices, required ) )
+                else:
+                    if len(required) >0:
+                        #TO FIX WITH CORRECT WAY TO SAY FIELD IS REQUIRED
+                        required= ''
+                    f.write("\t%s\t= forms.%s(%s)\n" % (parameter, fieldtype, required) )
+        f.close()
+        responselist = ' '.join(allclasses.keys())
+        response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Customforms populated from foreman providers and with those classes:<p> %s</div>" % responselist 
+        return HttpResponse(response)

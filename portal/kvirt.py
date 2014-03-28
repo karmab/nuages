@@ -47,7 +47,7 @@ class Kvirt:
         self.conn=None
 
 
-    def create(self, name, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskformat2=None, disksize2=None,vnc=False):
+    def create(self, name, clu, numcpu, numinterfaces, netinterface, diskthin1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskthin2=None, disksize2=None,vnc=False):
         if vnc:
             display='vnc'
         else:
@@ -67,10 +67,14 @@ class Kvirt:
         #type,machine,emulator = 'kvm','pc','/usr/libexec/qemu-kvm'
         type,machine,emulator = 'kvm','pc','/usr/bin/qemu-system-x86_64'
         memory = memory*1024
+        diskformat1, diskformat2 = 'raw', 'raw'
         disksize1 = disksize1*GB
-        #disksize1 = int(disksize1) * 1073741824
+        if diskthin1:
+            diskformat1 = 'cow'
         if disksize2:
             disksize2 = disksize2*GB
+            if diskthin2:
+                diskformat2  ='cow'
         storagename = "%s.img" % name
         storagepool = conn.storagePoolLookupByName(storagedomain)
         poolxml = storagepool.XMLDesc(0)

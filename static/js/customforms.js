@@ -8,7 +8,7 @@ function addparam() {
    if ( paramrequired == true ) {
     required = "checked" ;
     }
-   newattr = '<tr id="'+paramname+'"><td>'+paramname+'</td><td id="'+paramname+'-type">'+paramtype+'</td><td><input type="text" id="'+paramname+'-default" '+'value="'+paramdefault+'"></td><td><input id="'+paramname+'-required" '+'type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(\''+paramname+'\');"></td></tr>';
+   newattr = '<tr id="'+paramname+'"><td>'+paramname+'</td><td id="'+paramname+'-type">'+paramtype+'</td><td><input type="text" id="'+paramname+'-default" '+'value="'+paramdefault+'"></td><td><input id="'+paramname+'-required" '+'type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-danger" value="remove" onclick="removeparam(\''+paramname+'\');"></td></tr>';
    $('#newparameter').replaceWith(newattr);
    if ( $('#parameters').html() == "" ) {
    $('#parameters').append(paramname);
@@ -18,14 +18,14 @@ function addparam() {
    $('#parameters').append(" "+paramname);
    $('#parameters').hide();
    }
-   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">CharField</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
+   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">CharField</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-danger" value="remove" onclick="removenewparam();"></td</tr>');
   }
   else if ( $('#newparameter-name').val() == "" ) {
    $("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Name required for your new parameter!</div>");
    $("#results").show(200);
   }
   else {
-   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">CharField</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
+   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">CharField</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-danger" value="remove" onclick="removenewparam();"></td</tr>');
   }
 
 }
@@ -35,7 +35,7 @@ function customformcreate() {
    $('#for_newtype').remove();
    $('#id_newtype').remove();
    $('#forminfo').replaceWith('<label id="for_newtype">New type name:</label><input type="text" id="id_newtype" ><table id="forminfo" border="1" class="alert alert-info"><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>');
-   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Charfield</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-info" value="remove" onclick="removenewparam();"></td</tr>');
+   $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Charfield</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-danger" value="remove" onclick="removenewparam();"></td</tr>');
    $('#forminfo').append('<input type="submit"  class="btn btn-info" value="add parameter" onclick="addparam();"></table><p>');
  }
 
@@ -127,7 +127,7 @@ function customformedit() {
 	required = "checked" ;
 	}
        //newattr = '<tr id="'+parameter[0]+'"><td>'+parameter[0]+'</td><td>'+parameter[1]+'</td><td><input type="text" value="'+parameter[2]+'"></td><td><input type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(\''+parameter[0]+'\');"></td></tr>';
-       newattr = '<tr id="'+parameter[0]+'"><td>'+parameter[0]+'</td><td id="'+parameter[0]+'-type">'+parameter[1]+'</td><td><input type="text" id="'+parameter[0]+'-default" '+'value="'+parameter[2]+'"></td><td><input id="'+parameter[0]+'-required" '+'type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-info" value="remove" onclick="removeparam(\''+parameter[0]+'\');"></td></tr>';
+       newattr = '<tr id="'+parameter[0]+'"><td>'+parameter[0]+'</td><td id="'+parameter[0]+'-type">'+parameter[1]+'</td><td><input type="text" id="'+parameter[0]+'-default" '+'value="'+parameter[2]+'"></td><td><input id="'+parameter[0]+'-required" '+'type="checkbox" '+required+'></td>'+'<td><input type="submit" class="btn btn-danger" value="remove" onclick="removeparam(\''+parameter[0]+'\');"></td></tr>';
         attributesinfo = attributesinfo+newattr;
         });
         $('#forminfo').append(attributesinfo);
@@ -231,3 +231,33 @@ function customformdelete() {
   	}
   });
 }
+
+function customformforeman() {
+ baseurl = '';
+ path = location.pathname.split('/');
+ if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+    }
+ var sure = confirm("This will recreate from scratch all your customtypes from foreman providers classes!!!Sure?");
+ if (sure) {
+ $.ajax({  
+    type: "GET",
+    url: baseurl+'/customformforeman/',
+    success: function(data) {
+   	$("#result").html(data);
+   	$("#results").show(200);
+     }
+  });
+
+ } else {
+  return;
+ }
+
+}
+
+
+
+
+
+
+

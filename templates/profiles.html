@@ -10,8 +10,7 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}
-</select></p>
-<div id="voila2"><input name="voila2" type="submit" class="btn btn-info" value="Enter" onclick="getprofile();"/></div><p>
+</select>   <input type="submit" class="btn btn-info" value="Enter" onclick="getprofile();"/><hr>
 <fieldset class="module aligned">
 <div id="profileinfo" ><p>
 </fieldset>

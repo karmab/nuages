@@ -15,7 +15,7 @@ name2 = 'prout'
 profile = Profile.objects.get(name=profile)
 virtualprovider = profile.virtualprovider
 ohost, oport, ouser, opassword, ossl = virtualprovider.host, virtualprovider.port, virtualprovider.user, virtualprovider.password, virtualprovider.ssl
-clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, guestid, net1, net2, net3, net4, diskformat2, disksize2,vnc =  profile.clu, profile.numcpu, profile.numinterfaces, profile.netinterface, profile.diskformat1, profile.disksize1, profile.diskinterface,profile.memory, profile.guestid, profile.net1, profile.net2, profile.net3, profile.net4, profile.diskformat2, profile.disksize2, profile.vnc
+clu, numcpu, numinterfaces, netinterface, diskthin1, disksize1, diskinterface,memory, guestid, net1, net2, net3, net4, diskthin2, disksize2,vnc =  profile.clu, profile.numcpu, profile.numinterfaces, profile.netinterface, profile.diskthin1, profile.disksize1, profile.diskinterface,profile.memory, profile.guestid, profile.net1, profile.net2, profile.net3, profile.net4, profile.diskthin2, profile.disksize2, profile.vnc
 datacenter = virtualprovider.datacenter
 
 
@@ -30,7 +30,7 @@ print o.allvms()
 print o.status(name1)
 print o.console(name1)
 print o.getmacs(name1)
-#print o.create(name2, clu, numcpu, numinterfaces, netinterface, diskformat1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=net2, net3=net3, net4=net4, iso=iso, diskformat2=diskformat2, disksize2=disksize2,vnc=vnc)
+#print o.create(name2, clu, numcpu, numinterfaces, netinterface, diskthin1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=net2, net3=net3, net4=net4, iso=iso, diskthin2=diskthin2, disksize2=disksize2,vnc=vnc)
 #print o.start(name2)
 #print o.remove(name2)
 sys.exit(0)

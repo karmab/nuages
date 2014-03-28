@@ -12,9 +12,7 @@
 {% for vprovider in vproviders %}
 <option value="{{vprovider.name }}" >{{vprovider.name }}</option>
 {% endfor %}
-</select></p>
-
-<div id="voila2"><input name="voila2" type="submit" class="btn btn-info"  value="Enter" onclick="getstorage();"/></div>
+</select>  <input type="submit" class="btn btn-info"  value="Enter" onclick="getstorage();"/><hr>
 <p id="error"></p>
 <p id="storageinfo"></p>
 <p id="storageinfo0"></p>
