@@ -231,6 +231,28 @@ function customformdelete() {
   	}
   });
 }
+function customformcobbler() {
+ baseurl = '';
+ path = location.pathname.split('/');
+ if ( path.length == 4 ) {
+    baseurl = '/'+location.pathname.split('/')[1];
+    }
+ var sure = confirm("This will recreate from scratch all your customtypes from cobbler providers classes!!!Sure?");
+ if (sure) {
+ $.ajax({  
+    type: "GET",
+    url: baseurl+'/customformcobbler/',
+    success: function(data) {
+   	$("#result").html(data);
+   	$("#results").show(200);
+     }
+  });
+
+ } else {
+  return;
+ }
+
+}
 
 function customformforeman() {
  baseurl = '';

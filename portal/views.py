@@ -19,6 +19,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from nuages.settings import LOGIN_REDIRECT_URL as baseurl
 
 
+COBBLERPORT = 80
 
 if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
     from customtypes import *
@@ -1509,4 +1510,79 @@ def customformforeman(request):
         f.close()
         responselist = ' '.join(allclasses.keys())
         response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Customforms populated from foreman providers and with those classes:<p> %s</div>" % responselist 
+        return HttpResponse(response)
+
+@login_required
+def customformcobbler(request):
+    logging.debug('prout')
+    if os.path.exists('/tmp/customtypes.py.lock' ):
+        response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>customtypes  currently edited by another user</div>"
+        return HttpResponse(response)
+    else:
+        allclasses = {}    
+        for cobblerprovider in CobblerProvider.objects.all():
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(5)
+                sock.connect((cobblerprovider.host, COBBLERPORT))
+                available = True
+            except socket.error:
+                available=False
+            if available:
+                cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password 
+                cobblerspecialvm = cobblerprovider.specialvm
+                if cobblerspecialvm == None:
+                    continue
+                cobbler= Cobbler(cobblerhost=cobblerhost, cobbleruser=cobbleruser, cobblerpassword=cobblerpassword)
+                allclasses = cobbler.classes(cobblerspecialvm)
+                #for foremanclass in classes:
+                #    if not foremanclass in allclasses.keys():
+                #        classinfo = foreman.classinfo(foremanclass) 
+                #        allclasses[foremanclass] = classinfo
+        if len(allclasses) == 0:
+            response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>no classes found, not doing anything</div>"
+            return HttpResponse(response)
+        if os.path.exists("%s/portal/customtypes.py" % settings.PWD):
+            os.remove("%s/portal/customtypes.py" % settings.PWD )
+        f=open("%s/portal/customtypes.py" % settings.PWD , 'w')
+        f.write("from django import forms\n")
+        for puppetclass in sorted(allclasses):
+            f.write("class %s(forms.Form):\n" % puppetclass.replace('::', '__'))
+            parameters = allclasses[puppetclass]
+            if len(parameters) == 0:
+                f.write("\tpass\n")
+                continue
+            for parameter in sorted(parameters):
+                default, required = parameters[parameter][0], parameters[parameter][1]
+                if required:
+                    #TO FIX WITH CORRECT WAY TO SAY FIELD IS REQUIRED
+                    required= ''
+                else:    
+                    required = ''
+                if 'join' in dir(default):
+                    fieldtype = 'CharField'
+                elif 'real' in dir(default):    
+                    fieldtype = 'IntField'
+                else:    
+                    fieldtype = 'ChoiceField'
+                if fieldtype == "IntegerField" and default != None:
+                    f.write("\t%s\t= forms.%s(initial=%s%s)\n" % (parameter, fieldtype, int(default), required ) )
+                elif fieldtype == "CharField" and default != None:
+                    f.write("\t%s\t= forms.%s(initial=\"%s\"%s)\n" % (parameter, fieldtype, default, required ) )
+                elif fieldtype == "ChoiceField" and default != None:
+                    choices=''
+                    for choice in default:
+                        if choices == '':
+                            choices = "('%s', '%s')" % (choice,choice)
+                        else:
+                            choices = choices+",('%s', '%s')" % (choice, choice)
+                    f.write("\t%s\t= forms.%s(choices=(%s)%s)\n" % (parameter, fieldtype, choices, required ) )
+                else:
+                    if len(required) >0:
+                        #TO FIX WITH CORRECT WAY TO SAY FIELD IS REQUIRED
+                        required= ''
+                    f.write("\t%s\t= forms.%s(%s)\n" % (parameter, fieldtype, required) )
+        f.close()
+        responselist = ' '.join(allclasses.keys())
+        response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Customforms populated from Cobbler providers and with those classes:<p> %s</div>" % responselist 
         return HttpResponse(response)

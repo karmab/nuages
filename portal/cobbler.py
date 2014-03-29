@@ -174,3 +174,16 @@ class Cobbler:
             s.sync(token)
             print "%s sucessfully killed in Cobbler" % (name)
         return True
+
+    def classes(self,name):
+        #s = self.s
+        #token = self.token
+        #system = s.find_system({"name":name})
+        #if system ==[]:
+        #    print "%s not found in Cobbler" % (name)
+        #else:
+        #    ##s.remove_system(name,token)
+        #    s.sync(token)
+        #    print "%s sucessfully killed in Cobbler" % (name)
+        allclasses = { 'apache' : { 'apacheversion' : ['0.20.6', False] , 'apachedir' : ['/var/www/html', False] } , 'test': { 'rootdir' : ['/root/d',False] } }
+        return allclasses
