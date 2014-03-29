@@ -88,7 +88,7 @@ $( document ).ready(function() {
  	}
  	var profile = $('#id_profile').val();
 	if ( (profile =='' ) || ( virtualprovider == '' ) ) {
-		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>Set first profile!</div>");
+		$("#result").html("<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>First, set profile!</div>");
 		$("#result").show(500);
 		return;
 	}
@@ -129,12 +129,12 @@ $( document ).ready(function() {
 			var additionaliplabel = $('#id_iplabel'+String(numif)+"_"+String(numvm));
  			additionalip.show(400);
  			additionaliplabel.show(400);
-			if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
-				var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
-				var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
- 				additionalmac.show(400);
- 				additionalmaclabel.show(400);
-				}
+			//if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
+            var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
+            var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
+            additionalmac.show(400);
+     		additionalmaclabel.show(400);
+	        //}
 	}}
    }
    });
@@ -308,10 +308,12 @@ $( document ).ready(function() {
    		for (var numif = 1; numif <= numinterfaces; numif++) {
 			var additionalip = $('#id_ip'+String(numif)+"_"+String(numvm));
 			var additionaliplabel = $('#id_iplabel'+String(numif)+"_"+String(numvm));
+			var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
+			var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
  			additionalip.show(400);
  			additionaliplabel.show(400);
+            additionalmaclabel.show(400);
  			additionalmac.show(400);
- 			additionalmaclabel.show(400);
 	}}
 	}
     if ( index == 7 )  {	

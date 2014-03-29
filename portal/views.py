@@ -1487,7 +1487,7 @@ def customformforeman(request):
                 if 'join' in dir(default):
                     fieldtype = 'CharField'
                 elif 'real' in dir(default):    
-                    fieldtype = 'IntField'
+                    fieldtype = 'IntegerField'
                 else:    
                     fieldtype = 'ChoiceField'
                 if fieldtype == "IntegerField" and default != None:
@@ -1530,15 +1530,8 @@ def customformcobbler(request):
                 available=False
             if available:
                 cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password 
-                cobblerspecialvm = cobblerprovider.specialvm
-                if cobblerspecialvm == None:
-                    continue
                 cobbler= Cobbler(cobblerhost=cobblerhost, cobbleruser=cobbleruser, cobblerpassword=cobblerpassword)
-                allclasses = cobbler.classes(cobblerspecialvm)
-                #for foremanclass in classes:
-                #    if not foremanclass in allclasses.keys():
-                #        classinfo = foreman.classinfo(foremanclass) 
-                #        allclasses[foremanclass] = classinfo
+                allclasses = cobbler.classes()
         if len(allclasses) == 0:
             response = "<div class='alert alert-error'><button type='button' class='close' data-dismiss='alert'>&times;</button>no classes found, not doing anything</div>"
             return HttpResponse(response)
@@ -1562,7 +1555,7 @@ def customformcobbler(request):
                 if 'join' in dir(default):
                     fieldtype = 'CharField'
                 elif 'real' in dir(default):    
-                    fieldtype = 'IntField'
+                    fieldtype = 'IntegerField'
                 else:    
                     fieldtype = 'ChoiceField'
                 if fieldtype == "IntegerField" and default != None:

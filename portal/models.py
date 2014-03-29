@@ -172,20 +172,11 @@ class CobblerProvider(models.Model):
     host                = models.CharField(max_length=60,blank=True, null=True)
     user                = models.CharField(max_length=60, blank=True)
     password            = models.CharField(max_length=20, blank=True)
-    specialvm           = models.CharField(max_length=20, blank=True)
     def __unicode__(self):
         return self.name
     def clean(self):
         if not self.host:
             raise ValidationError("Host cant be blank")
-        if self.specialvm:
-            connection=checkconn(self.host,COBBLERPORT)
-            if not connection:
-                raise ValidationError("Cobbler server cant be reached...")
-            cobbler=Cobbler(self.host, self.user, self.password)
-            specialvmfound = cobbler.exists(self.specialvm)
-            if not specialvmfound:
-                raise ValidationError("Special VM not found on cobbler...")
 
 class Storage(models.Model):
     name              = models.CharField(max_length=80)

@@ -175,15 +175,24 @@ class Cobbler:
             print "%s sucessfully killed in Cobbler" % (name)
         return True
 
-    def classes(self,name):
-        #s = self.s
-        #token = self.token
-        #system = s.find_system({"name":name})
-        #if system ==[]:
-        #    print "%s not found in Cobbler" % (name)
-        #else:
-        #    ##s.remove_system(name,token)
-        #    s.sync(token)
-        #    print "%s sucessfully killed in Cobbler" % (name)
-        allclasses = { 'apache' : { 'apacheversion' : ['0.20.6', False] , 'apachedir' : ['/var/www/html', False] } , 'test': { 'rootdir' : ['/root/d',False] } }
+    def classes(self):
+        allclasses = {}
+        s = self.s
+        for classe in s.get_mgmtclasses():
+            classename = classe['name']
+            allclasses[classename] = {}
+            i = 0
+            for parameter in classe['packages']:
+                if len(classe['files']) >= i:
+                    parameterinfo = classe['files'][i]
+                    parametersplit = parameterinfo.split(',')
+                    if len(parametersplit) >1:
+                        allclasses[classename][parameter]=[parametersplit,False]
+                    else:
+                        if parameterinfo.isdigit():
+                            parameterinfo = int(parameterinfo)
+                        allclasses[classename][parameter]=[parameterinfo,False]
+                else:         
+                    allclasses[classename][parameter]={}
+                i = i+1
         return allclasses
