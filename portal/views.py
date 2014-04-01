@@ -374,7 +374,7 @@ def types(request):
         reload(customtypes)
         for element in dir(customtypes):
             if element in types:
-                exec("type=%s()" % element)
+                exec("type=customtypes.%s()" % element)
                 for attr in type.fields.keys():
                     results.append(attr)
             elif not element.startswith('__') and element != "forms":
