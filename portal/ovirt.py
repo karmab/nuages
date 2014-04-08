@@ -191,7 +191,10 @@ class Ovirt:
         macs=[]
         for nic in vm.nics.list():
             address = nic.mac.address
-            net = api.networks.get(id=nic.network.id).get_name()
+            if nic.network != None:
+                net = api.networks.get(id=nic.network.id).get_name()
+            else:
+                net = ''
             macs.append("%s=%s" % (net,address))
         return macs
 
