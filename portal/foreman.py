@@ -46,7 +46,7 @@ def foremangetid(protocol, host, port, user, password, searchtype, searchname):
     try:
         return str(result[shortname]['id'])
     except:
-        return 0
+        return str(result['id'])
 
 #VM CREATION IN FOREMAN
 class Foreman:
@@ -79,7 +79,7 @@ class Foreman:
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         name = name.encode('ascii')
         dns = dns.encode('ascii')
-        if not envid:
+        if envid == None:
             envid = "production"
         if ip:
             ip = ip.encode('ascii')
