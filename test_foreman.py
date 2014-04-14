@@ -20,7 +20,7 @@ f = Foreman(foremanhost,foremanport,foremanuser, foremanpassword)
 #print f.hostgroups(environment)
 classes = f.classes(environment)
 print classes
-for classe in classes:
-    print f.classinfo(classe)
+#for classe in classes:
+#    print f.classinfo(classe)
 #print f.override('test2','testdir')
 sys.exit(0)

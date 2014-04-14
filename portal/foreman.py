@@ -236,23 +236,38 @@ class Foreman:
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         url = "%s://%s:%s/api/hostgroups?search=environment+=+%s" % (protocol, host, port, environment)
         res= foremando(url=url, user=user, password=password)
-        results = []
+        results = {}
         for  r in res['results']:
             name = r["name"]
-            results.append(name)
+            del r["name"]
+            results[name]=r
         return sorted(results)
+
+#    def classes(self, environment):
+#        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
+#        url = "%s://%s:%s/api/puppetclasses?search=environment+=+%s" % (protocol, host, port, environment)
+#        res= foremando(url=url, user=user, password=password)
+#        results=[]
+#        for  module in res:
+#            if len(res[module]) == 1:
+#                results.append(module)
+#            else:
+#                for classe in res[module]:
+#                    results.append(classe['puppetclass']['name'])
+#        return sorted(results)
 
     def classes(self, environment):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         url = "%s://%s:%s/api/puppetclasses?search=environment+=+%s" % (protocol, host, port, environment)
         res= foremando(url=url, user=user, password=password)
         results=[]
+        res = res['results']
         for  module in res:
             if len(res[module]) == 1:
                 results.append(module)
             else:
                 for classe in res[module]:
-                    results.append(classe['puppetclass']['name'])
+                    results.append(classe['name'])
         return sorted(results)
 
     def exists(self, name):
