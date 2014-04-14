@@ -219,16 +219,27 @@ class Foreman:
                 foremando(url=url, actiontype='DELETE', v2=True, user=user, password=password)
                 print "parameter %s deleted from %s.%s" % (parameter, name, dns)
 
+#    OLD V1 code
+#    def hostgroups(self, environment):
+#        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
+#        url = "%s://%s:%s/api/hostgroups?search=environment+=+%s" % (protocol, host, port, environment)
+#        res= foremando(url=url, user=user, password=password)
+#        results = {}
+#        for  r in res:
+#            info = r.values()[0]
+#            name = info["name"]
+#            del info["name"]
+#            results[name] = info
+#        return sorted(results)
+
     def hostgroups(self, environment):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         url = "%s://%s:%s/api/hostgroups?search=environment+=+%s" % (protocol, host, port, environment)
         res= foremando(url=url, user=user, password=password)
-        results = {}
-        for  r in res:
-            info = r.values()[0]
-            name = info["name"]
-            del info["name"]
-            results[name] = info
+        results = []
+        for  r in res['results']:
+            name = r["name"]
+            results.append(name)
         return sorted(results)
 
     def classes(self, environment):
