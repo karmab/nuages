@@ -554,9 +554,10 @@ function createvm(){
     }
 
   //CHECK VALUES ARE THERE
-  if ( ( name == "" ) || ( profile == "" ) || ( hostgroup == "" )  ) {
+  //if ( ( name == "" ) || ( profile == "" ) || ( hostgroup == "" )  ) {
+  if ( ( name == "" ) || ( profile == "" )  ) {
 	$("#result").hide();
-	$("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Name/Profile/Hostgroup  cant be blank!</div>");
+	$("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Name/Profile cant be blank!</div>");
 	$("#result").show(500);
 	return ;
   }

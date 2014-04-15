@@ -231,7 +231,6 @@ class Foreman:
             print "parameter %s of class %s set as overriden" % (parameter, name)
 
     def addparameters(self, name, dns, parameters):
-        print "KARIM parameters %s " % (parameters)
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         name = name.encode('ascii')
         dns = dns.encode('ascii')
@@ -253,6 +252,7 @@ class Foreman:
                     print "parameter %s not found" % (parameter)
                     continue
             else:
+                print "handling parameter %s" % (parameter)
                 parameterid = parametersid[parameter]
             parameterurl = "%s://%s:%s/api/v2/smart_class_parameters/%s-%s" % (protocol, host, port, parameterid, parameter)
             res = foremando(url=parameterurl, user=user, password=password)
@@ -270,7 +270,7 @@ class Foreman:
                     if match[0] == 'fqdn' and match[1] == "%s.%s" % (name,dns):
                         overrideid =  o['id']
                         break
-            if override_values_count == 0:
+            if overrideid == 0:
                 postdata = { "override_value": { "match":"fqdn=%s.%s" % (name,dns) } }
                 if parameter_type == 'string':
                     postdata["override_value"]["value"] = value
@@ -280,7 +280,7 @@ class Foreman:
                 overrideurl = "%s://%s:%s/api/v2/smart_class_parameters/%s/override_values" % (protocol, host, port, parameter)
                 res = foremando(url=overrideurl, actiontype="POST", postdata=postdata, user=user, password=password)
                 print "parameter %s created for %s.%s" % (parameter, name, dns)
-            elif overrideid != 0:    
+            else:    
                 postdata = { "override_value": { "match":"fqdn=%s.%s" % (name,dns) } }
                 if parameter_type == 'string':
                     postdata["override_value"]["value"] = value

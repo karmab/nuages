@@ -479,6 +479,8 @@ class VM(models.Model):
             foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
             f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
             f.create(name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
+            if puppetclasses != '':
+                f.addclasses(name=name,dns=dns,classes=puppetclasses)
             if foremanparameters and parameters != '':
                 f.addparameters(name=name,dns=dns,parameters=parameters)
         super(VM, self).save(*args, **kwargs)
