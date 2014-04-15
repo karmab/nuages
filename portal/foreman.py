@@ -1,16 +1,11 @@
-import datetime
 import json
-import os
 import requests
-import simplejson
-import sys
-import time
+import simplejson 
 
 #helper functions
-def foremando(url, actiontype=None, postdata=None, v2=False, user=None, password=None):
-    headers = {'content-type': 'application/json', 'Accept': 'application/json,version=2' }
+def foremando(url, actiontype=None, postdata=None, user=None, password=None):
+    headers = {'content-type': 'application/json', 'Accept': 'application/json' }
     #get environments
-    envs = {}
     if user and password:
         user     = user.encode('ascii')
         password = password.encode('ascii')
@@ -31,11 +26,11 @@ def foremando(url, actiontype=None, postdata=None, v2=False, user=None, password
 
 def foremangetid(protocol, host, port, user, password, searchtype, searchname):
     if searchtype == 'puppet':
-        url = "%s://%s:%s/api/smart_proxies?type=%s"  % (protocol, host, port, searchtype)
+        url = "%s://%s:%s/api/v2/smart_proxies?type=%s"  % (protocol, host, port, searchtype)
         result = foremando(url)
         return result[0]['smart_proxy']['id']
     else:
-        url = "%s://%s:%s/api/%s/%s" % (protocol, host, port, searchtype, searchname)
+        url = "%s://%s:%s/api/v2/%s/%s" % (protocol, host, port, searchtype, searchname)
         result = foremando(url=url, user=user, password=password)
     if searchtype == 'ptables':
         shortname = 'ptable'
@@ -69,7 +64,7 @@ class Foreman:
         if dns:
             dns = dns.encode('ascii')
             name = "%s.%s" % (name, dns)
-        url = "%s://%s/hosts/%s" % (protocol, host, name)
+        url = "%s://%s/api/v2/hosts/%s" % (protocol, host, name)
         result = foremando(url=url, actiontype='DELETE', user=user, password=password)
         if result:
             print "%s deleted in Foreman" % name
@@ -105,7 +100,7 @@ class Foreman:
             computeid = computeid.encode('ascii')
         if hostgroup:
             hostgroup = hostgroup.encode('ascii')
-        url = "%s://%s:%s/hosts" % (protocol, host, port)
+        url = "%s://%s:%s/api/v2/hosts" % (protocol, host, port)
         if dns:
             name = "%s.%s" % (name, dns)
         if osid:
@@ -156,85 +151,14 @@ class Foreman:
         classes = classes.split(',')
         for classe in classes:
             classid = foremangetid(protocol, host, port, user, password, 'puppetclasses', classe)
-            url = "%s://%s:%s/api/hosts/%s.%s/puppetclass_ids" % (protocol, host, port, name, dns)
+            url = "%s://%s:%s/api/v2/hosts/%s.%s/puppetclass_ids" % (protocol, host, port, name, dns)
             postdata = {'puppetclass_id': classid}
-            foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
+            foremando(url=url, actiontype="POST", postdata=postdata, user=user, password=password)
             print "class %s added to %s.%s" % (classe,name,dns)
-
-    #only works for host global parameters
-    def addparameters(self, name, dns, parameters):
-        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-        name = name.encode('ascii')
-        dns = dns.encode('ascii')
-        parameters = parameters.encode('ascii')
-        parameters = parameters.split(' ')
-        parametersinfo = {}
-        url = "%s://%s:%s/api/hosts/%s.%s/parameters" % (protocol, host, port, name, dns)
-        res = foremando(url=url, v2=True, user=user, password=password)
-        res = res['parameters']
-        for element in res:
-            parametersinfo[element['parameter']['name']] = { 'id' : element['parameter']['id'] , 'value' : element['parameter']['value'] }
-        for parameter in parameters:
-            try:
-                parameter, value = parameter.split("=")
-            except:
-                print parameter
-                continue
-            #update existing parameter
-            if parametersinfo.has_key(parameter):
-                parameterid, oldvalue = parametersinfo[parameter]['id'], parametersinfo[parameter]['value']
-                if value == oldvalue:
-                    print "parameter %s unchanged for %s.%s" % (parameter, name, dns)
-                    continue
-                url = "%s://%s:%s/api/hosts/%s.%s/parameters/%s" % (protocol, host, port, name, dns, parameterid)
-                postdata = dict(parameter={"name": parameter, "value": value })
-                postdata = json.dumps(postdata)
-                foremando(url=url, actiontype="PUT", postdata=postdata, v2=True, user=user, password=password)
-                print "parameter %s updated for %s.%s" % (parameter, name, dns)
-            else:
-                url = "%s://%s:%s/api/hosts/%s.%s/parameters/" % (protocol, host, port, name, dns)
-                postdata=dict(parameter = {"name": parameter, "value": value })
-                foremando(url=url, actiontype="POST", postdata=postdata, v2=True, user=user, password=password)
-                print "parameter %s added to %s.%s" % (parameter, name, dns)
-
-    def deleteparameters(self, name, dns, parameters):
-        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-        name = name.encode('ascii')
-        dns = dns.encode('ascii')
-        parameters = parameters.encode('ascii')
-        parameters = parameters.split(',')
-        ids = {}
-        url = "%s://%s:%s/api/hosts/%s.%s/parameters" % (protocol, host, port, name, dns)
-        res = foremando(url=url, v2=True, user=user, password=password)
-        res = res['parameters']
-        for element in res:
-            ids[element['parameter']['name']] = element['parameter']['id']
-        for parameter in parameters:
-            if not ids.has_key(parameter):
-                print "parameter %s not removed from %s.%s as not found" % (parameter, name, dns)
-                continue
-            else:
-                parameterid = ids[parameter]
-                url = "%s://%s:%s/api/hosts/%s.%s/parameters/%s" % (protocol, host, port, name, dns, parameterid)
-                foremando(url=url, actiontype='DELETE', v2=True, user=user, password=password)
-                print "parameter %s deleted from %s.%s" % (parameter, name, dns)
-
-#    OLD V1 code
-#    def hostgroups(self, environment):
-#        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-#        url = "%s://%s:%s/api/hostgroups?search=environment+=+%s" % (protocol, host, port, environment)
-#        res= foremando(url=url, user=user, password=password)
-#        results = {}
-#        for  r in res:
-#            info = r.values()[0]
-#            name = info["name"]
-#            del info["name"]
-#            results[name] = info
-#        return sorted(results)
 
     def hostgroups(self, environment):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-        url = "%s://%s:%s/api/hostgroups?search=environment+=+%s" % (protocol, host, port, environment)
+        url = "%s://%s:%s/api/v2/hostgroups?search=environment+=+%s" % (protocol, host, port, environment)
         res= foremando(url=url, user=user, password=password)
         results = {}
         for  r in res['results']:
@@ -243,22 +167,9 @@ class Foreman:
             results[name]=r
         return sorted(results)
 
-#    def classes(self, environment):
-#        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-#        url = "%s://%s:%s/api/puppetclasses?search=environment+=+%s" % (protocol, host, port, environment)
-#        res= foremando(url=url, user=user, password=password)
-#        results=[]
-#        for  module in res:
-#            if len(res[module]) == 1:
-#                results.append(module)
-#            else:
-#                for classe in res[module]:
-#                    results.append(classe['puppetclass']['name'])
-#        return sorted(results)
-
     def classes(self, environment):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-        url = "%s://%s:%s/api/puppetclasses?search=environment+=+%s" % (protocol, host, port, environment)
+        url = "%s://%s:%s/api/v2/puppetclasses?search=environment+=+%s" % (protocol, host, port, environment)
         res= foremando(url=url, user=user, password=password)
         results=[]
         res = res['results']
@@ -270,42 +181,41 @@ class Foreman:
                     results.append(classe['name'])
         return sorted(results)
 
-    def exists(self, name):
+    def exists(self, name,dns=None):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-        url = "%s://%s:%s/api/hosts"  % (protocol, host, port)
+        if dns:
+            name = "%s.%s" % (name, dns)
+        url = "%s://%s:%s/api/v2/hosts"  % (protocol, host, port)
         res = foremando(url=url, user=user, password=password)
-        results = {}
-        for  r in res:
-            info = r.values()[0]
-            if info["name"]== name:
+        for  r in res['results']:
+            currentname = r['name']
+            if currentname == name:
                 return True
         return False
 
     def classinfo(self, name ):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
-        url = "%s://%s:%s/api/puppetclasses/%s" % (protocol, host, port, name)
+        url = "%s://%s:%s/api/v2/puppetclasses/%s" % (protocol, host, port, name)
         res= foremando(url=url, user=user, password=password)
         results={}
-        parameters = res['puppetclass']['smart_class_parameters']
+        parameters = res['smart_class_parameters']
         for parameter in parameters:
             parameterid = parameter['id']
             parametername = parameter['parameter']
-            parameterurl = "%s://%s:%s/api/lookup_keys/%s-%s" % (protocol, host, port, parameterid, parametername)
+            parameterurl = "%s://%s:%s/api/v2/smart_class_parameters/%s-%s" % (protocol, host, port, parameterid, parametername)
             res= foremando(url=parameterurl, user=user, password=password)
-            lookupkey = res['lookup_key'] 
-            required = lookupkey['required']
-            override = lookupkey['override']
-            defaultvalue = lookupkey['default_value']
+            print res
+            required = res['required']
+            defaultvalue = res['default_value']
             results[parametername]=[defaultvalue, required]
         return results
 
-    # not working on foreman1.3, try 1.4...
     def override(self, name, parameter, parameterid=None ):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         if not parameterid:
-            url = "%s://%s:%s/api/puppetclasses/%s" % (protocol, host, port, name)
+            url = "%s://%s:%s/api/v2/puppetclasses/%s" % (protocol, host, port, name)
             res= foremando(url=url, user=user, password=password)
-            classparameters = res['puppetclass']['smart_class_parameters']
+            classparameters = res['smart_class_parameters']
             for param in classparameters:
                 if param['parameter'] == parameter:
                     parameterid = param['id']
@@ -313,9 +223,71 @@ class Foreman:
             if parameterid == None:
                 print "parameterid for parameter %s of class %s not found" % (parameter, name)
                 return False
-            parameterurl = "%s://%s:%s/api/lookup_keys/%s" % (protocol, host, port, parameterid)
+            parameterurl = "%s://%s:%s/api/v2/smart_class_parameters/%s-%s" % (protocol, host, port, parameterid, parameter)
             postdata = {}
-            postdata['lookup_key'] = {'override': True }
-            res = foremando(url=parameterurl, actiontype="PUT", postdata=postdata, v2=True, user=user, password=password)
-            #print res 
+            postdata["smart_class_parameter"] = { "override": True }
+            postdata = simplejson.dumps(postdata)
+            res = foremando(url=parameterurl, actiontype="PUT", postdata=postdata, user=user, password=password)
             print "parameter %s of class %s set as overriden" % (parameter, name)
+
+    def addparameters(self, name, dns, parameters):
+        print "KARIM parameters %s " % (parameters)
+        host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
+        name = name.encode('ascii')
+        dns = dns.encode('ascii')
+        parameters = parameters.encode('ascii')
+        parameters = parameters.split(' ')
+        parametersid = {}
+        parametersurl = "%s://%s:%s/api/v2/smart_class_parameters?per_page=10000" % (protocol, host, port)
+        res = foremando(url=parametersurl, user=user, password=password)
+        res = res['results']
+        for p in res:
+            parametersid[p["parameter"]] = p["id"]
+        for parameter in parameters:
+            try:
+                parameter, value = parameter.split("=")
+            except:
+                print "Cant split parameter=value for %s" % parameter
+                continue
+            if not parametersid.has_key(parameter):
+                    print "parameter %s not found" % (parameter)
+                    continue
+            else:
+                parameterid = parametersid[parameter]
+            parameterurl = "%s://%s:%s/api/v2/smart_class_parameters/%s-%s" % (protocol, host, port, parameterid, parameter)
+            res = foremando(url=parameterurl, user=user, password=password)
+            override, override_values, override_values_count, parameter_type = res['override'], res['override_values'], res['override_values_count'], res['parameter_type']
+            if not override:
+                postdata = {}
+                postdata["smart_class_parameter"] = { "override": True }
+                postdata = simplejson.dumps(postdata)
+                res = foremando(url=parameterurl, actiontype="PUT", postdata=postdata, user=user, password=password)
+                print "parameter %s set as overriden" % (parameter)
+            overrideid = 0
+            if len(override_values) > 0:
+                for o in override_values:
+                    match = o['match'].split('=')
+                    if match[0] == 'fqdn' and match[1] == "%s.%s" % (name,dns):
+                        overrideid =  o['id']
+                        break
+            if override_values_count == 0:
+                postdata = { "override_value": { "match":"fqdn=%s.%s" % (name,dns) } }
+                if parameter_type == 'string':
+                    postdata["override_value"]["value"] = value
+                elif parameter_type == 'array':    
+                    value = value.split(',')
+                    postdata["override_value"]["value"] = value
+                overrideurl = "%s://%s:%s/api/v2/smart_class_parameters/%s/override_values" % (protocol, host, port, parameter)
+                res = foremando(url=overrideurl, actiontype="POST", postdata=postdata, user=user, password=password)
+                print "parameter %s created for %s.%s" % (parameter, name, dns)
+            elif overrideid != 0:    
+                postdata = { "override_value": { "match":"fqdn=%s.%s" % (name,dns) } }
+                if parameter_type == 'string':
+                    postdata["override_value"]["value"] = value
+                elif parameter_type == 'array':    
+                    value = value.split(',')
+                    postdata["override_value"]["value"] = value
+                postdata = simplejson.dumps(postdata)
+                overrideurl = "%s://%s:%s/api/v2/smart_class_parameters/%s/override_values/%s" % (protocol, host, port, parameter, overrideid)
+                res = foremando(url=overrideurl, actiontype="PUT", postdata=postdata, user=user, password=password)
+                print "parameter %s updated for %s.%s" % (parameter, name, dns)

@@ -405,7 +405,7 @@ class VM(models.Model):
                 return "Connectivity issue with foreman provider %s!" % foremanprovider.name
             foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password
             foreman=Foreman(host=foremanhost,port=foremanport, user=foremanuser, password=foremanpassword, secure=foremansecure)
-            foremanfound = foreman.exists("%s.%s" %  (name,dns) )
+            foremanfound = foreman.exists(name, dns)
             if foremanfound:
                 return "Machine %s.%s allready exists within foreman!" % (name,dns)
 
