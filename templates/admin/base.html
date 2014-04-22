@@ -22,8 +22,13 @@
 <div class="navbar"><div class="navbar-inner">
 <ul class="nav">
     <a class="brand"><img src="{% static "img/nuages.custom.png" %}" onerror="this.onerror=null;this.src='{% static "img/nuages.png" %}'"  ></a>
-      <li class="divider-vertical"></li>
-      <li><a href="{% url 'create' %}"><div style="font-size:10pt"><i class="icon-white icon-shopping-cart"></i>Create</div></a></li>
+     <li class="divider-vertical"></li>
+     <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-shopping-cart"></i>Creation<b class="caret"></b></a>
+      <ul class="dropdown-menu" >
+      <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>VM</a></li>
+      <li><a href="{% url 'stacks' %}"><i class="icon-white icon-shopping-cart"></i>Stack</a></li>
+     </ul></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><div style="font-size:10pt"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></div></a>
       <ul class="dropdown-menu">
@@ -31,7 +36,11 @@
           <li><a href="{% url 'profiles' %}"><div style="font-size:10pt"><i class="icon-white icon-tasks"></i>Profiles</div></a></li>
           <li><a href="{% url 'customforms' %}"><div style="font-size:10pt"><i class="icon-white icon-thumbs-up"></i>CustomForms</div></a></li>
      </ul></li>
-     <li><a href="{% url 'yourvms' %}"><div style="font-size:10pt"><i class="icon-white icon-list"></i>Your VMS</div></a></li>
+      <li class="dropdown">
+      <ul class="dropdown-menu" >
+      <li><a href="{% url 'yourvms' %}"><i class="icon-white icon-list"></i>Your VMS</a></li>
+      <li><a href="{% url 'yourstacks' %}"><i class="icon-white icon-list"></i>Your Stacks</a></li>
+     </ul></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><div style="font-size:10pt"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></div></a>
       <ul class="dropdown-menu">

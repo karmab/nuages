@@ -129,12 +129,10 @@ $( document ).ready(function() {
 			var additionaliplabel = $('#id_iplabel'+String(numif)+"_"+String(numvm));
  			additionalip.show(400);
  			additionaliplabel.show(400);
-			//if ( ( profiletype == 'ilo' ) || ( profiletype == 'oa' ) ) {
             var additionalmac = $('#id_mac'+String(numif)+"_"+String(numvm));
             var additionalmaclabel = $('#id_maclabel'+String(numif)+"_"+String(numvm));
             additionalmac.show(400);
      		additionalmaclabel.show(400);
-	        //}
 	}}
    }
    });
@@ -274,26 +272,26 @@ $( document ).ready(function() {
  	ip1label.show(400);
  	ip1.show(400);
  	mac1label.show(400);
-        $('#id_mac1').show(400);
+    $('#id_mac1').show(400);
 	}
 	if ( parameter >= 2 ) {
  	ip2label.show(400);
  	ip2.show(400);
  	mac2label.show(400);
-        $('#id_mac2').show(400);
+    $('#id_mac2').show(400);
 	}
 	if ( parameter >= 3 ) {
  	ip3label.show(400);
  	ip3.show(400);
  	mac3label.show(400);
  	mac3.show(400);
-        $('#id_mac3').show(400);
+    $('#id_mac3').show(400);
 	}
 	if ( parameter >= 4 ) {
  	ip4label.show(400);
  	ip4.show(400);
  	mac4label.show(400);
-        $('#id_mac4').show(400);
+    $('#id_mac4').show(400);
 	}
  	var numvms = $('#numvms').val();
 	if ( numvms > 1 ) {
@@ -488,7 +486,7 @@ function createvm(){
   var ip4               = $('#id_ip4').val();
   var iso               = $('#id_iso').val();
   var puppetclasses     = $('#id_puppetclasses').val();
-  var parameters  	= $('#id_parameters').val();
+  var parameters  	    = $('#id_parameters').val();
   var ipilo             = $('#id_ipilo').val();
   var ipoa              = $('#id_ipoa').val();
   var numvms            = $('#numvms').val();
@@ -554,10 +552,10 @@ function createvm(){
     }
 
   //CHECK VALUES ARE THERE
-  //if ( ( name == "" ) || ( profile == "" ) || ( hostgroup == "" )  ) {
-  if ( ( name == "" ) || ( profile == "" )  ) {
+  if (  profile == ""  ) {
+  //if ( ( name == "" ) || ( profile == "" )  ) {
 	$("#result").hide();
-	$("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Name/Profile cant be blank!</div>");
+	$("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Profile cant be blank!</div>");
 	$("#result").show(500);
 	return ;
   }

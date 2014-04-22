@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% load staticfiles %}
+{% block title %}Nuages Stack creation{% endblock %}
+
+{% block content %}
+<script src="{% static "js/stacks.js" %}"></script>
+
+<fieldset class="module aligned">
+<p id="allvms" class="alert alert-info" ><button type='button' class='close' data-dismiss='alert'>&times;</button>Enter name of your stack, number of vms and then select profile for each of them and press CreateStack...<br>
+</p>
+<div id="wheel"></div>
+<p id="result"></p>
+<input type="submit" value="CreateStack" class="btn btn-info" onclick="createstack();"/><p><p>
+<p><p>
+<label id="id_namelabel">Stack Name:</label> <input id="id_name" name="name" maxlength="20" type="text"></p>
+<label >NumVms</label><select id="numvms">
+  <option value="0" selected="selected">0</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+  <option value="3">3</option>
+  <option value="4">4</option>
+  <option value="5">5</option>
+  <option value="6">6</option>
+  <option value="7">7</option>
+  <option value="8">8</option>
+  <option value="9">9</option>
+  <option value="10">10</option>
+</select> 
+{{ credentials.info }}
+</fieldset><p>
+{% endblock content %}
+
+
+{% block vms %}
+<fieldset id="id_extravmsfieldset" class="module aligned">
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_1">Name_1:</label> <input style="display: none;" id="id_name_1" name="name_1" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_1">Profile_1:</label><select style="display: none;"  name="profile1" id="id_profile_1">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_2">Name_2:</label> <input style="display: none;" id="id_name_2" name="name_2" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_2">Profile_2:</label><select style="display: none;" name="profile2" id="id_profile_2">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_3">Name_3:</label> <input style="display: none;" id="id_name_3" name="name_3" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_3">Profile_3:</label><select style="display: none;" name="profile3" id="id_profile_3">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_4">Name_4:</label> <input style="display: none;" id="id_name_4" name="name_4" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_4">Profile_4:</label><select style="display: none;" name="profile4" id="id_profile_4">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_5">Name_5:</label> <input style="display: none;" id="id_name_5" name="name_5" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_5">Profile_5:</label><select style="display: none;" name="profile5" id="id_profile_5">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_6">Name_6:</label> <input style="display: none;" id="id_name_6" name="name_6" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_6">Profile_6:</label><select style="display: none;" name="profile6" id="id_profile_6">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_7">Name_7:</label> <input style="display: none;" id="id_name_7" name="name_2" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_7">Profile_7:</label><select style="display: none;" name="profile7" id="id_profile_7">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_8">Name_8:</label> <input style="display: none;" id="id_name_8" name="name_8" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_8">Profile_8:</label><select style="display: none;" name="profile8" id="id_profile_8">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_9">Name_9:</label> <input style="display: none;" id="id_name_9" name="name_9" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_9">Profile_9:</label><select style="display: none;" name="profile9" id="id_profile_9">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<table><tr>
+<td><label style="display: none;" id="id_namelabel_10">Name_10:</label> <input style="display: none;" id="id_name_10" name="name_10" maxlength="20" type="text"></p></td>
+<td><label style="display: none;" id="id_profilelabel_10">Profile_10:</label><select style="display: none;" name="profile10" id="id_profile_10">
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+</tr>
+</table>
+
+<p><label style="display: none;" id="id_parameterslabel">Parameters:</label><textarea style="display: none;" id="id_parameters" rows="3" cols="9" name="parameters"></textarea></p><p>
+</fieldset>
+{% endblock vms %}

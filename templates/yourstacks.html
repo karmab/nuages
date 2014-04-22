@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load staticfiles %}{% load url from future %}
+{% block title %}Nuages Stacks Information{% endblock %}
+
+{% block content %}
+<script src="{% static "js/yourstacks.js" %}"></script>
+<script src="{% static "js/actions.js" %}"></script>
+
+<div id="actionwheel"></div>
+<fieldset class="module aligned">
+<p class="alert alert-info" >Here s a list of all stacks created by you or your groups peers<br>
+Autorefresh info every 5s / Enable actions:<input id="refresh" type="checkbox"></p>
+<div id="actionpending" class="hidden">0</div>
+<div id="refreshpending" class="hidden">0</div>
+<div id="results"></div>
+<p id="yourstacks"></p>
+
+<table id="yourstacksinitial" border="1" class='alert alert-info'>
+<tr>
+<td>Stack Name</td>
+<td>Created by</td>
+<td>Created when</td>
+</tr>
+{% for stack in stacks|dictsort:"name" %}
+<tr>
+<td>
+{{ stack.name}}</a></td>
+<td>{{ stack.createdby }}</td>
+<td>{{ stack.createdwhen|date:'Y-m-d H:i' }}</td>
+<td>
+</tr>
+{% endfor %}
+</table>
+</fieldset>
+{% endblock content %}               

@@ -260,7 +260,6 @@ function customformforeman() {
  if ( path.length == 4 ) {
     baseurl = '/'+location.pathname.split('/')[1];
     }
- var sure = confirm("This will recreate from scratch all your customtypes from foreman providers classes!!!Sure?");
  if (sure) {
  $.ajax({  
     type: "GET",

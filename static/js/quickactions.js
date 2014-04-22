@@ -55,7 +55,7 @@ if ( path.length == 4 ) {
     baseurl = '/'+location.pathname.split('/')[1];
 }
 $("#quickresults").replaceWith('<div id="quickresults"></div>');
-var sure = confirm(vm+" will be deleted!!!Sure?");
+sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
  $("#actionwheel").show();
  data = { 'name': vm , 'provider' : provider } ;
@@ -84,7 +84,7 @@ path = location.pathname.split('/');
 if ( path.length == 4 ) {
     baseurl = '/'+location.pathname.split('/')[1];
 }
-var sure = confirm(vmname+" will be removed from db!!!Sure?");
+sure = confirm(vmname+" will be removed from db!!!Sure?");
 if (sure) {
  $("#actionwheel").show();
  data = { 'id': vmid , 'name' : vmname } ;

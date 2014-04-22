@@ -47,7 +47,12 @@
 <ul class="nav">
     <a class="brand"><img src="{% static "img/nuages.custom.png" %}" onerror="this.onerror=null;this.src='{% static "img/nuages.png" %}'"  ></a>
       <li class="divider-vertical"></li>
-      <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>Create</a></li>
+     <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-shopping-cart"></i>Creation<b class="caret"></b></a>
+      <ul class="dropdown-menu" >
+      <li><a href="{% url 'create' %}"><i class="icon-white icon-shopping-cart"></i>VM</a></li>
+      <li><a href="{% url 'stacks' %}"><i class="icon-white icon-shopping-cart"></i>Stack</a></li>
+     </ul></li>
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-info-sign"></i>Information<b class="caret"></b></a>
       <ul class="dropdown-menu" >
@@ -55,7 +60,12 @@
           <li><a href="{% url 'profiles' %}"><i class="icon-white icon-tasks"></i>Profiles</a></li>
           <li><a href="{% url 'customforms' %}"><i class="icon-white icon-thumbs-up"></i>CustomForms</a></li>
      </ul></li>
-     <li><a href="{% url 'yourvms' %}"><i class="icon-white icon-list"></i>Your VMS</a></li>
+     <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-list"></i>Your Stuff<b class="caret"></b></a>
+      <ul class="dropdown-menu" >
+      <li><a href="{% url 'yourvms' %}"><i class="icon-white icon-list"></i>Your VMS</a></li>
+      <li><a href="{% url 'yourstacks' %}"><i class="icon-white icon-list"></i>Your Stacks</a></li>
+     </ul></li>
      {% if username.is_staff  %}
      <li class="dropdown">
       <a href="#" class="dropdown-toggle" data-toggle="dropdown"><i class="icon-white icon-cog"></i>Admin<b class="caret"></b></a>
@@ -86,4 +96,7 @@
 <p>
 {% block extravms %}
 {% endblock extravms %}
+
+{% block vms %}
+{% endblock vms %}
 </body></html>

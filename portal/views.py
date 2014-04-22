@@ -105,7 +105,6 @@ def create(request):
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
     if request.method == 'POST':
-        numvms            = request.POST.get('numvms')
         name              = request.POST.get('name')
         storagedomain     = request.POST.get('storagedomain')
         physicalprovider  = request.POST.get('physicalprovider')
@@ -175,6 +174,20 @@ def create(request):
         if type:
             parameters = "type=%s %s" % (type, parameters)
 
+        if name == '':
+            if profile.naming == None:
+                return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM with this profile needs a name</div>")
+            else:
+                names = VM.objects.filter(virtualprovider=virtualprovider).filter(name__startswith=profile.naming).values('name')
+                if names == None:
+                    name = "%s001" % (profile.naming)
+                else:
+                    counter = 0
+                    for n in names:
+                        if int(n['name'][-3:])> counter:
+                            counter = int(n['name'][-3:])
+                    counter = counter+1        
+                    name = "%s%0.3d"  % (profile.naming, counter)
         #CHECK SECTION
         #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
         vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
@@ -1581,3 +1594,130 @@ def customformcobbler(request):
         responselist = ' '.join(allclasses.keys())
         response = "<div class='alert alert-success'><button type='button' class='close' data-dismiss='alert'>&times;</button>Customforms populated from Cobbler providers and with those classes:<p> %s</div>" % responselist 
         return HttpResponse(response)
+
+@login_required
+def stacks(request):
+    username          = request.user.username
+    username          = User.objects.filter(username=username)[0]
+    if request.method == 'POST':
+        logging.debug('prout')
+        stackname         = request.POST.get('name')
+        numvms            = int(request.POST.get('numvms'))
+        name1          = request.POST.get('name1')
+        name2          = request.POST.get('name2')
+        name3          = request.POST.get('name3')
+        name4          = request.POST.get('name4')
+        name5          = request.POST.get('name5')
+        name6          = request.POST.get('name6')
+        name7          = request.POST.get('name7')
+        name8          = request.POST.get('name8')
+        name9          = request.POST.get('name9')
+        name10         = request.POST.get('name10')
+        profile1          = request.POST.get('profile1')
+        profile2          = request.POST.get('profile2')
+        profile3          = request.POST.get('profile3')
+        profile4          = request.POST.get('profile4')
+        profile5          = request.POST.get('profile5')
+        profile6          = request.POST.get('profile6')
+        profile7          = request.POST.get('profile7')
+        profile8          = request.POST.get('profile8')
+        profile9          = request.POST.get('profile9')
+        profile10         = request.POST.get('profile10')
+        profiles          = { 1 : profile1 , 2 : profile2, 3 : profile3, 4 : profile4 , 5 : profile5, 6 : profile6, 7 : profile7 , 8 : profile8, 9 : profile9, 10: profile10 }
+        names             = { 1 : name1 , 2 : name2, 3 : name3, 4 : name4 , 5 : name5, 6 : name6, 7 : name7 , 8 : name8, 9 : name9, 10: name10 }
+        parameters          = request.POST.get('parameters')
+        #puppetclasses     = request.POST.get('puppetclasses')
+        #parameters        = request.POST.get('parameters')
+        #hostgroup         = request.POST.get('hostgroup')
+        stack = Stack(name=stackname, numvms=numvms, createdby=username)
+        stack.save()
+        failure = False
+        for num in range(1,numvms+1):
+            name       = names[num]
+            profile    = profiles[num]
+            profilevms = profiles.values().count(profile)
+            profile    = Profile.objects.get(name=profile)
+            if profile.maxvms:
+                currentvms = len(VM.objects.filter(profile=profile))
+                if currentvms + profilevms > profile.maxvms:
+                    return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Exceeded maximum vms for this profile<p</div>")
+            virtualprovider, cobblerprovider, foremanprovider, ipamprovider = profile.virtualprovider, profile.cobblerprovider, profile.foremanprovider, profile.ipamprovider
+            disksize1, disksize2, numinterfaces, requireip, cobbler, foreman = profile.disksize1, profile.disksize2, profile.numinterfaces, profile.requireip, profile.cobbler, profile.foreman
+            # get best storage domain
+            datacenter = profile.datacenter
+            if virtualprovider.type == 'ovirt':
+                ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+                storagedomain = ovirt.beststorage(datacenter)
+                ovirt.close()
+            elif virtualprovider.type == 'kvirt':
+                kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                storagedomain = kvirt.beststorage()
+                kvirt.close()
+            elif virtualprovider.type == 'vsphere':
+                beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+                bestds = os.popen(beststoragecommand).read()
+                storagedomain = bestds.strip()
+            #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
+            vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
+            if len(vms) > 0:
+                return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM %s allready exists</div>" % name)
+            if not virtualprovider.type == 'fake' and not profile.autostorage:
+                storageresult=checkstorage(profilevms,virtualprovider,disksize1,disksize2,storagedomain)
+                if storageresult != 'OK':
+                    return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
+            hostgroup, puppetclasses = None, None
+            parameters = None
+            #newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, puppetclasses=puppetclasses, parameters=parameters, createdby=username, hostgroup=hostgroup)
+            newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, createdby=username)
+            success = newvm.save()
+            if success == 'OK':
+                stack.vms.add(newvm)
+            else:    
+                failure   = True
+                break
+        if not failure:
+            return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Stack %s successfully created!</div>" % stackname )
+        else:
+            # WE SHOULD DELETE ALL VMS OF THE STACK AND THE STACK
+            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Stack %s not created!</div>" % stackname )
+    elif username.is_staff:
+        profiles = Profile.objects.all()
+        if not profiles:
+            information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
+            return render(request, 'information.html', { 'information' : information , 'username': username } )
+        else:
+            return render(request, 'stacks.html', { 'username': username, 'profiles': profiles  } )
+    else:
+        usergroups=[]
+        for g in groups.values():
+            usergroups.append(g['id'])
+        if len(usergroups) == 0:
+            query = Q(groups=None)
+        else:
+            query = Q(groups=None)|Q(groups=usergroups[0])
+            for group in usergroups[1:]:
+                query=query|Q(groups=group)
+        query=Profile.objects.filter(query)
+        if not query:
+            information = { 'title':'Missing elements' , 'details':'Create profiles first...' }
+            return render(request, 'information.html', { 'information' : information } )
+        return render(request, 'stacks.html', { 'username': username, 'profiles': profiles  } )
+
+@login_required
+def yourstacks(request):
+    #ajax = False
+    #if request.is_ajax():
+    #    ajax = True
+    username          = request.user.username
+    username          = User.objects.get(username=username)
+    usergroups        = username.groups
+    query             = Q(createdby=username)
+    allusers          = User.objects.all()
+    for g in usergroups.all():
+        for u in allusers:
+            if u.username == username.username:
+                continue
+            if g in u.groups.all():
+                query=query|Q(createdby=u)
+    stacks = Stack.objects.filter(query)
+    return render(request, 'yourstacks.html', { 'stacks': stacks, 'username': username  } )

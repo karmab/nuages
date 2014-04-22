@@ -160,7 +160,7 @@ class ForemanProvider(models.Model):
     envid               = models.CharField(max_length=20, default=FOREMANENV, blank=True, null=True)
     archid              = models.CharField(max_length=20, default=FOREMANARCH, blank=True, null=True)
     puppetid            = models.CharField(max_length=20, default=FOREMANPUPPET, blank=True, null=True)
-    ptableid             = models.CharField(max_length=20, blank=True, null=True)
+    ptableid            = models.CharField(max_length=20, blank=True, null=True)
     def __unicode__(self):
         return self.name
     def clean(self):
@@ -200,6 +200,7 @@ class Hook(models.Model):
 
 class Profile(models.Model):
     name              = models.CharField(max_length=80)
+    naming            = models.CharField(max_length=80,blank=True,null=True)
     physicalprovider  = models.ForeignKey(PhysicalProvider,blank=True,null=True)
     virtualprovider   = models.ForeignKey(VirtualProvider,blank=True,null=True)
     cobblerprovider   = models.ForeignKey(CobblerProvider,blank=True,null=True)
@@ -478,11 +479,11 @@ class VM(models.Model):
         if foreman and foremanprovider:
             foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
             f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
-            f.create(name=name,dns=dns,ip=ip1,hostgroup=hostgroup)
+            f.create(name=name, dns=dns, ip=ip1, hostgroup=hostgroup)
             if puppetclasses != '':
-                f.addclasses(name=name,dns=dns,classes=puppetclasses)
+                f.addclasses(name=name, dns=dns, classes=puppetclasses)
             if foremanparameters and parameters != '':
-                f.addparameters(name=name,dns=dns,parameters=parameters)
+                f.addparameters(name=name, dns=dns, parameters=parameters)
         super(VM, self).save(*args, **kwargs)
         if aftercreate:
             env = os.environ
@@ -559,30 +560,23 @@ class Default(models.Model):
     consoleminport    = models.IntegerField(default=6000)
     consolemaxport    = models.IntegerField(default=7000)
     currency          = models.CharField(max_length=20, default='$',choices=( ('$', '$'),('€', '€') ))
-#    color             = models.CharField(max_length=7,default='#ADD8E6')
     def __unicode__(self):
         return self.name
     def clean(self):
         model = self.__class__
         if (model.objects.count() > 0 and self.id != model.objects.get().id):
             raise ValidationError("Can only create 1 %s instance" % model.__name__)
-#    def save(self, *args, **kw):
-#        if self.pk is not None:
-#            ori = Default.objects.get(pk=self.pk)
-#            if ori.color != self.color:
-#                content=""".navbar-inner
-#                {
-#                            background-color: %s;
-#                                background-image: none;
-#                                }   
-#
-#                .dropdown-menu
-#                {
-#                            background-color: %s;
-#                                background-image: none;
-#                                }""" % (self.color, self.color)
-#                colorfile = open("%s/static/css/colors.custom.css" % settings.PWD , 'w')
-#                colorfile.write(content)
-#                colorfile.close()
-#
-#        super(Default, self).save(*args, **kw)
+
+class Stack(models.Model):
+    name              = models.CharField(max_length=80)
+    numvms            = models.IntegerField(default=0)
+    vms               = models.ManyToManyField(VM,blank=True,null=True,related_name='vms')
+    status            = models.CharField(max_length=20, default='N/A')
+    createdby         = models.ForeignKey(User,default=1,blank=True)
+    createdwhen       = models.DateTimeField(editable=True,blank=True,null=True)
+    price             = models.IntegerField(blank=True,null=True)
+    def __unicode__(self):
+        return self.name
+    def save(self, *args, **kwargs):
+        self.createdwhen=datetime.now()
+        super(Stack, self).save(*args, **kwargs)

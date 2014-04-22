@@ -8,9 +8,9 @@ from django.core.urlresolvers import reverse_lazy
 admin.autodiscover()
 
 urlpatterns = patterns('portal.views',
-      #url(r'^$', 'create'),
       url(r'^$', RedirectView.as_view(url=reverse_lazy('create'))),
       url(r'^vms/$', 'create', name='create'),
+      url(r'^vms/stacks/$', 'stacks', name='stacks'),
       url(r'^vms/findvm', 'findvm', name='findvm'),
       url(r'^vms/quickvms/$', 'quickvms', name='quickvms'),
       url(r'^profiles/$', 'profiles', name='profiles'),
@@ -24,6 +24,7 @@ urlpatterns = patterns('portal.views',
       url(r'^types/', 'types', name='types'),
       url(r'^hostgroups/', 'hostgroups', name='hostgroups'),
       url(r'^yourvms/$', 'yourvms', name='yourvms'),
+      url(r'^yourstacks/$', 'yourstacks', name='yourstacks'),
       url(r'^allvms/$', 'allvms', name='allvms'),
       url(r'^vms/console', 'console', name='console'),
       url(r'^vms/start', 'start', name='start'),
