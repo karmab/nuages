@@ -34,12 +34,18 @@
 
 {% block vms %}
 <fieldset id="id_extravmsfieldset" class="module aligned">
-
-<table><tr>
+<table>
+<tr>
+</tr>
+<tr>
 <td><label style="display: none;" id="id_namelabel_1">Name_1:</label> <input style="display: none;" id="id_name_1" name="name_1" maxlength="20" type="text"></p></td>
 <td><label style="display: none;" id="id_profilelabel_1">Profile_1:</label><select style="display: none;"  name="profile1" id="id_profile_1">
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select></td>
+<td><label style="display: none;" id="id_hostgrouplabel_1">Hostgroup_1:</label><select style="display: none;"  name="hostgroup1" id="id_hostgroup_1">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
 {% endfor %}</select></td>
 </tr>
 </table>
@@ -50,6 +56,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_2">Hostgroup_2:</label><select style="display: none;"  name="hostgroup2" id="id_hostgroup_2">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -59,6 +70,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_3">Hostgroup_3:</label><select style="display: none;"  name="hostgroup3" id="id_hostgroup_3">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -68,6 +84,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_4">Hostgroup_4:</label><select style="display: none;"  name="hostgroup4" id="id_hostgroup_4">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -77,6 +98,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_5">Hostgroup_5:</label><select style="display: none;"  name="hostgroup5" id="id_hostgroup_5">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -86,6 +112,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_6">Hostgroup_6:</label><select style="display: none;"  name="hostgroup7" id="id_hostgroup_6">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -95,6 +126,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_7">Hostgroup_7:</label><select style="display: none;"  name="hostgroup7" id="id_hostgroup_7">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -104,6 +140,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_1">Hostgroup_8:</label><select style="display: none;"  name="hostgroup8" id="id_hostgroup_8">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -113,6 +154,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_9">Hostgroup_9:</label><select style="display: none;"  name="hostgroup9" id="id_hostgroup_9">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 
@@ -122,6 +168,11 @@
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
+<td><label style="display: none;" id="id_hostgrouplabel_10">Hostgroup_10:</label><select style="display: none;"  name="hostgroup10" id="id_hostgroup_10">
+{% for hostgroup in hostgroups|dictsort:"name" %}
+<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
+{% endfor %}</select></td>
+</tr>
 </tr>
 </table>
 

@@ -244,7 +244,7 @@ class Ovirt:
         nics = params.Nics()
         nics.add_nic(nic1)
         if numinterfaces > 1:
-            nics.add_nic(nic3)
+            nics.add_nic(nic2)
         if numinterfaces > 2:
             nics.add_nic(nic3)
         if numinterfaces > 3:

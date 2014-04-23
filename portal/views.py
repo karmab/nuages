@@ -188,6 +188,42 @@ def create(request):
                             counter = int(n['name'][-3:])
                     counter = counter+1        
                     name = "%s%0.3d"  % (profile.naming, counter)
+        if ip1 == '' and profile.range1 != None:
+            ips = VM.objects.filter(profile=profile).exclude(ip1=None).values('ip1')
+            last = 1
+            for i in ips:
+                ip = i['ip1']
+                currentlast = int(ip.split('.')[3])
+                if ip.startswith(profile.range1) and currentlast > last:
+                    last = currentlast
+            ip1 = "%s.%d" % (profile.range1, last)
+        if ip2 == '' and profile.range2 != '':
+            ips = VM.objects.filter(profile=profile).exclude(ip2=None).values('ip2')
+            last = 1
+            for i in ips:
+                ip = i['ip2']
+                currentlast = int(ip.split('.')[3])
+                if ip.startswith(profile.range2) and currentlast > last:
+                    last = currentlast
+            ip2 = "%s.%d" % (profile.range2, last)
+        if ip3 == '' and profile.range3 != '':
+            ips = VM.objects.filter(profile=profile).exclude(ip3=None).values('ip3')
+            last = 1
+            for i in ips:
+                ip = i['ip3']
+                currentlast = int(ip.split('.')[3])
+                if ip.startswith(profile.range3) and currentlast > last:
+                    last = currentlast
+            ip3 = "%s.%d" % (profile.range3, last)
+        if ip4 == '' and profile.range4 != '':
+            ips = VM.objects.filter(profile=profile).exclude(ip4=None).values('ip4')
+            last = 1
+            for i in ips:
+                ip = i['ip4']
+                currentlast = int(ip.split('.')[3])
+                if ip.startswith(profile.range4) and currentlast > last:
+                    last = currentlast
+            ip4 = "%s.%d" % (profile.range4, last)
         #CHECK SECTION
         #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
         vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)

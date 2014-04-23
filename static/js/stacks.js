@@ -16,20 +16,28 @@ $( document ).ready(function() {
 		var namelabel       = $('#id_namelabel_'+String(numvm));
 		var profile         = $('#id_profile_'+String(numvm));
 		var profilelabel    = $('#id_profilelabel_'+String(numvm));
+		var hostgroup         = $('#id_hostgroup_'+String(numvm));
+		var hostgrouplabel    = $('#id_hostgrouplabel_'+String(numvm));
  		name.hide();
  		namelabel.hide();
  		profile.hide();
  		profilelabel.hide();
+ 		hostgroup.hide();
+ 		hostgrouplabel.hide();
     }
     for (var numvm = 1; numvm <= numvms; numvm++) {
 		var name            = $('#id_name_'+String(numvm));
 		var namelabel       = $('#id_namelabel_'+String(numvm));
 		var profile         = $('#id_profile_'+String(numvm));
 		var profilelabel    = $('#id_profilelabel_'+String(numvm));
+		var hostgroup         = $('#id_hostgroup_'+String(numvm));
+		var hostgrouplabel    = $('#id_hostgrouplabel_'+String(numvm));
  		name.show(400);
  		namelabel.show(400);
  		profile.show(400);
  		profilelabel.show(400);
+ 		hostgroup.show(400);
+ 		hostgrouplabel.show(400);
     }
   });
 
