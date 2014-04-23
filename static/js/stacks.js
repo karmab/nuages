@@ -87,9 +87,9 @@ $( document ).ready(function() {
   var profile10         = $('#id_profile_10').val();
   var details = { 'name': name, 'numvms' : numvms, 'name1' : name1 , 'profile1' : profile1 , 'name2' : name2 , 'profile2' : profile2 , 'name3' : name3 , 'profile3' : profile3 , 'name4' : name4 , 'profile4' : profile4 , 'name5' : name5 , 'profile5' : profile5 ,  'name6' : name6 , 'profile6' : profile6 , 'name7' : name7 , 'profile7' : profile7 , 'name8' : name8 , 'profile8' : profile8 , 'name9' : name9 , 'profile9' : profile9 , 'name10' : name10 , 'profile10' : profile10, 'parameters' : parameters  } ;
   //CHECK VALUES ARE THERE
-  if ( ( name == "" ) || ( numvms == 0 )  ) {
+  if (  numvms == 0   ) {
     $("#result").hide();
-    $("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Stack Name cant be blank and numvms has to be more than 0 !</div>");
+    $("#result").html("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Numvms has to be more than 0 !</div>");
     $("#result").show(500);
     return ;
   }

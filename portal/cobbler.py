@@ -27,7 +27,7 @@ class Cobbler:
         self.s = xmlrpclib.Server("http://%s/cobbler_api" % cobblerhost)
         self.token = self.s.login(cobbleruser,cobblerpassword)
 
-    def create(self,name,profile, numinterfaces, dns=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, gwstatic=None, gwbackup=None, staticroutes=None, backuproutes=None,macaddr=None,parameters=None,cmdline=None,nextserver=None):
+    def create(self,name,profile, numinterfaces, dns=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, gateway=None, gwstatic=None, gwbackup=None, staticroutes=None, backuproutes=None,macaddr=None,parameters=None,cmdline=None,nextserver=None):
         if ip1:
             ip1=ip1.encode('ascii')
         if ip2:
@@ -101,7 +101,8 @@ class Cobbler:
             s.modify_system(system, 'modify_interface', eth1, token)
             s.modify_system(system, 'modify_interface', eth2, token)
             s.modify_system(system, 'modify_interface', eth3, token)
-
+        if gateway:
+            s.modify_system(system,"gateway", gateway, token)
         if parameters:
             s.modify_system(system,"ks_meta", parameters, token)
         if cmdline:

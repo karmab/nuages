@@ -207,7 +207,7 @@ class Ovirt:
         api.vms.get(name).start()
         return "%s started" % name
 
-    def cloudinit(self, name, numinterfaces=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, rootpw=None, dns=None, dns1=None):
+    def cloudinit(self, name, numinterfaces=None, ip1=None, subnet1=None, ip2=None, subnet2=None, ip3=None, subnet3=None, ip4=None, subnet4=None, gateway=None, rootpw=None, dns=None, dns1=None):
         api=self.api
         while api.vms.get(name).status.state =="image_locked":
             time.sleep(5)
@@ -215,7 +215,7 @@ class Ovirt:
         hostname = params.Host(address=name)
         nic1, nic2, nic3, nic4 = None, None, None, None
         if ip1 and subnet1:
-            ip = params.IP(address=ip1, netmask=subnet1)
+            ip = params.IP(address=ip1, netmask=subnet1,gateway=gateway)
             network=params.Network(ip=ip)
             nic1 = params.NIC(name='eth0', boot_protocol= 'STATIC', network=network, on_boot=True)
         else:

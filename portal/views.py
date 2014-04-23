@@ -99,6 +99,45 @@ def customlogin(request, *args, **kwargs):
         request.session.modified = True
     return auth_views.login(request, *args, **kwargs)
 
+
+
+
+def getname(profile):
+    names = VM.objects.filter(profile=profile).filter(name__startswith=profile.naming).values('name')
+    if names == None:
+        name = "%s001" % (profile.naming)
+    else:
+        counter = 0
+        for n in names:
+            if int(n['name'][-3:])> counter:
+                counter = int(n['name'][-3:])
+        counter = counter+1
+        name = "%s%0.3d"  % (profile.naming, counter)
+        return name
+
+def getip(profile,index):
+    netranges = { 1: profile.range1, 2: profile.range2, 3 : profile.range3 , 4: profile.range4 }
+    netrange = netranges[index]
+    if netrange == '':
+        return ''
+    filter = "ip%d" % index
+    if index == 1:
+        ips = VM.objects.filter(profile=profile).exclude(ip1=None).values('ip1')
+    elif index == 2:
+        ips = VM.objects.filter(profile=profile).exclude(ip2=None).values('ip2')
+    elif index == 3:
+        ips = VM.objects.filter(profile=profile).exclude(ip3=None).values('ip3')
+    elif index == 4:
+        ips = VM.objects.filter(profile=profile).exclude(ip4=None).values('ip4')
+    last = 0
+    for i in ips:
+        ip = i[filter]
+        currentlast = int(ip.split('.')[3])
+        if ip.startswith(netrange) and currentlast > last:
+            last = currentlast
+    last = last+1
+    return "%s.%d" % (netrange, last)
+
 @login_required
 def create(request):
     logging.debug('prout')
@@ -178,52 +217,15 @@ def create(request):
             if profile.naming == None:
                 return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM with this profile needs a name</div>")
             else:
-                names = VM.objects.filter(virtualprovider=virtualprovider).filter(name__startswith=profile.naming).values('name')
-                if names == None:
-                    name = "%s001" % (profile.naming)
-                else:
-                    counter = 0
-                    for n in names:
-                        if int(n['name'][-3:])> counter:
-                            counter = int(n['name'][-3:])
-                    counter = counter+1        
-                    name = "%s%0.3d"  % (profile.naming, counter)
-        if ip1 == '' and profile.range1 != None:
-            ips = VM.objects.filter(profile=profile).exclude(ip1=None).values('ip1')
-            last = 1
-            for i in ips:
-                ip = i['ip1']
-                currentlast = int(ip.split('.')[3])
-                if ip.startswith(profile.range1) and currentlast > last:
-                    last = currentlast
-            ip1 = "%s.%d" % (profile.range1, last)
-        if ip2 == '' and profile.range2 != '':
-            ips = VM.objects.filter(profile=profile).exclude(ip2=None).values('ip2')
-            last = 1
-            for i in ips:
-                ip = i['ip2']
-                currentlast = int(ip.split('.')[3])
-                if ip.startswith(profile.range2) and currentlast > last:
-                    last = currentlast
-            ip2 = "%s.%d" % (profile.range2, last)
-        if ip3 == '' and profile.range3 != '':
-            ips = VM.objects.filter(profile=profile).exclude(ip3=None).values('ip3')
-            last = 1
-            for i in ips:
-                ip = i['ip3']
-                currentlast = int(ip.split('.')[3])
-                if ip.startswith(profile.range3) and currentlast > last:
-                    last = currentlast
-            ip3 = "%s.%d" % (profile.range3, last)
-        if ip4 == '' and profile.range4 != '':
-            ips = VM.objects.filter(profile=profile).exclude(ip4=None).values('ip4')
-            last = 1
-            for i in ips:
-                ip = i['ip4']
-                currentlast = int(ip.split('.')[3])
-                if ip.startswith(profile.range4) and currentlast > last:
-                    last = currentlast
-            ip4 = "%s.%d" % (profile.range4, last)
+                name = getname(profile)
+        if ip1 == '':
+            ip1 = getip(profile, 1)
+        if ip2 == '':
+            ip2 = getip(profile, 2)
+        if ip3 == '':
+            ip3 = getip(profile, 3)
+        if ip4 == '':
+            ip4 = getip(profile, 4)
         #CHECK SECTION
         #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
         vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
@@ -242,11 +244,25 @@ def create(request):
             successes={ name : "Machine %s successfully created!!!" % name }
             for num in range(2,numvms+1):
                 newname = request.POST.get("name_%s" % num)
-                newip1 = request.POST.get("ip1_%s" % num)
+                newip1  = request.POST.get("ip1_%s" % num)
                 newmac1 = request.POST.get("mac1_%s" % num)
-                newip2 = request.POST.get("ip2_%s" % num)
-                newip3 = request.POST.get("ip3_%s" % num)
-                newip4 = request.POST.get("ip4_%s" % num)
+                newip2  = request.POST.get("ip2_%s" % num)
+                newip3  = request.POST.get("ip3_%s" % num)
+                newip4  = request.POST.get("ip4_%s" % num)
+                if newname == '':
+                    if profile.naming == None:
+                        successes["name_%s" % num]= "Named needed for name_%s" %  num
+                        continue
+                else:
+                    newname = getname(profile)
+                if newip1 == '':
+                    newip1 = getip(profile, 1)
+                if newip2 == '':
+                    newip2 = getip(profile, 2)
+                if newip3 == '':
+                    newip3 = getip(profile, 3)
+                if newip4 == '':
+                    newip4 = getip(profile, 4)
                 if requireip and not ipamprovider and not newip1:
                     successes[newname]="Ip1 needed for %s" % newname
                     continue
@@ -910,9 +926,12 @@ def kill(request):
             remove = os.popen(removecommand).read()
             #removeinfo= ast.literal_eval(remove)
             r='VM killed in vsphere'
-        #vm.delete()
-        vm.unmanaged = True
-        vm.save()
+        profile = vm.profile
+        if profile.fulldelete:
+            vm.delete()
+        else:
+            vm.unmanaged = True
+            vm.save()
         return HttpResponse("VM %s killed" % name)
 
 def dbremove(request):
@@ -1693,6 +1712,12 @@ def stacks(request):
                 beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                 bestds = os.popen(beststoragecommand).read()
                 storagedomain = bestds.strip()
+            if name == '':
+                if profile.naming == None:
+                    failure   = True
+                    break
+                else:
+                    name = getname(profile)
             #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
             vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
             if len(vms) > 0:
