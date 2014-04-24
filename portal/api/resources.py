@@ -4,6 +4,7 @@ from tastypie.authentication import BasicAuthentication
 from tastypie.authorization import DjangoAuthorization
 from tastypie import fields
 from portal.models import *
+from django.conf.urls import url
 
 class CreatedByResource(ModelResource):
     class Meta:
@@ -12,6 +13,11 @@ class CreatedByResource(ModelResource):
         allowed_methods = ['get']
         excludes        = ['email', 'password', 'is_active', 'is_staff', 'is_superuser']
         authentication = BasicAuthentication()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
 class PhysicalProviderResource(ModelResource):
     class Meta:
@@ -20,6 +26,11 @@ class PhysicalProviderResource(ModelResource):
         allowed_methods = ['get']
         fields          = ['name']
         authentication = BasicAuthentication()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
 class VirtualProviderResource(ModelResource):
     class Meta:
@@ -28,6 +39,11 @@ class VirtualProviderResource(ModelResource):
         allowed_methods = ['get']
         fields          = ['name','type']
         authentication = BasicAuthentication()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
 class ForemanProviderResource(ModelResource):
     class Meta:
@@ -36,6 +52,11 @@ class ForemanProviderResource(ModelResource):
         allowed_methods = ['get']
         fields          = ['name']
         authentication = BasicAuthentication()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
 class CobblerProviderResource(ModelResource):
     class Meta:
@@ -44,6 +65,11 @@ class CobblerProviderResource(ModelResource):
         allowed_methods = ['get']
         fields = ['name']
         authentication = BasicAuthentication()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
 class ProfileResource(ModelResource):
     physicalprovider = fields.ForeignKey(PhysicalProviderResource, 'physicalprovider', null=True, blank=True)
@@ -55,6 +81,11 @@ class ProfileResource(ModelResource):
         resource_name  = 'profile'
         authentication = BasicAuthentication()
         authorization  = DjangoAuthorization()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
 class VMResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
@@ -62,6 +93,12 @@ class VMResource(ModelResource):
         queryset       =  VM.objects.all()
         authentication = BasicAuthentication()
         authorization  = DjangoAuthorization()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
+
 
 class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
@@ -69,3 +106,8 @@ class StackResource(ModelResource):
         queryset       =  Stack.objects.all()
         authentication = BasicAuthentication()
         authorization  = DjangoAuthorization()
+        detail_uri_name = 'name'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
