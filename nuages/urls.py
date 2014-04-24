@@ -4,6 +4,11 @@ from django.contrib import admin
 from django.conf.urls.defaults import *
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
+from tastypie.api import Api
+from portal.api.resources import *
+
+v1api = Api(api_name='v1')
+v1api.register(VMResource())
 
 admin.autodiscover()
 
@@ -46,6 +51,7 @@ urlpatterns = patterns('portal.views',
       url(r'^invoicepdf','invoicepdf', name='invoicepdf'),
       url(r'^invoice','invoice', name='invoice'),
       url(r'^afterbuild/(?P<name>.*)$', 'afterbuild', name='afterbuild'),
+      url(r'^api/', include(v1api.urls)),
 )
 
 urlpatterns += patterns('',

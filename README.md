@@ -12,6 +12,7 @@ nuages repository
     -VMS get created based on predefined profiles ( with a given virtualprovider and optional foremanprovider and cobblerprovider, and vm details such as disksize ( 2 disks supported), net interfaces ( 4 nets supported ) ,...)
     -Authentication can use remote ldap providers
     -You get some basic billing/invoice
+    -You get a REST api
 
 What s that name,man?
 ------------
@@ -46,6 +47,7 @@ Requisites
     a DB (postgresql is what i used but sqlite3 is another simpler option)
     python-requests if you will connect to foreman
     python-ldap for ldap auth
+    python-django-tastypie from epel ( provides REST api)
     ovirt-engine-sdk package from epel (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
     libvirt-python and python-lxml ( only if you will connect to libvirt hosts)
@@ -63,7 +65,7 @@ I want it all, i want it now !
 -----------------------------
     
     #if rhel/centos, subscribe to epel and optional channel
-    yum -y install jython ovirt-engine-sdk  python-requests  python-ldap libvirt-python python-lxml python-websockify python-paramiko python-reportlab python-dateutil  openssl python-crypto httpd  mod_wsgi postgresql-server python-psycopg2 Django14 Django-south
+    yum -y install jython ovirt-engine-sdk  python-requests  python-ldap libvirt-python python-lxml python-websockify python-paramiko python-reportlab python-dateutil  openssl python-crypto httpd  mod_wsgi postgresql-server python-psycopg2 Django14 Django-south python-django-tastypie
 
 
 Ovirt SDK Installation
@@ -205,6 +207,8 @@ Usage
      you can then begin creating vms or manage existing ones from the allvms tabs
 
      to create custom types, you can go in /usr/share/nuages/portal and copy customtypes.py.sample to customtypes.py
+
+     api access is at /nuages/api/v1/?format=json
 
  
 Screenshots
