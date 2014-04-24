@@ -840,52 +840,26 @@ def console(request):
 @login_required
 def start(request):
     if request.method == 'POST':
-        vmname = request.POST.get('name')
+        name = request.POST.get('name')
         virtualprovider=request.POST.get('virtualprovider')
-        virtualprovider = VirtualProvider.objects.filter(name=virtualprovider)[0]
-        if virtualprovider.type == 'ovirt':
-            ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            results=ovirt.start(vmname)
-            ovirt.close()
+        virtualprovider = VirtualProvider.objects.get(name=virtualprovider)
+        results = vmstart(name, virtualprovider)
+        if virtualprovider.type == 'vsphere':
+            return HttpResponse(results, mimetype='application/json')
+        else:
             return HttpResponse(results)
-        elif virtualprovider.type == 'kvirt':
-            kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            results=kvirt.start(vmname)
-            kvirt.close()
-            return HttpResponse(results)
-        elif virtualprovider.type == 'vsphere':
-            startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
-            startinfo = os.popen(startcommand).read()
-            #startinfo= ast.literal_eval(startinfo)
-            print startinfo
-            startinfo = json.dumps(startinfo)
-            print startinfo
-            return HttpResponse(startinfo,mimetype='application/json')
 
 @login_required
 def stop(request):
     if request.method == 'POST':
-        vmname = request.POST.get('name')
-        virtualprovider=request.POST.get('virtualprovider')
+        name            = request.POST.get('name')
+        virtualprovider = request.POST.get('virtualprovider')
         virtualprovider = VirtualProvider.objects.get(name=virtualprovider)
-        if virtualprovider.type == 'ovirt':
-            ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            results= ovirt.stop(vmname)
-            ovirt.close()
+        results = vmstop(name, virtualprovider)
+        if virtualprovider.type == 'vsphere':
+            return HttpResponse(results,mimetype='application/json')
+        else:
             return HttpResponse(results)
-        elif virtualprovider.type == 'kvirt':
-            kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            results= kvirt.stop(vmname)
-            kvirt.close()
-            return HttpResponse(results)
-        elif virtualprovider.type == 'vsphere':
-            stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,vmname )
-            stopinfo = os.popen(stopcommand).read()
-            #stopinfo= ast.literal_eval(stopinfo)
-            print stopinfo
-            stopinfo = json.dumps(stopinfo)
-            print stopinfo
-            return HttpResponse(stopinfo,mimetype='application/json')
 
 @login_required
 def kill(request):
@@ -894,46 +868,23 @@ def kill(request):
         provider = request.POST.get('provider')
         if provider =='':
             virtualprovider = None
-            vm = VM.objects.filter(name=name).filter(physical=True)[0]
+            vm              = VM.objects.filter(name=name).filter(physical=True)[0]
         else:
             virtualprovider = VirtualProvider.objects.get(name=provider)
-            vm = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
+            vm              = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
         profile = vm.profile
-        if profile.fulldelete:
-            vm.delete()
-            return HttpResponse("VM %s killed" % name)
-        cobblerprovider=vm.cobblerprovider
-        foremanprovider=vm.foremanprovider
-        if cobblerprovider:
-            cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
-            cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
-            cobbler.remove(name)
-        if foremanprovider:
-            dns = vm.profile.dns
-            foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
-            foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
-            foreman.delete(name=name,dns=dns)
-        if virtualprovider and virtualprovider.type == 'ovirt':
-            ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            ovirt.remove(name)
-            ovirt.close()
-        elif virtualprovider and virtualprovider.type == 'kvirt':
-            kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            kvirt.remove(name)
-            kvirt.close()
-        elif virtualprovider and virtualprovider.type == 'vsphere':
-            removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
-            os.popen(removecommand).read()
-        profile = vm.profile
+        vm.kill()
         vm.unmanaged = True
         vm.save()
+        if profile.fulldelete:
+            vm.delete()
         return HttpResponse("VM %s killed" % name)
 
 def dbremove(request):
     if request.method == 'POST':
-        vmid   = request.POST.get('id')
+        vmid     = request.POST.get('id')
         vmname   = request.POST.get('name')
-        vm = VM.objects.get(id=vmid)
+        vm       = VM.objects.get(id=vmid)
         if vm.unmanaged:
             vm.delete()
             return HttpResponse("VM %s removed from DB" % vmname)
@@ -1055,8 +1006,6 @@ def customformedit(request):
             return HttpResponse(types,mimetype='application/json')
         else:
             return render(request, 'customformedit.html', { 'username': username , 'types': types } )
-
-
 
 @login_required
 def customformcreate(request):
@@ -1802,24 +1751,10 @@ def stopstack(request):
     if request.method == 'POST':
         stackname = request.POST.get('name')
         stack     = Stack.objects.get(name=stackname)
-        vms       = stack.vms.values()
-        results  = "stack %s stopped with the following vms<p>" % stackname
+        vms       = stack.stop()
+        results   = "stack %s stopped with the following vms<p>" % stackname
         for vm in vms:
-            name = vm['name']
-            results =  "%s%s<p>" % ( results, name)
-            virtualproviderid = vm['virtualprovider_id']
-            virtualprovider = VirtualProvider.objects.get(id=virtualproviderid)
-            if virtualprovider.type == 'ovirt':
-                ovirt = Ovirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, virtualprovider.password, virtualprovider.ssl)
-                ovirt.stop(name)
-                ovirt.close()
-            elif virtualprovider.type == 'kvirt':
-                kvirt = Kvirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, protocol='ssh')
-                kvirt.stop(name)
-                kvirt.close()
-            elif virtualprovider.type == 'vsphere':
-                stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
-                os.popen(stopcommand).read()
+            results =  "%s%s<p>" % ( results, vm)
         return HttpResponse(results)
 
 @login_required
@@ -1827,55 +1762,36 @@ def startstack(request):
     if request.method == 'POST':
         stackname = request.POST.get('name')
         stack     = Stack.objects.get(name=stackname)
-        vms       = stack.vms.values()
-        results  = "stack %s started with the following vms<p>" % stackname
-        for vm in vms:
-            name = vm['name']
-            vmid = vm['id']
-            consoleurl = "<a href='%s/vms/console/?id=%s'>%s</a><p>" % ( baseurl, vmid, name )
-            results =  "%s%s" % ( results, consoleurl)
-            virtualproviderid = vm['virtualprovider_id']
-            virtualprovider = VirtualProvider.objects.get(id=virtualproviderid)
-            if virtualprovider.type == 'ovirt':
-                ovirt = Ovirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, virtualprovider.password, virtualprovider.ssl)
-                ovirt.start(name)
-                ovirt.close()
-            elif virtualprovider.type == 'kvirt':
-                kvirt = Kvirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, protocol='ssh')
-                kvirt.start(name)
-                kvirt.close()
-            elif virtualprovider.type == 'vsphere':
-                startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
-                os.popen(startcommand).read()
+        vms       = stack.start()
+        results   = "stack %s started with the following vms<p>" % stackname
+        for name in sorted(vms):
+            url        = vms[name]
+            consoleurl = "<a href='%s'>%s</a><p>" % ( url, name )
+            results    =  "%s%s" % ( results, consoleurl)
         return HttpResponse(results)
 
 @login_required
 def killstack(request):
-    logging.debug('prout')
     if request.method == 'POST':
         stackname = request.POST.get('name')
         stack     = Stack.objects.get(name=stackname)
-        vms       = stack.vms.values()
+        vms       = stack.kill()
         results   = "stack %s killed along with the following vms<p>" % stackname
-        for vm in vms:
-            name = vm['name']
-            vmid = vm['id']
-            vm = VM.objects.get(id=vmid)
-            vm.delete()
+        for name in vms:
             results =  "%s%s<p>" % ( results, name)
         stack.delete()
         return HttpResponse(results)
 
 @login_required
 def showstack(request):
+    logging.debug("prout")
     if request.method == 'POST':
         stackname = request.POST.get('name')
         stack     = Stack.objects.get(name=stackname)
         results   = "stack %s contains the following vms<p>" % stackname
-        vms       = stack.vms.values()
-        for vm in vms:
-            vmid = vm['id']
-            name = vm['name']
-            consoleurl = "<a href='%s/vms/console/?id=%s'>%s</a><p>" % ( baseurl, vmid, name )
-            results =  "%s%s" % ( results, consoleurl)
+        vms       = stack.show()
+        for name in sorted(vms):
+            url        = vms[name]
+            consoleurl = "<a href='%s'>%s</a><p>" % ( url, name )
+            results    =  "%s%s" % ( results, consoleurl)
         return HttpResponse(results)

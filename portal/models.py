@@ -3,10 +3,12 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User,Group
 import ast
+import json
 import os
 import subprocess
 import time
 from django.conf import settings
+from nuages.settings import LOGIN_REDIRECT_URL as baseurl
 hooks = settings.PWD+'/hooks'
 
 
@@ -83,6 +85,49 @@ def nonone(variable):
         #    return name
         #except:
         #    return str(variable)
+
+def vmstart(name,virtualprovider):
+    if virtualprovider.type == 'ovirt':
+        ovirt   = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+        results = ovirt.start(name)
+        ovirt.close()
+    elif virtualprovider.type == 'kvirt':
+        kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+        results = kvirt.start(name)
+        kvirt.close()
+    elif virtualprovider.type == 'vsphere':
+        startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+        startinfo    = os.popen(startcommand).read()
+        results      = json.dumps(startinfo)
+    return results
+
+def vmstop(name,virtualprovider):
+    if virtualprovider.type == 'ovirt':
+        ovirt   = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+        results = ovirt.stop(name)
+        ovirt.close()
+    elif virtualprovider.type == 'kvirt':
+        kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+        results = kvirt.stop(name)
+        kvirt.close()
+    elif virtualprovider.type == 'vsphere':
+        stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
+        stopinfo    = os.popen(stopcommand).read()
+        results     = json.dumps(stopinfo)
+    return results
+
+def vmremove(name,virtualprovider):
+    if virtualprovider and virtualprovider.type == 'ovirt':
+        ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+        ovirt.remove(name)
+        ovirt.close()
+    elif virtualprovider and virtualprovider.type == 'kvirt':
+        kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+        kvirt.remove(name)
+        kvirt.close()
+    elif virtualprovider and virtualprovider.type == 'vsphere':
+        removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
+        os.popen(removecommand).read()
 
 class IpamProvider(models.Model):
     name                = models.CharField(max_length=80)
@@ -559,32 +604,31 @@ class VM(models.Model):
                 f.close()
             subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
         return 'OK'
-    def delete(self, *args, **kwargs):
-        if self.profile.fulldelete:
-            virtualprovider=self.virtualprovider
-            cobblerprovider=self.cobblerprovider
-            foremanprovider=self.foremanprovider
-            if cobblerprovider:
-                cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
-                cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
-                r=cobbler.remove(self.name)
-            if foremanprovider:
-                dns = self.profile.dns
-                foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
-                foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
-                foreman.delete(name=self.name,dns=dns)
-            if virtualprovider and virtualprovider.type == 'ovirt':
-                ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-                ovirt.remove(self.name)
-                ovirt.close()
-            elif virtualprovider and virtualprovider.type == 'kvirt':
-                kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-                kvirt.remove(self.name)
-                kvirt.close()
-            elif virtualprovider and virtualprovider.type == 'vsphere':
-                removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,self.name )
-                os.popen(removecommand).read()
-        super(VM, self).delete(*args, **kwargs)
+    def kill(self, *args, **kwargs):
+        name = self.name
+        virtualprovider = self.virtualprovider
+        cobblerprovider = self.cobblerprovider
+        foremanprovider = self.foremanprovider
+        if cobblerprovider:
+            cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
+            cobbler = Cobbler(cobblerhost, cobbleruser, cobblerpassword)
+            cobbler.remove(name)
+        if foremanprovider:
+            dns = self.profile.dns
+            foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
+            foreman = Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
+            foreman.delete(name=name, dns=dns)
+        vmremove(name, virtualprovider)
+
+    def start(self, *args, **kwargs):
+        name            = self.name
+        virtualprovider = self.virtualprovider
+        return vmstart(name, virtualprovider)
+
+    def stop(self, *args, **kwargs):
+        name            = self.name
+        virtualprovider = self.virtualprovider
+        return vmstop(name, virtualprovider)
 
 class Default(models.Model):
     name              = models.CharField(max_length=20)
@@ -619,3 +663,42 @@ class Stack(models.Model):
         if self.name == '':
             self.name = self.createdwhen
         super(Stack, self).save(*args, **kwargs)
+    def kill(self, *args, **kwargs):
+        vms       = self.vms.values()
+        results   = []
+        for vm in vms:
+            name = vm['name']
+            vmid = vm['id']
+            vm = VM.objects.get(id=vmid)
+            vm.kill()
+            vm.delete()
+            results.append(name)
+        return  results
+    def show(self, *args, **kwargs):
+        vms       = self.vms.values()
+        results   = {}
+        for vm in vms:
+            vmid = vm['id']
+            name = vm['name']
+            results[name] = "%s/vms/console/?id=%s" % ( baseurl, vmid)
+        return  results
+    def start(self, *args, **kwargs):
+        vms       = self.vms.values()
+        results   = {}
+        for vm in vms:
+            name = vm['name']
+            vmid = vm['id']
+            results[name] = "%s/vms/console/?id=%s" % ( baseurl, vmid)
+            vm = VM.objects.get(id=vmid)
+            vm.start()
+        return  results
+    def stop(self, *args, **kwargs):
+        vms       = self.vms.values()
+        results   = []
+        for vm in vms:
+            name = vm['name']
+            vmid = vm['id']
+            vm = VM.objects.get(id=vmid)
+            vm.stop()
+            results.append(name)
+        return  results
