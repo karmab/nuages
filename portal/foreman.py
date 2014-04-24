@@ -70,72 +70,66 @@ class Foreman:
             print "%s deleted in Foreman" % name
         else:
             print "Nothing to do in foreman"
-    def create(self, name, dns, ip, mac=None, osid=None, envid=None, archid="x86_64", puppetid=None, ptableid=None, powerup=None, memory=None, core=None, computeid=None, hostgroup=None):
+    def create(self, name, dns, ip, mac=None, operatingsystem=None, environment=None, arch="x86_64", puppet=None, ptable=None, powerup=None, memory=None, core=None, compute=None, hostgroup=None):
         host, port, user , password, protocol = self.host, self.port, self.user, self.password, self.protocol
         name = name.encode('ascii')
         dns = dns.encode('ascii')
-        if envid == None:
-            envid = "production"
+        if environment == None:
+            environment = "production"
         if ip:
             ip = ip.encode('ascii')
         if mac:
             mac = mac.encode('ascii')
-        if osid:
-            osid = osid.encode('ascii')
-        if envid:
-            envid = envid.encode('ascii')
-        if archid:
-            archid = archid.encode('ascii')
-        if puppetid:
-            puppetid = puppetid.encode('ascii')
-        if ptableid:
-            ptableid = ptableid.encode('ascii')
+        if operatingsystem:
+            operatingsystem = operatingsystem.encode('ascii')
+        if environment:
+            environment = environment.encode('ascii')
+        if arch:
+            arch = arch.encode('ascii')
+        if puppet:
+            puppet = puppet.encode('ascii')
+        if ptable:
+            ptable = ptable.encode('ascii')
         if powerup:
             powerup = powerup.encode('ascii')
         if memory:
             memory = memory.encode('ascii')
         if core:
             core = core.encode('ascii')
-        if computeid:
-            computeid = computeid.encode('ascii')
+        if compute:
+            compute = compute.encode('ascii')
         if hostgroup:
             hostgroup = hostgroup.encode('ascii')
         url = "%s://%s:%s/api/v2/hosts" % (protocol, host, port)
+        postdata = {}
         if dns:
             name = "%s.%s" % (name, dns)
-        if osid:
-            osid = foremangetid(protocol, host, port, user, password, 'operatingsystems', osid)
-        envid = foremangetid(protocol, host, port, user, password, 'environments', envid)
-        if archid:
-            archid = foremangetid(protocol, host, port, user, password, 'architectures', archid)
-        if puppetid:
-            puppetid = foremangetid(protocol, host, port, user, password, 'puppet', puppetid)
-        postdata = {}
         postdata['host'] = {'name':name}
+        if operatingsystem:
+            osid = foremangetid(protocol, host, port, user, password, 'operatingsystems', operatingsystem)
+            postdata['host']['operatingsystem_id'] = osid
+        envid = foremangetid(protocol, host, port, user, password, 'environments', environment)
+        postdata['host']['environment_id'] = envid
+        if arch:
+            archid = foremangetid(protocol, host, port, user, password, 'architectures', arch)
+            postdata['host']['architecture_id'] = archid
+        if puppet:
+            puppetid = foremangetid(protocol, host, port, user, password, 'puppet', puppet)
+            postdata['host']['puppet_proxy_id'] = puppetid
         if not ip or not mac or not ptableid or not osid:
             postdata['host']['managed'] = False
-        if osid:
-            postdata['host']['operatingsystem_id'] = osid
-        if envid:
-            postdata['host']['environment_id'] = envid
-        if archid:
-            postdata['host']['architecture_id'] = envid
-        if puppetid:
-            postdata['host']['puppet_proxy_id'] = puppetid
-        if ptableid:
-            postdata['host']['ptable_id'] = ptableid
         if ip:
             postdata['host']['ip'] = ip
         if mac:
             postdata['host']['mac'] = mac
-        if computeid:
-            computeid = foremangetid(protocol, host, port, user, password, 'compute_resources', computeid)
+        if compute:
+            computeid = foremangetid(protocol, host, port, user, password, 'compute_resources', compute)
             postdata['host']['compute_resource_id'] = computeid
         if hostgroup:
             hostgroupid = foremangetid(protocol, host, port, user, password, 'hostgroups', hostgroup)
             postdata['host']['hostgroup_id'] = hostgroupid
-        if ptableid:
-            ptableid = foremangetid(protocol, host, port, user, password, 'ptables', ptableid)
+        if ptable:
+            ptableid = foremangetid(protocol, host, port, user, password, 'ptables', ptable)
             postdata['host']['ptable_id'] = ptableid
         result = foremando(url=url, actiontype="POST", postdata=postdata, user=user, password=password)
         if not result.has_key('errors'):

@@ -7,10 +7,12 @@
 <script src="{% static "js/stacks.js" %}"></script>
 
 <fieldset class="module aligned">
-<p id="allvms" class="alert alert-info" ><button type='button' class='close' data-dismiss='alert'>&times;</button>Enter name of your stack, number of vms and then select profile for each of them and press CreateStack...<br>
+<p id="allvms" class="alert alert-info" ><button type='button' class='close' data-dismiss='alert'>&times;</button>Enter name of your stack, number of vms and then select profile for each of them. You can optionnally set a foreman hostgroup if profile is set this way and a name for the vm if the profile doesnt make one on its own. Click on parameters to add specific parameters. And finally press CreateStack...<br>
 </p>
 <div id="wheel"></div>
 <p id="result"></p>
+<div id="actionpending" class="hidden">0</div>
+
 <input type="submit" value="CreateStack" class="btn btn-info" onclick="createstack();"/><p><p>
 <p><p>
 <label id="id_namelabel">Stack Name:</label> <input id="id_name" name="name" maxlength="20" type="text"></p>
@@ -27,6 +29,8 @@
   <option value="9">9</option>
   <option value="10">10</option>
 </select> 
+<p><label style="display: none;" id="id_parameterslabel">Parameters:</label><textarea style="display: none;" id="id_parameters" rows="3" cols="9" name="parameters"></textarea></p><p>
+</fieldset>
 {{ credentials.info }}
 </fieldset><p>
 {% endblock content %}
@@ -34,148 +38,131 @@
 
 {% block vms %}
 <fieldset id="id_extravmsfieldset" class="module aligned">
-<table>
+<table id="id_stacklist" name="stacklist" style="display: none;"  class="table table-condensed alert-info">
 <tr>
+<td>#</td>
+<td>Name</td>
+<td>Profile</td>
+<td>Hostgroup</td>
 </tr>
 <tr>
-<td><label style="display: none;" id="id_namelabel_1">Name_1:</label> <input style="display: none;" id="id_name_1" name="name_1" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_1">Profile_1:</label><select style="display: none;"  name="profile1" id="id_profile_1">
+<td>1</td>
+<td><input style="display: none;" id="id_name_1" name="name_1" maxlength="20" type="text"></p></td>
+<td><select style="display: none;"  name="profile1" id="id_profile_1" onchange="changeprofile(1);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select></td>
-<td><label style="display: none;" id="id_hostgrouplabel_1">Hostgroup_1:</label><select style="display: none;"  name="hostgroup1" id="id_hostgroup_1">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup1" id="id_hostgroup_1">
+</select>
+</td>
 </tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_2">Name_2:</label> <input style="display: none;" id="id_name_2" name="name_2" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_2">Profile_2:</label><select style="display: none;" name="profile2" id="id_profile_2">
-{% for profile in profiles|dictsort:"name" %}
-<option value="{{profile.name }}" >{{profile.name }}</option>
-{% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_2">Hostgroup_2:</label><select style="display: none;"  name="hostgroup2" id="id_hostgroup_2">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
-</tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_3">Name_3:</label> <input style="display: none;" id="id_name_3" name="name_3" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_3">Profile_3:</label><select style="display: none;" name="profile3" id="id_profile_3">
+<tr>
+<td>2</td>
+<td><input style="display: none;" id="id_name_2" name="name_2" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile2" id="id_profile_2" onchange="changeprofile(2);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_3">Hostgroup_3:</label><select style="display: none;"  name="hostgroup3" id="id_hostgroup_3">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup2" id="id_hostgroup_2">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_4">Name_4:</label> <input style="display: none;" id="id_name_4" name="name_4" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_4">Profile_4:</label><select style="display: none;" name="profile4" id="id_profile_4">
+<tr>
+<td>3</td>
+<td><input style="display: none;" id="id_name_3" name="name_3" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile3" id="id_profile_3" onchange="changeprofile(3);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_4">Hostgroup_4:</label><select style="display: none;"  name="hostgroup4" id="id_hostgroup_4">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup3" id="id_hostgroup_3">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_5">Name_5:</label> <input style="display: none;" id="id_name_5" name="name_5" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_5">Profile_5:</label><select style="display: none;" name="profile5" id="id_profile_5">
+<tr>
+<td>4</td>
+<td><input style="display: none;" id="id_name_4" name="name_4" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile4" id="id_profile_4" onchange="changeprofile(4);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_5">Hostgroup_5:</label><select style="display: none;"  name="hostgroup5" id="id_hostgroup_5">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup4" id="id_hostgroup_4">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_6">Name_6:</label> <input style="display: none;" id="id_name_6" name="name_6" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_6">Profile_6:</label><select style="display: none;" name="profile6" id="id_profile_6">
+<tr>
+<td>5</td>
+<td><input style="display: none;" id="id_name_5" name="name_5" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile5" id="id_profile_5" onchange="changeprofile(5);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_6">Hostgroup_6:</label><select style="display: none;"  name="hostgroup7" id="id_hostgroup_6">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup5" id="id_hostgroup_5">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_7">Name_7:</label> <input style="display: none;" id="id_name_7" name="name_2" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_7">Profile_7:</label><select style="display: none;" name="profile7" id="id_profile_7">
+<tr>
+<td>6</td>
+<td><input style="display: none;" id="id_name_6" name="name_6" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile6" id="id_profile_6" onchange="changeprofile(6);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_7">Hostgroup_7:</label><select style="display: none;"  name="hostgroup7" id="id_hostgroup_7">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup7" id="id_hostgroup_6">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_8">Name_8:</label> <input style="display: none;" id="id_name_8" name="name_8" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_8">Profile_8:</label><select style="display: none;" name="profile8" id="id_profile_8">
+<tr>
+<td>7</td>
+<td><input style="display: none;" id="id_name_7" name="name_2" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile7" id="id_profile_7" onchange="changeprofile(7);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_1">Hostgroup_8:</label><select style="display: none;"  name="hostgroup8" id="id_hostgroup_8">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup7" id="id_hostgroup_7">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_9">Name_9:</label> <input style="display: none;" id="id_name_9" name="name_9" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_9">Profile_9:</label><select style="display: none;" name="profile9" id="id_profile_9">
+<tr>
+<td>8</td>
+<td><input style="display: none;" id="id_name_8" name="name_8" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile8" id="id_profile_8" onchange="changeprofile(8);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_9">Hostgroup_9:</label><select style="display: none;"  name="hostgroup9" id="id_hostgroup_9">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup8" id="id_hostgroup_8">
+</select>
+</td>
 </tr>
-</tr>
-</table>
-
-<table><tr>
-<td><label style="display: none;" id="id_namelabel_10">Name_10:</label> <input style="display: none;" id="id_name_10" name="name_10" maxlength="20" type="text"></p></td>
-<td><label style="display: none;" id="id_profilelabel_10">Profile_10:</label><select style="display: none;" name="profile10" id="id_profile_10">
+<tr>
+<td>9</td>
+<td><input style="display: none;" id="id_name_9" name="name_9" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile9" id="id_profile_9" onchange="changeprofile(9);">
+<option value="" selected="selected"></option>
 {% for profile in profiles|dictsort:"name" %}
 <option value="{{profile.name }}" >{{profile.name }}</option>
 {% endfor %}</select><p></td>
-<td><label style="display: none;" id="id_hostgrouplabel_10">Hostgroup_10:</label><select style="display: none;"  name="hostgroup10" id="id_hostgroup_10">
-{% for hostgroup in hostgroups|dictsort:"name" %}
-<option value="{{hostgroup.name }}" >{{hostgroup.name }}</option>
-{% endfor %}</select></td>
+<td><select style="display: none;"  name="hostgroup9" id="id_hostgroup_9">
 </tr>
+<tr>
+<td>10</td>
+<td><input style="display: none;" id="id_name_10" name="name_10" maxlength="20" type="text"></p></td>
+<td><select style="display: none;" name="profile10" id="id_profile_10" onchange="changeprofile(10);">
+<option value="" selected="selected"></option>
+{% for profile in profiles|dictsort:"name" %}
+<option value="{{profile.name }}" >{{profile.name }}</option>
+{% endfor %}</select><p></td>
+<td><select style="display: none;"  name="hostgroup10" id="id_hostgroup_10">
+</td>
 </tr>
 </table>
 
-<p><label style="display: none;" id="id_parameterslabel">Parameters:</label><textarea style="display: none;" id="id_parameters" rows="3" cols="9" name="parameters"></textarea></p><p>
 </fieldset>
 {% endblock vms %}

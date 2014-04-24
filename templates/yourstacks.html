@@ -3,31 +3,33 @@
 {% block title %}Nuages Stacks Information{% endblock %}
 
 {% block content %}
-<script src="{% static "js/yourstacks.js" %}"></script>
-<script src="{% static "js/actions.js" %}"></script>
+<script src="{% static "js/stacks.js" %}"></script>
 
-<div id="actionwheel"></div>
+<div id="wheel"></div>
 <fieldset class="module aligned">
 <p class="alert alert-info" >Here s a list of all stacks created by you or your groups peers<br>
-Autorefresh info every 5s / Enable actions:<input id="refresh" type="checkbox"></p>
 <div id="actionpending" class="hidden">0</div>
-<div id="refreshpending" class="hidden">0</div>
 <div id="results"></div>
 <p id="yourstacks"></p>
 
-<table id="yourstacksinitial" border="1" class='alert alert-info'>
-<tr>
+<table id="yourstacksinitial" border="1" class="table table-condensed table-bordered alert-info">
+<tr class="active">
 <td>Stack Name</td>
 <td>Created by</td>
 <td>Created when</td>
+<td>Actions</td>
 </tr>
 {% for stack in stacks|dictsort:"name" %}
 <tr>
-<td>
-{{ stack.name}}</a></td>
+<td>{{ stack.name}}</a></td>
 <td>{{ stack.createdby }}</td>
 <td>{{ stack.createdwhen|date:'Y-m-d H:i' }}</td>
 <td>
+<img src="{% static "img/console.png" %}"  onclick="show('{{stack.name}}');" />
+<img src="{% static "img/start.png" %}" onclick="start('{{stack.name}}');" />
+<img src="{% static "img/down.png" %}"  onclick="stop('{{stack.name}}');" />
+<img src="{% static "img/kill.png" %}"  onclick="kill('{{stack.name}}');" />
+</td>
 </tr>
 {% endfor %}
 </table>

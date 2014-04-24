@@ -99,9 +99,6 @@ def customlogin(request, *args, **kwargs):
         request.session.modified = True
     return auth_views.login(request, *args, **kwargs)
 
-
-
-
 def getname(profile):
     names = VM.objects.filter(profile=profile).filter(name__startswith=profile.naming).values('name')
     if names == None:
@@ -140,7 +137,6 @@ def getip(profile,index):
 
 @login_required
 def create(request):
-    logging.debug('prout')
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
     if request.method == 'POST':
@@ -531,8 +527,9 @@ def profileinfo(request):
             if available:
                 foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password , foremanprovider.envid
                 foreman= Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
+                if profile.foremanenv:
+                    foremanenv = profile.foremanenv
                 hostgroups = ['']
-                #hostgroups = foreman.hostgroups(foremanenv)
                 hostgroups.extend(foreman.hostgroups(foremanenv))
                 results.append(hostgroups)
                 classes = foreman.classes(foremanenv)
@@ -899,39 +896,37 @@ def kill(request):
             virtualprovider = None
             vm = VM.objects.filter(name=name).filter(physical=True)[0]
         else:
-            virtualprovider= VirtualProvider.objects.get(name=provider)
+            virtualprovider = VirtualProvider.objects.get(name=provider)
             vm = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
+        profile = vm.profile
+        if profile.fulldelete:
+            vm.delete()
+            return HttpResponse("VM %s killed" % name)
         cobblerprovider=vm.cobblerprovider
         foremanprovider=vm.foremanprovider
-        results=[]
         if cobblerprovider:
             cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
             cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
-            r=cobbler.remove(name)
+            cobbler.remove(name)
         if foremanprovider:
             dns = vm.profile.dns
             foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
             foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
-            r=foreman.delete(name=name,dns=dns)
+            foreman.delete(name=name,dns=dns)
         if virtualprovider and virtualprovider.type == 'ovirt':
             ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            r=ovirt.remove(name)
+            ovirt.remove(name)
             ovirt.close()
         elif virtualprovider and virtualprovider.type == 'kvirt':
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            r=kvirt.remove(name)
+            kvirt.remove(name)
             kvirt.close()
         elif virtualprovider and virtualprovider.type == 'vsphere':
             removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
-            remove = os.popen(removecommand).read()
-            #removeinfo= ast.literal_eval(remove)
-            r='VM killed in vsphere'
+            os.popen(removecommand).read()
         profile = vm.profile
-        if profile.fulldelete:
-            vm.delete()
-        else:
-            vm.unmanaged = True
-            vm.save()
+        vm.unmanaged = True
+        vm.save()
         return HttpResponse("VM %s killed" % name)
 
 def dbremove(request):
@@ -948,13 +943,21 @@ def dbremove(request):
 @login_required
 def hostgroups(request):
     if request.method == 'POST':
-        foremanprovider=request.POST.get('foremanprovider')
-        foremanprovider = ForemanProvider.objects.filter(id=foremanprovider)[0]
-        foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
+        #foremanprovider=request.POST.get('foremanprovider')
+        #foremanprovider = ForemanProvider.objects.filter(id=foremanprovider)[0]
+        profile=request.POST.get('profile')
+        profile = Profile.objects.get(name=profile)
+        foreman = profile.foreman
+        if not foreman:
+            return HttpResponse(json.dumps([]), mimetype='application/json')
+        foremanprovider = profile.foremanprovider
+        foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanenv = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.envid
         foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
-        hostgroups= foreman.hostgroups()
+        if profile.foremanenv:
+            foremanenv = profile.foremanenv
+        hostgroups= foreman.hostgroups(foremanenv)
         hostgroups = json.dumps(hostgroups)
-        return HttpResponse(hostgroups,mimetype='application/json')
+        return HttpResponse(hostgroups, mimetype='application/json')
 
 @login_required
 def customforms(request):
@@ -1655,19 +1658,18 @@ def stacks(request):
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
     if request.method == 'POST':
-        logging.debug('prout')
         stackname         = request.POST.get('name')
         numvms            = int(request.POST.get('numvms'))
-        name1          = request.POST.get('name1')
-        name2          = request.POST.get('name2')
-        name3          = request.POST.get('name3')
-        name4          = request.POST.get('name4')
-        name5          = request.POST.get('name5')
-        name6          = request.POST.get('name6')
-        name7          = request.POST.get('name7')
-        name8          = request.POST.get('name8')
-        name9          = request.POST.get('name9')
-        name10         = request.POST.get('name10')
+        name1             = request.POST.get('name1')
+        name2             = request.POST.get('name2')
+        name3             = request.POST.get('name3')
+        name4             = request.POST.get('name4')
+        name5             = request.POST.get('name5')
+        name6             = request.POST.get('name6')
+        name7             = request.POST.get('name7')
+        name8             = request.POST.get('name8')
+        name9             = request.POST.get('name9')
+        name10            = request.POST.get('name10')
         profile1          = request.POST.get('profile1')
         profile2          = request.POST.get('profile2')
         profile3          = request.POST.get('profile3')
@@ -1678,17 +1680,28 @@ def stacks(request):
         profile8          = request.POST.get('profile8')
         profile9          = request.POST.get('profile9')
         profile10         = request.POST.get('profile10')
+        hostgroup1        = request.POST.get('hostgroup1')
+        hostgroup2        = request.POST.get('hostgroup2')
+        hostgroup3        = request.POST.get('hostgroup3')
+        hostgroup4        = request.POST.get('hostgroup4')
+        hostgroup5        = request.POST.get('hostgroup5')
+        hostgroup6        = request.POST.get('hostgroup6')
+        hostgroup7        = request.POST.get('hostgroup7')
+        hostgroup8        = request.POST.get('hostgroup8')
+        hostgroup9        = request.POST.get('hostgroup9')
+        hostgroup10       = request.POST.get('hostgroup10')
         profiles          = { 1 : profile1 , 2 : profile2, 3 : profile3, 4 : profile4 , 5 : profile5, 6 : profile6, 7 : profile7 , 8 : profile8, 9 : profile9, 10: profile10 }
+        hostgroups        = { 1 : hostgroup1 , 2 : hostgroup2, 3 : hostgroup3, 4 : hostgroup4 , 5 : hostgroup5, 6 : hostgroup6, 7 : hostgroup7 , 8 : hostgroup8, 9 : hostgroup9, 10: hostgroup10 }
         names             = { 1 : name1 , 2 : name2, 3 : name3, 4 : name4 , 5 : name5, 6 : name6, 7 : name7 , 8 : name8, 9 : name9, 10: name10 }
-        parameters          = request.POST.get('parameters')
-        #puppetclasses     = request.POST.get('puppetclasses')
-        #parameters        = request.POST.get('parameters')
-        #hostgroup         = request.POST.get('hostgroup')
-        stack = Stack(name=stackname, numvms=numvms, createdby=username)
+        parameters        = request.POST.get('parameters')
+        stack             = Stack(name=stackname, numvms=numvms, createdby=username)
         stack.save()
         failure = False
         for num in range(1,numvms+1):
             name       = names[num]
+            hostgroup  = hostgroups[num]
+            if hostgroup == '':
+                hostgroup = None
             profile    = profiles[num]
             profilevms = profiles.values().count(profile)
             profile    = Profile.objects.get(name=profile)
@@ -1726,10 +1739,10 @@ def stacks(request):
                 storageresult=checkstorage(profilevms,virtualprovider,disksize1,disksize2,storagedomain)
                 if storageresult != 'OK':
                     return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
-            hostgroup, puppetclasses = None, None
+            puppetclasses = None
             parameters = None
             #newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, puppetclasses=puppetclasses, parameters=parameters, createdby=username, hostgroup=hostgroup)
-            newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, createdby=username)
+            newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, createdby=username, hostgroup=hostgroup)
             success = newvm.save()
             if success == 'OK':
                 stack.vms.add(newvm)
@@ -1740,7 +1753,8 @@ def stacks(request):
             return HttpResponse("<div class='alert alert-success' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Stack %s successfully created!</div>" % stackname )
         else:
             # WE SHOULD DELETE ALL VMS OF THE STACK AND THE STACK
-            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Stack %s not created!</div>" % stackname )
+            stack.delete()
+            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Stack %s not createdbecause %s !</div>" % (stackname,success) )
     elif username.is_staff:
         profiles = Profile.objects.all()
         if not profiles:
@@ -1782,3 +1796,86 @@ def yourstacks(request):
                 query=query|Q(createdby=u)
     stacks = Stack.objects.filter(query)
     return render(request, 'yourstacks.html', { 'stacks': stacks, 'username': username  } )
+
+@login_required
+def stopstack(request):
+    if request.method == 'POST':
+        stackname = request.POST.get('name')
+        stack     = Stack.objects.get(name=stackname)
+        vms       = stack.vms.values()
+        results  = "stack %s stopped with the following vms<p>" % stackname
+        for vm in vms:
+            name = vm['name']
+            results =  "%s%s<p>" % ( results, name)
+            virtualproviderid = vm['virtualprovider_id']
+            virtualprovider = VirtualProvider.objects.get(id=virtualproviderid)
+            if virtualprovider.type == 'ovirt':
+                ovirt = Ovirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, virtualprovider.password, virtualprovider.ssl)
+                ovirt.stop(name)
+                ovirt.close()
+            elif virtualprovider.type == 'kvirt':
+                kvirt = Kvirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, protocol='ssh')
+                kvirt.stop(name)
+                kvirt.close()
+            elif virtualprovider.type == 'vsphere':
+                stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
+                os.popen(stopcommand).read()
+        return HttpResponse(results)
+
+@login_required
+def startstack(request):
+    if request.method == 'POST':
+        stackname = request.POST.get('name')
+        stack     = Stack.objects.get(name=stackname)
+        vms       = stack.vms.values()
+        results  = "stack %s started with the following vms<p>" % stackname
+        for vm in vms:
+            name = vm['name']
+            vmid = vm['id']
+            consoleurl = "<a href='%s/vms/console/?id=%s'>%s</a><p>" % ( baseurl, vmid, name )
+            results =  "%s%s" % ( results, consoleurl)
+            virtualproviderid = vm['virtualprovider_id']
+            virtualprovider = VirtualProvider.objects.get(id=virtualproviderid)
+            if virtualprovider.type == 'ovirt':
+                ovirt = Ovirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, virtualprovider.password, virtualprovider.ssl)
+                ovirt.start(name)
+                ovirt.close()
+            elif virtualprovider.type == 'kvirt':
+                kvirt = Kvirt(virtualprovider.host, virtualprovider.port, virtualprovider.user, protocol='ssh')
+                kvirt.start(name)
+                kvirt.close()
+            elif virtualprovider.type == 'vsphere':
+                startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
+                os.popen(startcommand).read()
+        return HttpResponse(results)
+
+@login_required
+def killstack(request):
+    logging.debug('prout')
+    if request.method == 'POST':
+        stackname = request.POST.get('name')
+        stack     = Stack.objects.get(name=stackname)
+        vms       = stack.vms.values()
+        results   = "stack %s killed along with the following vms<p>" % stackname
+        for vm in vms:
+            name = vm['name']
+            vmid = vm['id']
+            vm = VM.objects.get(id=vmid)
+            vm.delete()
+            results =  "%s%s<p>" % ( results, name)
+        stack.delete()
+        return HttpResponse(results)
+
+@login_required
+def showstack(request):
+    if request.method == 'POST':
+        stackname = request.POST.get('name')
+        stack     = Stack.objects.get(name=stackname)
+        results   = "stack %s contains the following vms<p>" % stackname
+        vms       = stack.vms.values()
+        for vm in vms:
+            vmid = vm['id']
+            name = vm['name']
+            consoleurl = "<a href='%s/vms/console/?id=%s'>%s</a><p>" % ( baseurl, vmid, name )
+            results =  "%s%s" % ( results, consoleurl)
+        return HttpResponse(results)

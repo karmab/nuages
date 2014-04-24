@@ -242,6 +242,7 @@ class Profile(models.Model):
     autostorage       = models.BooleanField(default=True)
     foreman           = models.BooleanField(default=False)
     foremanparameters = models.BooleanField(default=False)
+    foremanenv        = models.CharField(max_length=40, blank=True)
     cobbler           = models.BooleanField(default=False)
     cobblerparameters = models.BooleanField(default=False)
     iso               = models.BooleanField(default=False)
@@ -487,7 +488,9 @@ class VM(models.Model):
         if foreman and foremanprovider:
             foremanhost, foremanport, foremansecure, foremanuser, foremanpassword, foremanos, foremanenv, foremanarch, foremanpuppet, foremanptable = foremanprovider.host, foremanprovider.port, foremanprovider.secure, foremanprovider.user, foremanprovider.password, foremanprovider.osid, foremanprovider.envid, foremanprovider.archid, foremanprovider.puppetid, foremanprovider.ptableid
             f=Foreman(host=foremanhost, port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
-            f.create(name=name, dns=dns, ip=ip1, hostgroup=hostgroup)
+            if profile.foremanenv:
+                environment = profile.foremanenv
+            f.create(name=name, dns=dns, ip=ip1, hostgroup=hostgroup, environment=environment)
             if puppetclasses != '':
                 f.addclasses(name=name, dns=dns, classes=puppetclasses)
             if foremanparameters and parameters != '':
@@ -556,6 +559,32 @@ class VM(models.Model):
                 f.close()
             subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
         return 'OK'
+    def delete(self, *args, **kwargs):
+        if self.profile.fulldelete:
+            virtualprovider=self.virtualprovider
+            cobblerprovider=self.cobblerprovider
+            foremanprovider=self.foremanprovider
+            if cobblerprovider:
+                cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
+                cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
+                r=cobbler.remove(self.name)
+            if foremanprovider:
+                dns = self.profile.dns
+                foremanhost, foremanport, foremansecure, foremanuser, foremanpassword = foremanprovider.host, foremanprovider.port,foremanprovider.secure, foremanprovider.user, foremanprovider.password
+                foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
+                foreman.delete(name=self.name,dns=dns)
+            if virtualprovider and virtualprovider.type == 'ovirt':
+                ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+                ovirt.remove(self.name)
+                ovirt.close()
+            elif virtualprovider and virtualprovider.type == 'kvirt':
+                kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                kvirt.remove(self.name)
+                kvirt.close()
+            elif virtualprovider and virtualprovider.type == 'vsphere':
+                removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,self.name )
+                os.popen(removecommand).read()
+        super(VM, self).delete(*args, **kwargs)
 
 class Default(models.Model):
     name              = models.CharField(max_length=20)
@@ -587,4 +616,6 @@ class Stack(models.Model):
         return self.name
     def save(self, *args, **kwargs):
         self.createdwhen=datetime.now()
+        if self.name == '':
+            self.name = self.createdwhen
         super(Stack, self).save(*args, **kwargs)

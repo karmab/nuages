@@ -34,7 +34,7 @@ function customformcreate() {
    $('#parameters').replaceWith('<div id="parameters"></div>');
    $('#for_newtype').remove();
    $('#id_newtype').remove();
-   $('#forminfo').replaceWith('<label id="for_newtype">New type name:</label><input type="text" id="id_newtype" ><table id="forminfo" border="1" class="alert alert-info"><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>');
+   $('#forminfo').replaceWith('<label id="for_newtype">New type name:</label><input type="text" id="id_newtype" ><table id="forminfo" border="1" class="alert alert-info table table-condensed table-bordered"><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>');
    $('#forminfo').append('<tr id="newparameter" ><td><input type="text" id="newparameter-name" ></td><td><select id="newparameter-type"><option value="CharField">Charfield</option><option value="ChoiceField">ChoiceField</option><option value="IntegerField">IntegerField</option></select></td><td><input type="text" id="newparameter-default"></td><td><input id="newparameter-required" type="checkbox"></td><td><input type="submit" class="btn btn-danger" value="remove" onclick="removenewparam();"></td</tr>');
    $('#forminfo').append('<input type="submit"  class="btn btn-info" value="add parameter" onclick="addparam();"></table><p>');
  }
@@ -71,7 +71,7 @@ function customformget() {
         url: baseurl+'/customforms/',
         data: { 'type' : type },
         success: function(data) {
-        $('#forminfo').replaceWith("<table id='forminfo' border='1' class='alert alert-info'><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>");
+        $('#forminfo').replaceWith("<table id='forminfo' border='1' class='alert alert-info table table-condensed table-bordered'><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td></tr>");
         var attributesinfo = '';
         $.each(data, function(index, parameter) {
 	choices=parameter[2];
@@ -113,7 +113,7 @@ function customformedit() {
         url: baseurl+'/customformedit/',
         data: { 'type' : type },
         success: function(data) {
-        $('#forminfo').replaceWith("<table id='forminfo' border='1' class='alert alert-info'><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td><td>Actions</td></tr>");
+        $('#forminfo').replaceWith("<table id='forminfo' border='1' class='alert alert-info table table-condensed table-bordered '><tr><td>Attribute</td><td>Type</td><td>Value(s)</td><td>Required</td><td>Actions</td></tr>");
         var attributeslist = '';
         var attributesinfo = '';
         $.each(data, function(index, parameter) {
