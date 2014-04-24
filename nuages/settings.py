@@ -2,6 +2,9 @@
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+TASTYPIE_FULL_DEBUG = True
+TASTYPIE_ALLOW_MISSING_SLASH = True
+APPEND_SLASH = False
 
 PWD = '/usr/share/nuages'
 

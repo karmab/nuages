@@ -48,6 +48,7 @@ Requisites
     python-requests if you will connect to foreman
     python-ldap for ldap auth
     python-django-tastypie from epel ( provides REST api)
+    python-lxml            from epel ( provides XML support for REST api, if you re crazy enough)
     ovirt-engine-sdk package from epel (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
     libvirt-python and python-lxml ( only if you will connect to libvirt hosts)

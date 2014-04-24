@@ -4,6 +4,7 @@
 </Directory>
 
 WSGIScriptAlias /nuages /usr/share/nuages/django.wsgi
+WSGIPassAuthorization On
 
 Alias /static/ /usr/share/nuages/static/
 

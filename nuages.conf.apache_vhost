@@ -8,6 +8,7 @@
         Allow from all
     </Directory>
     WSGIScriptAlias / /usr/share/nuages/django.wsgi
+    WSGIPassAuthorization On
 </VirtualHost>
 
 Alias /static/ /usr/share/nuages/static/

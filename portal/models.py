@@ -252,10 +252,10 @@ class Profile(models.Model):
     foremanprovider   = models.ForeignKey(ForemanProvider,blank=True,null=True)
     ipamprovider      = models.ForeignKey(IpamProvider,blank=True,null=True)
     cobblerprofile    = models.CharField(max_length=40,blank=True)
-    datacenter        = models.CharField(max_length=50)
+    datacenter        = models.CharField(max_length=50,blank=True,null=True)
     template          = models.CharField(max_length=80,blank=True,null=True)
     clu               = models.CharField(max_length=50,blank=True)
-    guestid           = models.CharField(max_length=20, choices=( ('rhel_6x64', 'rhel_6x64'),('rhel_5x64', 'rhel_5x64'),('windows_xp', 'windows_xp') ))
+    guestid           = models.CharField(max_length=20,default='rhel_6x64', choices=( ('rhel_6x64', 'rhel_6x64'),('rhel_5x64', 'rhel_5x64'),('windows_xp', 'windows_xp') ))
     memory            = models.IntegerField(default=MEMORY)
     numcpu            = models.IntegerField(default=CPUS)
     disksize1         = models.IntegerField(default=10)
@@ -326,8 +326,8 @@ class Profile(models.Model):
             raise ValidationError("Cobbler requires a CobblerProvider to be set")
         if self.cobblerparameters and not self.cobbler:
             raise ValidationError("Cobbler Parameters requires Cobbler to be set")
-        if not self.physicalprovider and not self.virtualprovider:
-            raise ValidationError("You need to assign at least one physical or virtual provider")
+        #if not self.physicalprovider and not self.virtualprovider:
+        #    raise ValidationError("You need to assign at least one physical or virtual provider")
         if self.cloudinit and not self.rootpw:
             raise ValidationError("Cloudinit requires a rootpw to be set")
         if self.cobbler and self.cobblerprovider:

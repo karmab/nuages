@@ -8,7 +8,14 @@ from tastypie.api import Api
 from portal.api.resources import *
 
 v1api = Api(api_name='v1')
+v1api.register(CreatedByResource())
+v1api.register(PhysicalProviderResource())
+v1api.register(VirtualProviderResource())
+v1api.register(CobblerProviderResource())
+v1api.register(ForemanProviderResource())
+v1api.register(ProfileResource())
 v1api.register(VMResource())
+v1api.register(StackResource())
 
 admin.autodiscover()
 
