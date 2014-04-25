@@ -7,6 +7,7 @@ from portal.models import *
 from django.conf.urls import url
 from django.db.models import Q
 from customauthentication import StaffAuthentication
+##from customauthorization import StaffAuthorization
 
 def groupquery(user):
     usergroups  = user.groups

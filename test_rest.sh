@@ -18,7 +18,7 @@ password="karim"
 #exit 0
 
 #START A VM 
-curl --dump-header - -k -u $username:$password -H "Content-Type: application/json" -X GET  http://192.168.8.6/nuages/api/v1/vm/satellite6
+curl --dump-header - -k -u $username:$password -H "Content-Type: application/json" -X GET  http://192.168.8.6/nuages/api/v1/vm/satellite6/start
 exit 0 
 
 #USING XML
