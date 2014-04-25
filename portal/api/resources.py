@@ -6,7 +6,7 @@ from tastypie import fields
 from portal.models import *
 from django.conf.urls import url
 from django.db.models import Q
-from customauthorization import StaffAuthorization
+from customauthentication import StaffAuthentication
 
 def groupquery(user):
     usergroups  = user.groups
@@ -98,7 +98,7 @@ class ProfileResource(ModelResource):
     class Meta:
         queryset       = Profile.objects.all()
         resource_name  = 'profile'
-        authentication = BasicAuthentication()
+        authentication = StaffAuthentication()
         authorization  = DjangoAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
@@ -111,7 +111,7 @@ class VMResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
     class Meta:
         queryset       =  VM.objects.all()
-        authentication = BasicAuthentication()
+        authentication = StaffAuthentication()
         authorization  = DjangoAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
@@ -144,7 +144,7 @@ class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
     class Meta:
         queryset       =  Stack.objects.all()
-        authentication = BasicAuthentication()
+        authentication = StaffAuthentication()
         authorization  = DjangoAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'

@@ -209,7 +209,7 @@ Usage
 
      to create custom types, you can go in /usr/share/nuages/portal and copy customtypes.py.sample to customtypes.py
 
-     api access is at /nuages/api/v1/?format=json
+     api access is at /nuages/api/v1/?format=json . it s only available for staff users
 
  
 Screenshots
