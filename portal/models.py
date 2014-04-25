@@ -619,12 +619,13 @@ class VM(models.Model):
             foreman = Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
             foreman.delete(name=name, dns=dns)
         vmremove(name, virtualprovider)
-
+    def console(self, *args, **kwargs):
+        results   = "%s/vms/console/?id=%s" % ( baseurl, self.id)
+        return  results
     def start(self, *args, **kwargs):
         name            = self.name
         virtualprovider = self.virtualprovider
         return vmstart(name, virtualprovider)
-
     def stop(self, *args, **kwargs):
         name            = self.name
         virtualprovider = self.virtualprovider

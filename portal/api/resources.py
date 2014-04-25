@@ -99,7 +99,7 @@ class ProfileResource(ModelResource):
         queryset       = Profile.objects.all()
         resource_name  = 'profile'
         authentication = BasicAuthentication()
-        authorization  = StaffAuthorization()
+        authorization  = DjangoAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
     def prepend_urls(self):
@@ -112,16 +112,25 @@ class VMResource(ModelResource):
     class Meta:
         queryset       =  VM.objects.all()
         authentication = BasicAuthentication()
-        authorization  = StaffAuthorization()
+        authorization  = DjangoAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
     def prepend_urls(self):
         return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/console$" % self._meta.resource_name, self.wrap_view('console'), name="api_vm_console"),
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_vm_kill"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/start$" % self._meta.resource_name, self.wrap_view('start'), name="api_vm_start"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/stop$" % self._meta.resource_name, self.wrap_view('stop'), name="api_vm_stop"),
-            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_vm_kill"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
+    def console(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, vm.console())
+    def kill(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, vm.kill())
     def start(self, request, **kwargs):
          basic_bundle = self.build_bundle(request=request)
          vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
@@ -130,26 +139,31 @@ class VMResource(ModelResource):
          basic_bundle = self.build_bundle(request=request)
          vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, vm.stop())
-    def kill(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, vm.kill())
 
 class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
     class Meta:
         queryset       =  Stack.objects.all()
         authentication = BasicAuthentication()
-        authorization  = StaffAuthorization()
+        authorization  = DjangoAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
     def prepend_urls(self):
         return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_stack_kill"),
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/show$" % self._meta.resource_name, self.wrap_view('show'), name="api_stack_show"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/start$" % self._meta.resource_name, self.wrap_view('start'), name="api_stack_start"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/stop$" % self._meta.resource_name, self.wrap_view('stop'), name="api_stack_stop"),
-            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_stack_kill"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
+    def kill(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, stack.kill())
+    def show(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, stack.show())
     def start(self, request, **kwargs):
          basic_bundle = self.build_bundle(request=request)
          stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
@@ -158,7 +172,3 @@ class StackResource(ModelResource):
          basic_bundle = self.build_bundle(request=request)
          stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, stack.stop())
-    def kill(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, stack.kill())
