@@ -10,7 +10,7 @@ password="prout"
 #curl --dump-header -  -k -u $username:$password -H "Content-Type: application/json" -X GET http://192.168.8.6/nuages/api/v1/profile
 
 # LIST ALL VMS
-curl -k -u $username:$password -H "Content-Type: application/json" -X GET http://192.168.8.6/nuages/api/v1/vm
+curl  --dump-header - -k -u $username:$password -H "Content-Type: application/json" -X GET http://192.168.8.6/nuages/api/v1/vm
 exit 0
 
 # LIST ONE VM

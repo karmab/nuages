@@ -6,6 +6,7 @@ from tastypie import fields
 from portal.models import *
 from django.conf.urls import url
 from django.db.models import Q
+from customauthorization import StaffAuthorization
 
 def groupquery(user):
     usergroups  = user.groups
@@ -98,7 +99,7 @@ class ProfileResource(ModelResource):
         queryset       = Profile.objects.all()
         resource_name  = 'profile'
         authentication = BasicAuthentication()
-        authorization  = DjangoAuthorization()
+        authorization  = StaffAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
     def prepend_urls(self):
@@ -111,7 +112,7 @@ class VMResource(ModelResource):
     class Meta:
         queryset       =  VM.objects.all()
         authentication = BasicAuthentication()
-        authorization  = DjangoAuthorization()
+        authorization  = StaffAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
     def prepend_urls(self):
@@ -128,17 +129,13 @@ class VMResource(ModelResource):
          basic_bundle = self.build_bundle(request=request)
          vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, vm.stop())
-    def apply_authorization_limits(self, request, object_list):
-        user = request.user
-        #if not user.is_staff:
-        return object_list.filter(user=user)
 
 class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
     class Meta:
         queryset       =  Stack.objects.all()
         authentication = BasicAuthentication()
-        authorization  = DjangoAuthorization()
+        authorization  = StaffAuthorization()
         detail_uri_name = 'name'
         collection_name = 'results'
     def prepend_urls(self):
