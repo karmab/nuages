@@ -119,6 +119,7 @@ class VMResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/start$" % self._meta.resource_name, self.wrap_view('start'), name="api_vm_start"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/stop$" % self._meta.resource_name, self.wrap_view('stop'), name="api_vm_stop"),
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_vm_kill"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
     def start(self, request, **kwargs):
@@ -129,6 +130,10 @@ class VMResource(ModelResource):
          basic_bundle = self.build_bundle(request=request)
          vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, vm.stop())
+    def kill(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, vm.kill())
 
 class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
@@ -142,6 +147,7 @@ class StackResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/start$" % self._meta.resource_name, self.wrap_view('start'), name="api_stack_start"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/stop$" % self._meta.resource_name, self.wrap_view('stop'), name="api_stack_stop"),
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_stack_kill"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
     def start(self, request, **kwargs):
@@ -152,3 +158,7 @@ class StackResource(ModelResource):
          basic_bundle = self.build_bundle(request=request)
          stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, stack.stop())
+    def kill(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, stack.kill())
