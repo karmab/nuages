@@ -172,6 +172,7 @@ def create(request):
         #VM CREATION IN DB
         newvm = VM(name=name, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=ip1, mac1=mac1, ip2=ip2, mac2=mac2, ip3=ip3, mac3=mac3, ip4=ip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup, create=create)
         success = newvm.save()
+        name  = newvm.name
         if success != 'OK':
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % success )
         if numvms > 1:
@@ -185,6 +186,7 @@ def create(request):
                 newip4  = request.POST.get("ip4_%s" % num)
                 newvm = VM(name=newname, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=newip1, mac1=newmac1, ip2=newip2, mac2=mac2, ip3=newip3, mac3=mac3, ip4=newip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
                 success = newvm.save()
+                newname = newvm.name
                 if success == 'OK':
                     successes[newname]="Machine %s successfully created!!!" % newname
                 else:

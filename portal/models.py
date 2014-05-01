@@ -478,11 +478,11 @@ class VM(models.Model):
             elif ipamprovider.type == 'internal':
                 self.name = internalname(profile)
             elif ipamprovider.type == 'marvel':
-                new = False
-                while not new:
-                    newname = marvelname(profile)
-                if len(VM.objects.filter(name=newname)) == 0:
-                    new = True
+                #new = False
+                #while not new:
+                newname = marvelname(profile)
+                #if len(VM.objects.filter(name=newname)) == 0:
+                #    new = True
                 self.name = newname
         name      = self.name
         if ip1 == '' and ipamprovider:
@@ -523,12 +523,6 @@ class VM(models.Model):
             subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
         if profile.price:
             self.price = profile.price
-        if profile.ipamprovider:
-            ipamprovider=profile.ipamprovider
-            connection=checkconn(ipamprovider.host,ipamprovider.port)
-            if not connection:
-                return "Connectivity issue with Ipam %s!" % ipamprovider.host
-            #TODO: RETRIEVE IPS (AND NAME?)
         if physical:
             physicalprovider = profile.physicalprovider
             if physicalprovider.type == 'oa':
