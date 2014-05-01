@@ -98,6 +98,11 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
         r = requests.delete(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def killvm(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/vm/%s/kill" % (protocol, host, port, name)
+        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
     def startvm(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/start" % (protocol, host, port, name)
@@ -129,6 +134,7 @@ if __name__ == '__main__':
     parser.add_option_group(actiongroup)
     creationgroup = optparse.OptionGroup(parser, 'Creation options')
     creationgroup.add_option('-d', '--deletevm', dest='deletevm', action='store_true', help='delete vm')
+    creationgroup.add_option('-k', '--killvm', dest='killvm', action='store_true', help='kill vm')
     creationgroup.add_option("-p", "--profile", dest="profile",type="string", help="specify Profile")
     creationgroup.add_option('-n', '--createvm', dest='createvm', action='store_true', help='create vm')
     parser.add_option_group(creationgroup)
@@ -157,6 +163,7 @@ if __name__ == '__main__':
     console = options.console
     startvm = options.startvm
     createvm = options.createvm
+    killvm = options.killvm
     deletevm = options.deletevm
     stopvm = options.stopvm
     nuageconffile = "%s/nuages.ini" % (os.environ['HOME'])
@@ -258,6 +265,9 @@ if __name__ == '__main__':
         print results
     if deletevm:
         results = n.deletevm(name)
+        print results
+    if killvm:
+        results = n.killvm(name)
         print results
     if console:
         results = n.console(name)
