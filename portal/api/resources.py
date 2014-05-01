@@ -110,6 +110,7 @@ class ProfileResource(ModelResource):
 
 class VMResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
+    profile          = fields.ForeignKey(ProfileResource, 'profile')
     class Meta:
         queryset       =  VM.objects.all()
         authentication = StaffAuthentication()
@@ -129,17 +130,20 @@ class VMResource(ModelResource):
          vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, vm.console())
     def kill(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, vm.kill())
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, vm.kill())
     def start(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, vm.start())
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, vm.start())
     def stop(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, vm.stop())
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, vm.stop())
 
 class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')
@@ -158,18 +162,21 @@ class StackResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
     def kill(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, stack.kill())
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, stack.kill())
     def show(self, request, **kwargs):
          basic_bundle = self.build_bundle(request=request)
          stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
          return self.create_response(request, stack.show())
     def start(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, stack.start())
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, stack.start())
     def stop(self, request, **kwargs):
-         basic_bundle = self.build_bundle(request=request)
-         stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
-         return self.create_response(request, stack.stop())
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            stack = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, stack.stop())
