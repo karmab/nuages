@@ -15,6 +15,8 @@ from datetime import datetime
 from django.conf import settings
 from nuages.settings import LOGIN_REDIRECT_URL as baseurl
 hooks = settings.PWD+'/hooks'
+import logging
+
 
 try:
     from portal.ovirt import Ovirt
@@ -461,12 +463,14 @@ class VM(models.Model):
         else:
             return "physical:%s" % (self.name)
     def save(self, *args, **kwargs):
+        logging.debug('prout')
         if self.pk:
             super(VM, self).save(*args, **kwargs)
             return
         self.createdwhen=datetime.now()
-        name, storagedomain, physicalprovider, virtualprovider, physical, cobblerprovider, foremanprovider, ipamprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physicalprovider, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.ipamprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
+        name, storagedomain, physicalprovider, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physicalprovider, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
         clu, guestid, memory, numcpu, disksize1, diskthin1, disksize2, diskthin2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, gateway, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template, cloudinit, rootpw, dns1, requireip = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskthin1, profile.disksize2, profile.diskthin2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.gateway, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template, profile.cloudinit, profile.rootpw, profile.dns1, profile.requireip
+        ipamprovider = profile.ipamprovider
         beforecreate, aftercreate, beforestart, afterstart, afterbuild = profile.hookbeforecreate, profile.hookaftercreate, profile.hookbeforestart, profile.hookafterstart, profile.hookafterbuild
         if name == '':
             if not ipamprovider:
@@ -477,7 +481,7 @@ class VM(models.Model):
                 new = False
                 while not new:
                     newname = marvelname(profile)
-                if not VM.objects.get(name=newname):
+                if len(VM.objects.filter(name=newname)) == 0:
                     new = True
                 self.name = newname
         name      = self.name
