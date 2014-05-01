@@ -3,14 +3,18 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User,Group
 import ast
-import json
+import hashlib
 import os
+import random
+import requests
 import subprocess
 import time
+import django.utils.simplejson as json
+import datetime
+from datetime import datetime
 from django.conf import settings
 from nuages.settings import LOGIN_REDIRECT_URL as baseurl
 hooks = settings.PWD+'/hooks'
-
 
 try:
     from portal.ovirt import Ovirt
@@ -26,13 +30,6 @@ try:
     from portal.foreman import Foreman
 except:
     print "Missing python-requests package for foreman support"
-import django.utils.simplejson as json
-import time,datetime
-from random import choice
-import json
-from django.contrib.auth.decorators import login_required
-import logging
-import random
 try:
     from portal.ilo import Ilo
 except:
@@ -42,9 +39,6 @@ try:
 except:
     print "Missing python-paramiko package for oa support"
 import socket
-from django.forms import ModelForm
-from django.db.models import Q
-from datetime import datetime
 
 
 #default values
@@ -80,11 +74,6 @@ def nonone(variable):
         return ''
     else:
         return str(variable)
-        #try:
-        #    name= variable.name
-        #    return name
-        #except:
-        #    return str(variable)
 
 def vmstart(name,virtualprovider):
     if virtualprovider.type == 'ovirt':
@@ -129,15 +118,81 @@ def vmremove(name,virtualprovider):
         removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
         os.popen(removecommand).read()
 
+def internalname(profile):
+    naming = profile.ipamprovider.naming
+    names = VM.objects.filter(profile=profile).filter(name__startswith=naming).values('name')
+    if names == None:
+        name = "%s001" % (naming)
+    else:
+        counter = 0
+        for n in names:
+            if int(n['name'][-3:])> counter:
+                counter = int(n['name'][-3:])
+        counter = counter+1
+        name = "%s%0.3d"  % (naming, counter)
+        return name
+
+def marvelname(profile):
+    ipamprovider  = profile.ipamprovider
+    pubkey        = ipamprovider.pubkey
+    privkey       = ipamprovider.privkey
+    timestamp     = str(int(time.time()))
+    offset        = random.randrange(1,1402)
+    limit         = '1'
+    hashvalue     = hashlib.md5(timestamp + privkey + pubkey).hexdigest()
+    uri           = "http://gateway.marvel.com:80/v1/public/characters?limit=%s&offset=%s&apikey=%s&ts=%s&hash=%s" % (limit, offset, pubkey, timestamp, hashvalue)
+    headers       = {'content-type':'application/json'}
+    request       = requests.get(uri, headers=headers)
+    data          = json.loads(request.content)
+    name          = data['data']['results'][0]['name'].strip().split(' ')[0]
+    return name
+
+def internalip(profile,index):
+    netranges = { 1: profile.ipamprovider.range1, 2: profile.ipamprovider.range2, 3 : profile.ipamprovider.range3 , 4: profile.ipamprovider.range4 }
+    netrange = netranges[index]
+    if netrange == '':
+        return ''
+    filter = "ip%d" % index
+    if index == 1:
+        ips = VM.objects.filter(profile=profile).exclude(ip1=None).values('ip1')
+    elif index == 2:
+        ips = VM.objects.filter(profile=profile).exclude(ip2=None).values('ip2')
+    elif index == 3:
+        ips = VM.objects.filter(profile=profile).exclude(ip3=None).values('ip3')
+    elif index == 4:
+        ips = VM.objects.filter(profile=profile).exclude(ip4=None).values('ip4')
+    last = 0
+    for i in ips:
+        ip = i[filter]
+        currentlast = int(ip.split('.')[3])
+        if ip.startswith(netrange) and currentlast > last:
+            last = currentlast
+    last = last+1
+    return "%s.%d" % (netrange, last)
+
 class IpamProvider(models.Model):
     name                = models.CharField(max_length=80)
-    host                = models.CharField(max_length=60)
-    port                = models.IntegerField(default=80)
-    user                = models.CharField(max_length=60)
-    password            = models.CharField(max_length=20)
-    type                = models.CharField(max_length=10, default='naman')
+    type                = models.CharField(max_length=20, default='internal',choices=( ('internal', 'internal'),('marvel', 'marvel') ))
+    host                = models.CharField(max_length=60,blank=True, null=True)
+    port                = models.IntegerField(default=80,blank=True, null=True)
+    user                = models.CharField(max_length=60,blank=True, null=True)
+    password            = models.CharField(max_length=20,blank=True, null=True)
+    privkey          = models.CharField(max_length=100,blank=True, null=True)
+    pubkey           = models.CharField(max_length=100,blank=True, null=True)
+    naming              = models.IntegerField(default=80,blank=True, null=True)
+    range1              = models.CharField(max_length=40, blank=True)
+    range2              = models.CharField(max_length=40, blank=True)
+    range3              = models.CharField(max_length=40, blank=True)
+    range4              = models.CharField(max_length=40, blank=True)
     def __unicode__(self):
         return self.name
+    def clean(self):
+        if not self.password and not self.privkey:
+                raise ValidationError("You either need keys or a host+password")
+        if self.type == 'marvel'  and not self.prikey:
+                raise ValidationError("Marvel needs keys")
+        if self.type == 'internal'  and not self.naming:
+                raise ValidationError("Internal needs naming to be set")
 
 class LdapProvider(models.Model):
     name                = models.CharField(max_length=80)
@@ -245,7 +300,6 @@ class Hook(models.Model):
 
 class Profile(models.Model):
     name              = models.CharField(max_length=80)
-    naming            = models.CharField(max_length=80,blank=True,null=True)
     physicalprovider  = models.ForeignKey(PhysicalProvider,blank=True,null=True)
     virtualprovider   = models.ForeignKey(VirtualProvider,blank=True,null=True)
     cobblerprovider   = models.ForeignKey(CobblerProvider,blank=True,null=True)
@@ -266,16 +320,12 @@ class Profile(models.Model):
     numinterfaces     = models.IntegerField(default=NUMINTERFACES)
     net1              = models.CharField(max_length=40, default=NET1)
     subnet1           = models.GenericIPAddressField(default=SUBNET1, blank=True, null=True, protocol="IPv4")
-    range1            = models.CharField(max_length=40, blank=True)
     net2              = models.CharField(max_length=40, blank=True)
     subnet2           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-    range2            = models.CharField(max_length=40, blank=True)
     net3              = models.CharField(max_length=40, blank=True)
     subnet3           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-    range3            = models.CharField(max_length=40, blank=True)
     net4              = models.CharField(max_length=40, blank=True)
     subnet4           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
-    range4            = models.CharField(max_length=40, blank=True)
     gateway           = models.GenericIPAddressField(blank=True, null=True, protocol="IPv4")
     diskinterface     = models.CharField(max_length=20, default=DISKINTERFACE)
     netinterface      = models.CharField(max_length=20, default=NETINTERFACE)
@@ -412,9 +462,46 @@ class VM(models.Model):
             super(VM, self).save(*args, **kwargs)
             return
         self.createdwhen=datetime.now()
-        name, storagedomain, physicalprovider, virtualprovider, physical, cobblerprovider, foremanprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physicalprovider, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
-        clu, guestid, memory, numcpu, disksize1, diskthin1, disksize2, diskthin2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, gateway, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template, cloudinit, rootpw, dns1 = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskthin1, profile.disksize2, profile.diskthin2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.gateway, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template, profile.cloudinit, profile.rootpw, profile.dns1
+        name, storagedomain, physicalprovider, virtualprovider, physical, cobblerprovider, foremanprovider, ipamprovider, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physicalprovider, self.virtualprovider, self.physical, self.cobblerprovider, self.foremanprovider, self.ipamprovider, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
+        clu, guestid, memory, numcpu, disksize1, diskthin1, disksize2, diskthin2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, gateway, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template, cloudinit, rootpw, dns1, requireip = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskthin1, profile.disksize2, profile.diskthin2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.gateway, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template, profile.cloudinit, profile.rootpw, profile.dns1, profile.requireip
         beforecreate, aftercreate, beforestart, afterstart, afterbuild = profile.hookbeforecreate, profile.hookaftercreate, profile.hookbeforestart, profile.hookafterstart, profile.hookafterbuild
+        if name == '':
+            if not ipamprovider:
+                return "Setting a name is required!"
+            elif ipamprovider.type == 'internal':
+                self.name = internalname(profile)
+            elif ipamprovider.type == 'marvel':
+                new = False
+                while not new:
+                    newname = marvelname(profile)
+                if not VM.objects.get(name=newname):
+                    new = True
+                self.name = newname
+        name      = self.name
+        if ip1 == '' and ipamprovider:
+            if ipamprovider.type == 'internal':
+                self.ip1 = internalip(profile, 1)
+                ip1      = self.ip1
+        if ip2 == '' and ipamprovider and numinterfaces >1:
+            if ipamprovider.type == 'internal':
+                self.ip2 = internalip(profile, 2)
+                ip2      = self.ip2
+        if ip3 == '' and ipamprovider and numinterfaces >2:
+            if ipamprovider.type == 'internal':
+                self.ip3 = internalip(profile, 3)
+                ip3      = self.ip3
+        if ip4 == '' and ipamprovider and numinterfaces >3:
+            if ipamprovider.type == 'internal':
+                self.ip4 = internalip(profile, 4)
+                ip4      = self.ip4
+        if requireip and ip1 == '':
+                return "Setting ip1 is required!"
+        if requireip and ip2 == '' and numinterfaces >1:
+                return "Setting ip2 is required!"
+        if requireip and ip3 == '' and numinterfaces >2:
+                return "Setting ip3 is required!"
+        if requireip and ip4 == '' and numinterfaces >3:
+                return "Setting ip4 is required!"
         if beforecreate:
             env = os.environ
             env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = name, nonone(storagedomain), nonone(physicalprovider), nonone(virtualprovider), nonone(physical), nonone(cobblerprovider), nonone(foremanprovider), nonone(profile), nonone(ip1), nonone(mac1), nonone(ip2), nonone(mac2), nonone(ip3), nonone(mac3), nonone(ip4), nonone(mac4), nonone(ipilo), nonone(ipoa), nonone(iso), nonone(hostgroup), nonone(puppetclasses), nonone(parameters), nonone(createdby), nonone(createdwhen), nonone(price), nonone(unmanaged), nonone(status), nonone(create)

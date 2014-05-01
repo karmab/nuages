@@ -99,42 +99,6 @@ def customlogin(request, *args, **kwargs):
         request.session.modified = True
     return auth_views.login(request, *args, **kwargs)
 
-def getname(profile):
-    names = VM.objects.filter(profile=profile).filter(name__startswith=profile.naming).values('name')
-    if names == None:
-        name = "%s001" % (profile.naming)
-    else:
-        counter = 0
-        for n in names:
-            if int(n['name'][-3:])> counter:
-                counter = int(n['name'][-3:])
-        counter = counter+1
-        name = "%s%0.3d"  % (profile.naming, counter)
-        return name
-
-def getip(profile,index):
-    netranges = { 1: profile.range1, 2: profile.range2, 3 : profile.range3 , 4: profile.range4 }
-    netrange = netranges[index]
-    if netrange == '':
-        return ''
-    filter = "ip%d" % index
-    if index == 1:
-        ips = VM.objects.filter(profile=profile).exclude(ip1=None).values('ip1')
-    elif index == 2:
-        ips = VM.objects.filter(profile=profile).exclude(ip2=None).values('ip2')
-    elif index == 3:
-        ips = VM.objects.filter(profile=profile).exclude(ip3=None).values('ip3')
-    elif index == 4:
-        ips = VM.objects.filter(profile=profile).exclude(ip4=None).values('ip4')
-    last = 0
-    for i in ips:
-        ip = i[filter]
-        currentlast = int(ip.split('.')[3])
-        if ip.startswith(netrange) and currentlast > last:
-            last = currentlast
-    last = last+1
-    return "%s.%d" % (netrange, last)
-
 @login_required
 def create(request):
     username          = request.user.username
@@ -173,9 +137,6 @@ def create(request):
             physical = False
         else:
             physical = True
-        #get associated profiles
-        #TODO:add tags to model
-        tags = None
         profile = Profile.objects.get(id=profile)
         if profile.maxvms:
             currentvms = len(VM.objects.filter(profile=profile))
@@ -184,15 +145,6 @@ def create(request):
         if storagedomain == '' and not physical:
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>")
         disksize1, disksize2, numinterfaces, requireip, cobbler, foreman = profile.disksize1, profile.disksize2, profile.numinterfaces, profile.requireip, profile.cobbler, profile.foreman
-        ipamprovider = profile.ipamprovider
-        if requireip and not ipamprovider and not ip1:
-            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip1 needed <p><p</div>")
-        if requireip and not ipamprovider and not numinterfaces > 1 and not ip2:
-            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip2 needed <p><p</div>")
-        if requireip and not ipamprovider and numinterfaces > 2 and not ip3:
-            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip3 needed <p><p</div>")
-        if requireip and not ipamprovider and numinterfaces > 3 and not ip4:
-            return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Ip4 needed <p><p</div>")
         if physical:
             virtualprovider = None
         else:
@@ -208,20 +160,6 @@ def create(request):
             foremanprovider=None
         if type:
             parameters = "type=%s %s" % (type, parameters)
-
-        if name == '':
-            if profile.naming == None:
-                return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM with this profile needs a name</div>")
-            else:
-                name = getname(profile)
-        if ip1 == '':
-            ip1 = getip(profile, 1)
-        if ip2 == '':
-            ip2 = getip(profile, 2)
-        if ip3 == '':
-            ip3 = getip(profile, 3)
-        if ip4 == '':
-            ip4 = getip(profile, 4)
         #CHECK SECTION
         #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
         vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
@@ -245,32 +183,6 @@ def create(request):
                 newip2  = request.POST.get("ip2_%s" % num)
                 newip3  = request.POST.get("ip3_%s" % num)
                 newip4  = request.POST.get("ip4_%s" % num)
-                if newname == '':
-                    if profile.naming == None:
-                        successes["name_%s" % num]= "Named needed for name_%s" %  num
-                        continue
-                else:
-                    newname = getname(profile)
-                if newip1 == '':
-                    newip1 = getip(profile, 1)
-                if newip2 == '':
-                    newip2 = getip(profile, 2)
-                if newip3 == '':
-                    newip3 = getip(profile, 3)
-                if newip4 == '':
-                    newip4 = getip(profile, 4)
-                if requireip and not ipamprovider and not newip1:
-                    successes[newname]="Ip1 needed for %s" % newname
-                    continue
-                if requireip and not ipamprovider and not numinterfaces > 1 and not newip2:
-                    successes[newname]="Ip2 needed for %s" % newname
-                    continue
-                if requireip and not ipamprovider and numinterfaces > 2 and not newip3:
-                    successes[newname]="Ip3 needed for %s" % newname
-                    continue
-                if requireip and not ipamprovider and numinterfaces > 3 and not newip4:
-                    successes[newname]="Ip4 needed for %s" % newname
-                    continue
                 newvm = VM(name=newname, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=newip1, mac1=newmac1, ip2=newip2, mac2=mac2, ip3=newip3, mac3=mac3, ip4=newip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
                 success = newvm.save()
                 if success == 'OK':
@@ -1674,12 +1586,8 @@ def stacks(request):
                 beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                 bestds = os.popen(beststoragecommand).read()
                 storagedomain = bestds.strip()
-            if name == '':
-                if profile.naming == None:
+            if name == '' and not ipamprovider:
                     failure   = True
-                    break
-                else:
-                    name = getname(profile)
             #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
             vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
             if len(vms) > 0:
