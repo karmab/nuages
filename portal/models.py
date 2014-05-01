@@ -173,12 +173,12 @@ def internalip(profile,index):
 class IpamProvider(models.Model):
     name                = models.CharField(max_length=80)
     type                = models.CharField(max_length=20, default='internal',choices=( ('internal', 'internal'),('marvel', 'marvel') ))
-    host                = models.CharField(max_length=60,blank=True, null=True)
-    port                = models.IntegerField(default=80,blank=True, null=True)
-    user                = models.CharField(max_length=60,blank=True, null=True)
-    password            = models.CharField(max_length=20,blank=True, null=True)
-    privkey          = models.CharField(max_length=100,blank=True, null=True)
-    pubkey           = models.CharField(max_length=100,blank=True, null=True)
+    #host                = models.CharField(max_length=60,blank=True, null=True)
+    #port                = models.IntegerField(default=80,blank=True, null=True)
+    #user                = models.CharField(max_length=60,blank=True, null=True)
+    #password            = models.CharField(max_length=20,blank=True, null=True)
+    privkey             = models.CharField(max_length=100,blank=True, null=True)
+    pubkey              = models.CharField(max_length=100,blank=True, null=True)
     naming              = models.IntegerField(default=80,blank=True, null=True)
     range1              = models.CharField(max_length=40, blank=True)
     range2              = models.CharField(max_length=40, blank=True)
@@ -187,10 +187,12 @@ class IpamProvider(models.Model):
     def __unicode__(self):
         return self.name
     def clean(self):
-        if not self.password and not self.privkey:
-                raise ValidationError("You either need keys or a host+password")
-        if self.type == 'marvel'  and not self.prikey:
-                raise ValidationError("Marvel needs keys")
+        if self.type == 'internal' and not self.naming:
+                raise ValidationError("Internal needs naming")
+        if self.type == 'marvel'  and not self.privkey:
+                raise ValidationError("Marvel needs priv key")
+        if self.type == 'marvel'  and not self.pubkey:
+                raise ValidationError("Marvel needs pub key")
         if self.type == 'internal'  and not self.naming:
                 raise ValidationError("Internal needs naming to be set")
 
