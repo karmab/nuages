@@ -38,11 +38,9 @@ class Nuage:
     def createvm(self,name,profile):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
-        data = { "profile" : profile , "name" : name }
+        data = { "profile" : "/nuages/api/v1/profile/%s" % profile , "name" : name }
         r = requests.post(url,verify=False, data=json.dumps(data), headers=headers, auth=(user,password))
-        print r , r.reason, r.text
-        #results = r.json()['results']
-        #return results
+        return r.text
     def allvms(self):
         allvms = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
