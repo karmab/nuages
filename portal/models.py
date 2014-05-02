@@ -713,9 +713,9 @@ class VM(models.Model):
         return 'OK'
     def kill(self, *args, **kwargs):
         name = self.name
-        virtualprovider = self.virtualprovider
-        cobblerprovider = self.cobblerprovider
-        foremanprovider = self.foremanprovider
+        virtualprovider = self.profile.virtualprovider
+        cobblerprovider = self.profile.cobblerprovider
+        foremanprovider = self.profile.foremanprovider
         if cobblerprovider:
             cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
             cobbler = Cobbler(cobblerhost, cobbleruser, cobblerpassword)
