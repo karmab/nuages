@@ -361,13 +361,16 @@ if __name__ == '__main__':
     if delete:
         results = n.delete(name)
         print results
+        sys.exit(0)
     if kill:
         results = n.kill(name)
         print results
+        sys.exit(0)
     if console:
         results = n.console(name)
         baseurl = "http://%s:%s" % (host, port)
         print "%s%s" % (baseurl, results)
+        sys.exit(0)
     if create and profile:
         profiles = []
         for prof in sorted(n.profiles(), key=lambda profile: profile['name']):
