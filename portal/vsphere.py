@@ -606,7 +606,7 @@ if __name__ == '__main__':
         print vsphere.getmacs(name)
     elif action == 'html5console':
         name, fqdn, sha1 = sys.argv[7], sys.argv[8], sys.argv[9]
-        print vsphere.hmtl5console(name, fqdn, sha1)
+        print vsphere.html5console(name, fqdn, sha1)
     elif action == 'console':
         name = sys.argv[7]
         print vsphere.console(name)
