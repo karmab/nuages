@@ -1,7 +1,8 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 #specific stuff for auth
-from django.conf.urls.defaults import *
+#from django.conf.urls.defaults import *
+from django.conf.urls import patterns, url, include
 from django.views.generic import RedirectView
 from django.core.urlresolvers import reverse_lazy
 from tastypie.api import Api

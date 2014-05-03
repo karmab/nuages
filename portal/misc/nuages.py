@@ -31,11 +31,10 @@ class Nuage:
         self.user     = user
         self.password = password
         self.headers   = {'content-type': 'application/json', 'Accept': 'application/json' }
-        #if secure:
-        #self.protocol = 'https'
-        #else:
-        self.protocol = 'http'
-    #def create(self,name,profile):
+        if secure:
+            self.protocol = 'https'
+        else:
+            self.protocol = 'http'
     def create(self, name, profile, storage=None, ip1=None, ip2=None, ip3=None, ip4=None, hostgroup=None, iso=None):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
@@ -60,33 +59,6 @@ class Nuage:
             data['storagedomain'] = storage
         r = requests.post(url,verify=False, data=json.dumps(data), headers=headers, auth=(user,password))
         return r.text
-    def storages(self):
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/storage" % (protocol, host, port)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()['results']
-        return results
-    def vms(self):
-        allvms = []
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()['results']
-        for vm in results:
-            allvms.append(vm['name'])
-        return allvms
-    def profiles(self):
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/profile" % (protocol, host, port)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()['results']
-        return results
-    def profile(self,name):
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/profile/%s" % (protocol, host, port, name)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()
-        return results
     def cobblerproviders(self):
         cps = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
@@ -96,24 +68,6 @@ class Nuage:
         for cp in results:
             cps.append(cp['name'])
         return cps
-    def foremanproviders(self):
-        fps = []
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/cobblerprovider" % (protocol, host, port)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()['results']
-        for fp in results:
-            fps.append(fp['name'])
-        return fps
-    def physicalproviders(self):
-        pps = []
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/physicalprovider" % (protocol, host, port)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()['results']
-        for pp in results:
-            pps.append(pp['name'])
-        return pps
     def console(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/console" % (protocol, host, port, name)
@@ -124,19 +78,50 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
         r = requests.delete(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def foremanproviders(self):
+        fps = []
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/cobblerprovider" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        for fp in results:
+            fps.append(fp['name'])
+        return fps
     def kill(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/kill" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def physicalproviders(self):
+        pps = []
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/physicalprovider" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        for pp in results:
+            pps.append(pp['name'])
+        return pps
+    def profile(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/profile/%s" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()
+        return results
+    def profiles(self):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/profile" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        return results
+    def stacks(self):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        return results
     def start(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/start" % (protocol, host, port, name)
-        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
-        return r.text.replace('"','')
-    def stop(self,name):
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/vm/%s/stop" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
     def status(self,name):
@@ -144,11 +129,34 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s/status" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def stop(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/vm/%s/stop" % (protocol, host, port, name)
+        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
+    def storage(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/virtualprovider/%s/storage" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()
+        return results
+    def storages(self):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/storage" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        return results
     def vm(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
         r = requests.get(url,verify=False, headers=headers,auth=(user,password))
         return r.json()
+    def vms(self):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        return results
     def virtualproviders(self):
         vps = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
@@ -161,12 +169,6 @@ class Nuage:
     def virtualprovider(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/virtualprovider/%s" % (protocol, host, port, name)
-        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
-        results = r.json()
-        return results
-    def storage(self,name):
-        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
-        url = "%s://%s:%s/nuages/api/v1/virtualprovider/%s/storage" % (protocol, host, port, name)
         r = requests.get(url,verify=False, headers=headers,auth=(user,password))
         results = r.json()
         return results
@@ -203,6 +205,7 @@ if __name__ == '__main__':
     listinggroup.add_option('-v', '--virtualproviders', dest='virtualproviders', action='store_true', help='list virtual providers')
     listinggroup.add_option('-Q', '--physicalproviders', dest='physicalproviders', action='store_true', help='list physical providers')
     listinggroup.add_option('-V', '--vms', dest='vms', action='store_true', help='list all vms')
+    listinggroup.add_option('-X', '--stacks', dest='stacks', action='store_true', help='list all stacks')
     listinggroup.add_option("-z", "--virtualprovider", dest="virtualprovider", type="string", help="Specify virtualprovider")
     parser.add_option_group(listinggroup)
     parser.add_option("-C", "--client", dest="client", type="string", help="Specify Client")
@@ -214,6 +217,7 @@ if __name__ == '__main__':
     listclients = options.listclients
     storages = options.storages
     vms = options.vms
+    stacks = options.stacks
     cobblerproviders = options.cobblerproviders
     foremanproviders = options.foremanproviders
     physicalproviders = options.physicalproviders
@@ -322,8 +326,20 @@ if __name__ == '__main__':
             print vp
         sys.exit(0)
     if vms:
-        for vm in sorted(n.vms()):
+        results = n.vms()
+        allvms = []
+        for vm in results:
+            allvms.append(vm['name'])
+        for vm in sorted(allvms):
             print vm
+        sys.exit(0)
+    if stacks:
+        results = n.stacks()
+        allstacks = []
+        for stack in results:
+            allstacks.append(stack['name'])
+        for stack in sorted(allstacks):
+            print stack
         sys.exit(0)
     if profile:
         profiles = []
