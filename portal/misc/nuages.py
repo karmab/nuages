@@ -3,6 +3,7 @@
 wrapper around the nuages REST api
 """
 
+import ast
 import ConfigParser
 import optparse
 import os
@@ -19,6 +20,12 @@ __email__ = "karim.boumedhel@gmail.com"
 __status__ = "Production"
 
 ERR_NONUAGEFILE = "You need to create a correct nuages.ini file in your home directory.Check documentation"
+
+def checkargs(args):
+    if len(args) != 1:
+        print 'Name required'
+        sys.exit(0)
+    return args[0]
 
 class Nuage:
     def __init__(self, host, port, user, password,secure=False):
@@ -78,6 +85,11 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
         r = requests.delete(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def deletestack(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack/%s" % (protocol, host, port, name)
+        r = requests.delete(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
     def foremanproviders(self):
         fps = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
@@ -90,6 +102,11 @@ class Nuage:
     def kill(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/kill" % (protocol, host, port, name)
+        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
+    def killstack(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack/%s/kill" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
     def physicalproviders(self):
@@ -113,6 +130,17 @@ class Nuage:
         r = requests.get(url,verify=False, headers=headers,auth=(user,password))
         results = r.json()['results']
         return results
+    def showstack(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack/%s/show" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
+    def stack(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack/%s" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()
+        return results
     def stacks(self):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/stack" % (protocol, host, port)
@@ -124,6 +152,11 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s/start" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def startstack(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack/%s/start" % (protocol, host, port, name)
+        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
     def status(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/status" % (protocol, host, port, name)
@@ -132,6 +165,11 @@ class Nuage:
     def stop(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/stop" % (protocol, host, port, name)
+        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
+    def stopstack(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/stack/%s/stop" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
     def storage(self,name):
@@ -205,9 +243,16 @@ if __name__ == '__main__':
     listinggroup.add_option('-v', '--virtualproviders', dest='virtualproviders', action='store_true', help='list virtual providers')
     listinggroup.add_option('-Q', '--physicalproviders', dest='physicalproviders', action='store_true', help='list physical providers')
     listinggroup.add_option('-V', '--vms', dest='vms', action='store_true', help='list all vms')
-    listinggroup.add_option('-X', '--stacks', dest='stacks', action='store_true', help='list all stacks')
     listinggroup.add_option("-z", "--virtualprovider", dest="virtualprovider", type="string", help="Specify virtualprovider")
     parser.add_option_group(listinggroup)
+    stackgroup = optparse.OptionGroup(parser, "Stack options")
+    stackgroup.add_option("-q", "--stack", dest="stack",type="string", help="specify Stack")
+    stackgroup.add_option('-X', '--stacks', dest='stacks', action='store_true', help='list all stacks')
+    stackgroup.add_option('-5', '--startstack', dest="startstack", action='store_true', help='start stack. Requires you to use -q to indicate a stack')
+    stackgroup.add_option('-6', '--stopstack', dest='stopstack', action='store_true', help='stop stack. Requires you to use -q to indicate a stack')
+    stackgroup.add_option('-7', '--showstack', dest='showstack', action='store_true', help='show stack. Requires you to use -q to indicate a stack')
+    stackgroup.add_option('-8', '--killstack', dest='killstack', action='store_true', help='kill stack. Requires you to use -q to indicate a stack')
+    parser.add_option_group(stackgroup)
     parser.add_option("-C", "--client", dest="client", type="string", help="Specify Client")
     parser.add_option("-9", "--switchclient", dest="switchclient", type="string", help="Switch default client")
     (options, args) = parser.parse_args()
@@ -217,6 +262,7 @@ if __name__ == '__main__':
     listclients = options.listclients
     storages = options.storages
     vms = options.vms
+    stack = options.stack
     stacks = options.stacks
     cobblerproviders = options.cobblerproviders
     foremanproviders = options.foremanproviders
@@ -238,6 +284,10 @@ if __name__ == '__main__':
     iso = options.iso
     parameters = options.parameters
     puppetclasses = options.puppetclasses
+    startstack = options.startstack
+    stopstack = options.stopstack
+    showstack = options.showstack
+    killstack = options.killstack
     nuageconffile = "%s/nuages.ini" % (os.environ['HOME'])
     #parse nuage client auth file
     if not os.path.exists(nuageconffile):
@@ -354,6 +404,37 @@ if __name__ == '__main__':
                 continue
             print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
         sys.exit(0)
+    if stack:
+        stacks = []
+        for sta in sorted(n.stacks(), key=lambda stack: stack['name']):
+            stacks.append(sta['name'])
+        if not stack in stacks:
+            print "Stack %s not found" % stack
+            sys.exit(0)
+        results = n.stack(stack)
+        for attribute in sorted(results):
+            if attribute in ['resource_uri'] or results[attribute]=='' or results[attribute]==None:
+                continue
+            print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
+        if startstack:
+            results = n.startstack(stack)
+            print "Stack %s started" % stack
+            sys.exit(0)
+        if stopstack:
+            results = n.stopstack(stack)
+            print "Stack %s stopped" % stack
+            sys.exit(0)
+        if showstack:
+            results = n.showstack(stack)
+            baseurl = "http://%s:%s" % (host, port)
+            print results
+            sys.exit(0)
+        if killstack:
+            n.killstack(stack)
+            n.deletestack(stack)
+            print "Stack %s killed" % stack
+            sys.exit(0)
+        sys.exit(0)
     if virtualprovider:
         virtualproviders = n.virtualproviders()
         if not virtualprovider in virtualproviders:
@@ -369,32 +450,34 @@ if __name__ == '__main__':
         for result in results:
             print "%s\t%sGB\t\t%sGB" % (result, results[result][1], results[result][0])
         sys.exit(0)
-    if len(args) != 1:
-        print 'Name required'
-        sys.exit(0)
-    name = args[0]
     if start:
+        name = checkargs(args)
         n.start(name)
         print "VM %s started" % name
     if stop:
+        name = checkargs(args)
         n.stop(name)
         print "VM %s stopped" % name
         sys.exit(0)
     if delete:
+        name = checkargs(args)
         n.delete(name)
         print "VM %s deleted" % name
         sys.exit(0)
     if kill:
+        name = checkargs(args)
         n.kill(name)
         n.delete(name)
         print "VM %s killed" % name
         sys.exit(0)
     if console:
+        name = checkargs(args)
         results = n.console(name)
         baseurl = "http://%s:%s" % (host, port)
         print "%s%s" % (baseurl, results)
         sys.exit(0)
     if create and profile:
+        name = checkargs(args)
         profiles = []
         for prof in sorted(n.profiles(), key=lambda profile: profile['name']):
             profiles.append(prof['name'])
@@ -408,9 +491,11 @@ if __name__ == '__main__':
         results = n.create(name=name, profile=profile, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
         print "VM %s created" % name
 
-    results = n.vm(name)
-    for attribute in sorted(results):
-        if attribute in ['create','iso','resource_uri','status'] or results[attribute]=='' or results[attribute]==None:
-            continue
-        print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
-    print "status: %s" % n.status(name)
+    if len(args) == 1:
+        name =  args[0]
+        results = n.vm(name)
+        for attribute in sorted(results):
+            if attribute in ['create','iso','resource_uri','status'] or results[attribute]=='' or results[attribute]==None:
+                continue
+            print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
+        print "status: %s" % n.status(name)

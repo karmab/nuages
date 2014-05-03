@@ -12,6 +12,7 @@ import random
 import socket
 from django.db.models import Q
 from datetime import datetime
+from django.utils import timezone
 from calendar import monthrange
 from django.conf import settings
 from django.contrib.auth import views as auth_views
@@ -1053,7 +1054,8 @@ def invoicepdf(request):
         information = { 'title':'Missing library' , 'details':'python-dateutil missing.Contact administrator...' }
         return render(request, 'information.html', { 'information' : information  } )
     if request.method == 'GET' and request.GET.has_key('id'):
-        now      = datetime.now()
+        #now      = datetime.now()
+        now      = timezone.now()
         nowday   = now.strftime("%d")
         nowmonth = now.strftime("%Y-%m")
         default = getdefault()
@@ -1073,7 +1075,7 @@ def invoicepdf(request):
         p.setFont('Helvetica', 12)
         p.drawString(30,750,'Billing information regarding VM %s' % name)
         p.drawString(30,735,"From provider %s" % virtualprovider)
-        p.drawString(500,750,"Date: %s" % datetime.now().strftime("%Y-%m-%d"))
+        p.drawString(500,750,"Date: %s" % now().strftime("%Y-%m-%d"))
         p.drawString(275,725,'Price per day:')
         p.drawString(500,725,"%s" % vm.price+currency)
         p.line(378,723,580,723)
@@ -1110,7 +1112,8 @@ def invoicepdf(request):
             p.drawString(120,y,total)
 
         else:
-            now      = datetime.now()
+            #now      = datetime.now()
+            now      = timezone.now()
             nowday   = now.strftime("%d")
             nowmonth = now.strftime("%Y-%m")
             total = str((int(nowday)-int(day))*price)+currency
@@ -1141,7 +1144,8 @@ def invoice(request):
         createdwhen = vm.createdwhen
         month    = createdwhen.strftime("%Y-%m")
         day      = createdwhen.strftime("%d")
-        now      = datetime.now()
+        #now      = datetime.now()
+        now      =timezone.now()
         nowday   = now.strftime("%d")
         nowmonth = now.strftime("%Y-%m")
         #at least this time
@@ -1165,7 +1169,8 @@ def invoice(request):
             details.append({ 'month': month , 'total' : total  })
 
         else:
-            now      = datetime.now()
+            #now      = datetime.now()
+            now      = timezone.now()
             nowday   = now.strftime("%d")
             nowmonth = now.strftime("%Y-%m")
             total = (int(nowday)-int(day))*price
