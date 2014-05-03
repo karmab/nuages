@@ -353,18 +353,20 @@ if __name__ == '__main__':
         sys.exit(0)
     name = args[0]
     if start:
-        results = n.start(name)
-        print results
+        n.start(name)
+        print "VM %s started" % name
     if stop:
-        results = n.stop(name)
-        print results
+        n.stop(name)
+        print "VM %s stopped" % name
+        sys.exit(0)
     if delete:
-        results = n.delete(name)
-        print results
+        n.delete(name)
+        print "VM %s deleted" % name
         sys.exit(0)
     if kill:
-        results = n.kill(name)
-        print results
+        n.kill(name)
+        n.delete(name)
+        print "VM %s killed" % name
         sys.exit(0)
     if console:
         results = n.console(name)
@@ -383,7 +385,7 @@ if __name__ == '__main__':
             print "This profile requires a storagedomain to be set"
             sys.exit(0)
         results = n.create(name=name, profile=profile, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
-        print results
+        print "VM %s created" % name
     results = n.vm(name)
     for attribute in sorted(results):
         if attribute in ['create','iso','resource_uri','status'] or results[attribute]=='' or results[attribute]==None:
