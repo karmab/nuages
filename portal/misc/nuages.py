@@ -139,6 +139,11 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s/stop" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def status(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/vm/%s/status" % (protocol, host, port, name)
+        r = requests.post(url,verify=False, headers=headers,auth=(user,password))
+        return r.text.replace('"','')
     def vm(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
@@ -386,8 +391,10 @@ if __name__ == '__main__':
             sys.exit(0)
         results = n.create(name=name, profile=profile, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
         print "VM %s created" % name
+
     results = n.vm(name)
     for attribute in sorted(results):
         if attribute in ['create','iso','resource_uri','status'] or results[attribute]=='' or results[attribute]==None:
             continue
         print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
+    print "status: %s" % n.status(name)

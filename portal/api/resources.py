@@ -142,6 +142,7 @@ class VMResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/kill$" % self._meta.resource_name, self.wrap_view('kill'), name="api_vm_kill"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/start$" % self._meta.resource_name, self.wrap_view('start'), name="api_vm_start"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/stop$" % self._meta.resource_name, self.wrap_view('stop'), name="api_vm_stop"),
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/status$" % self._meta.resource_name, self.wrap_view('status'), name="api_vm_status"),
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
     def console(self, request, **kwargs):
@@ -163,6 +164,11 @@ class VMResource(ModelResource):
             basic_bundle = self.build_bundle(request=request)
             vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
             return self.create_response(request, vm.stop())
+    def status(self, request, **kwargs):
+        if request.method == 'POST':
+            basic_bundle = self.build_bundle(request=request)
+            vm = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+            return self.create_response(request, vm.status())
 
 class StackResource(ModelResource):
     createdby        = fields.ForeignKey(CreatedByResource, 'createdby')

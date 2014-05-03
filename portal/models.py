@@ -120,6 +120,21 @@ def vmremove(name,virtualprovider):
         removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
         os.popen(removecommand).read()
 
+def vmstatus(name,virtualprovider):
+    if virtualprovider.type == 'ovirt':
+        ovirt   = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+        results = ovirt.status(name)
+        ovirt.close()
+    elif virtualprovider.type == 'kvirt':
+        kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+        results = kvirt.status(name)
+        kvirt.close()
+    elif virtualprovider.type == 'vsphere':
+        statuscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'status', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+        statusinfo    = os.popen(statuscommand).read()
+        results      = json.dumps(statusinfo)
+    return results
+
 def internalname(profile):
     naming = profile.ipamprovider.naming
     names = VM.objects.filter(profile=profile).filter(name__startswith=naming).values('name')
@@ -742,6 +757,10 @@ class VM(models.Model):
         name            = self.name
         virtualprovider = self.profile.virtualprovider
         return vmstop(name, virtualprovider)
+    def status(self, *args, **kwargs):
+        name            = self.name
+        virtualprovider = self.profile.virtualprovider
+        return vmstatus(name, virtualprovider)
 
 class Default(models.Model):
     name              = models.CharField(max_length=20)
