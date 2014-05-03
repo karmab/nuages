@@ -49,6 +49,20 @@ class PhysicalProviderResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
         ]
 
+class StorageResource(ModelResource):
+    class Meta:
+        queryset        = Storage.objects.all()
+        resource_name   = 'storage'
+        allowed_methods = ['get']
+        #fields          = ['name']
+        authentication = BasicAuthentication()
+        detail_uri_name = 'name'
+        collection_name = 'results'
+    def prepend_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
+
 class VirtualProviderResource(ModelResource):
     class Meta:
         queryset        = VirtualProvider.objects.all()
@@ -61,7 +75,12 @@ class VirtualProviderResource(ModelResource):
     def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/$" % self._meta.resource_name, self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+            url(r"^(?P<resource_name>%s)/(?P<name>[\w\d_.-]+)/storage$" % self._meta.resource_name, self.wrap_view('storage'), name="api_vm_start"),
         ]
+    def storage(self, request, **kwargs):
+         basic_bundle = self.build_bundle(request=request)
+         virtualprovider = self.cached_obj_get(bundle=basic_bundle,**self.remove_api_resource_names(kwargs))
+         return self.create_response(request, virtualprovider.storage())
 
 class ForemanProviderResource(ModelResource):
     class Meta:

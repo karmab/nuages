@@ -252,7 +252,20 @@ class VirtualProvider(models.Model):
     def clean(self):
         if not self.host:
             raise ValidationError("Host cant be blank")
-
+    def storage(self):
+        if self.type == 'ovirt':
+            ovirt = Ovirt(self.host, self.port, self.user, self.password, self.ssl)
+            storageinfo = ovirt.getstorage()
+            ovirt.close()
+        elif self.type == 'kvirt':
+            kvirt = Kvirt(self.host,self.port,self.user,protocol='ssh')
+            storageinfo = kvirt.getstorage()
+            kvirt.close()
+        elif self.type == 'vsphere':
+            jythoncommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'getstorage', self.host, self.user, self.password , self.datacenter, self.clu )
+            storageinfo = os.popen(jythoncommand).read()
+        return storageinfo
+    
 class ForemanProvider(models.Model):
     name                = models.CharField(max_length=80)
     host                = models.CharField(max_length=60,blank=True, null=True)

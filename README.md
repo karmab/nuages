@@ -211,7 +211,10 @@ Usage
 
      api access is at /nuages/api/v1/?format=json . it s only available for staff users
 
- 
+     you can also check the nuages python wrapper available in portal/misc/nuages.py which can also be set as a cli
+     
+     ( You will have to create a nuages.ini in your home dir as the sample that can be found there )
+
 Screenshots
 ---------
 ![ScreenShot](https://raw.github.com/karmab/nuages/master/screenshots/nuages1.png)

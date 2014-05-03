@@ -35,13 +35,38 @@ class Nuage:
         #self.protocol = 'https'
         #else:
         self.protocol = 'http'
-    def createvm(self,name,profile):
+    #def create(self,name,profile):
+    def create(self, name, profile, storage=None, ip1=None, ip2=None, ip3=None, ip4=None, hostgroup=None, iso=None):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
         data = { "profile" : "/nuages/api/v1/profile/%s" % profile , "name" : name }
+        if ip1:
+            data['ip1']= ip1
+        if ip2:
+            data['ip2'] = ip2
+        if ip3:
+            data['ip3'] = ip3
+        if ip4:
+            data['ip4'] = ip4
+        if hostgroup:
+            data['hostgroup'] = hostgroup
+        if iso:
+            data['iso'] = iso
+        if parameters:
+            data['parameters'] = parameters
+        if puppetclasses:
+            data['puppetclasses'] = puppetclasses
+        if storage:
+            data['storagedomain'] = storage
         r = requests.post(url,verify=False, data=json.dumps(data), headers=headers, auth=(user,password))
         return r.text
-    def allvms(self):
+    def storages(self):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/storage" % (protocol, host, port)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()['results']
+        return results
+    def vms(self):
         allvms = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
@@ -51,14 +76,17 @@ class Nuage:
             allvms.append(vm['name'])
         return allvms
     def profiles(self):
-        profiles = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/profile" % (protocol, host, port)
         r = requests.get(url,verify=False, headers=headers,auth=(user,password))
         results = r.json()['results']
-        for profile in results:
-            profiles.append(profile['name'])
-        return profiles
+        return results
+    def profile(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/profile/%s" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()
+        return results
     def cobblerproviders(self):
         cps = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
@@ -91,26 +119,31 @@ class Nuage:
         url = "%s://%s:%s/nuages/api/v1/vm/%s/console" % (protocol, host, port, name)
         r = requests.get(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
-    def deletevm(self,name):
+    def delete(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
         r = requests.delete(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
-    def killvm(self,name):
+    def kill(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/kill" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
-    def startvm(self,name):
+    def start(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/start" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
-    def stopvm(self,name):
+    def stop(self,name):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm/%s/stop" % (protocol, host, port, name)
         r = requests.post(url,verify=False, headers=headers,auth=(user,password))
         return r.text.replace('"','')
+    def vm(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/vm/%s" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        return r.json()
     def virtualproviders(self):
         vps = []
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
@@ -120,6 +153,18 @@ class Nuage:
         for vp in results:
             vps.append(vp['name'])
         return vps
+    def virtualprovider(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/virtualprovider/%s" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()
+        return results
+    def storage(self,name):
+        host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
+        url = "%s://%s:%s/nuages/api/v1/virtualprovider/%s/storage" % (protocol, host, port, name)
+        r = requests.get(url,verify=False, headers=headers,auth=(user,password))
+        results = r.json()
+        return results
 
 if __name__ == '__main__':
     usage = 'wrapper around nuages api'
@@ -127,43 +172,63 @@ if __name__ == '__main__':
     parser = optparse.OptionParser('Usage: %prog [options] vmname',version=version)
     actiongroup = optparse.OptionGroup(parser, 'Action options')
     actiongroup.add_option('-o', '--console', dest='console', action='store_true', help='get console')
-    actiongroup.add_option('-s', '--startvm', dest='startvm', action='store_true', help='start vm')
-    actiongroup.add_option('-w', '--stopvm', dest='stopvm', action='store_true', help='stop vm')
+    actiongroup.add_option('-s', '--start', dest='start', action='store_true', help='start vm')
+    actiongroup.add_option('-w', '--stop', dest='stop', action='store_true', help='stop vm')
     parser.add_option_group(actiongroup)
     creationgroup = optparse.OptionGroup(parser, 'Creation options')
-    creationgroup.add_option('-d', '--deletevm', dest='deletevm', action='store_true', help='delete vm')
-    creationgroup.add_option('-k', '--killvm', dest='killvm', action='store_true', help='kill vm')
+    creationgroup.add_option('-d', '--delete', dest='delete', action='store_true', help='delete vm')
+    creationgroup.add_option('-k', '--kill', dest='kill', action='store_true', help='kill vm')
     creationgroup.add_option("-p", "--profile", dest="profile",type="string", help="specify Profile")
-    creationgroup.add_option('-n', '--createvm', dest='createvm', action='store_true', help='create vm')
+    creationgroup.add_option('-n', '--create', dest='create', action='store_true', help='create vm')
+    creationgroup.add_option("-1", "--ip1", dest="ip1", type="string", help="Specify First IP")
+    creationgroup.add_option("-2", "--ip2", dest="ip2", type="string", help="Specify Second IP")
+    creationgroup.add_option("-3", "--ip3", dest="ip3", type="string", help="Specify Third IP")
+    creationgroup.add_option("-4", "--ip4", dest="ip4", type="string", help="Specify Fourth IP")
+    creationgroup.add_option("-H", "--hostgroup", dest="hostgroup", type="string", help="Specify hostgroup")
+    creationgroup.add_option("-I", "--iso", dest="iso", type="string", help="Specify iso")
+    creationgroup.add_option("-x", "--parameters", dest="parameters", type="string", help="Specify parameters, by spaces")
+    creationgroup.add_option("-y", "--puppetclasses", dest="puppetclasses", type="string", help="Specify puppetclasses, separated by commas")
     parser.add_option_group(creationgroup)
     listinggroup = optparse.OptionGroup(parser, "Creation options")
     listinggroup.add_option('-L', '--listclients', dest="listclients", action='store_true', help='list available clients')
     listinggroup.add_option('-c', '--cobblerproviders', dest='cobblerproviders', action='store_true', help='list cobblerproviders')
     listinggroup.add_option('-f', '--foremanproviders', dest='foremanproviders', action='store_true', help='list foremanproviders')
-    listinggroup.add_option('-l', '--listprofiles', dest='listprofiles', action='store_true', help='list available profiles')
+    listinggroup.add_option('-l', '--profiles', dest='profiles', action='store_true', help='list available profiles')
+    listinggroup.add_option('-S', '--storage', dest='storages', action='store_true', help='list available storage')
     listinggroup.add_option('-v', '--virtualproviders', dest='virtualproviders', action='store_true', help='list virtual providers')
     listinggroup.add_option('-Q', '--physicalproviders', dest='physicalproviders', action='store_true', help='list physical providers')
-    listinggroup.add_option('-V', '--listvms', dest='listvms', action='store_true', help='list all vms')
+    listinggroup.add_option('-V', '--vms', dest='vms', action='store_true', help='list all vms')
+    listinggroup.add_option("-z", "--virtualprovider", dest="virtualprovider", type="string", help="Specify virtualprovider")
     parser.add_option_group(listinggroup)
     parser.add_option("-C", "--client", dest="client", type="string", help="Specify Client")
     parser.add_option("-9", "--switchclient", dest="switchclient", type="string", help="Switch default client")
     (options, args) = parser.parse_args()
     client = options.client
     profile = options.profile
-    listprofiles = options.listprofiles
+    profiles = options.profiles
     listclients = options.listclients
-    listvms = options.listvms
+    storages = options.storages
+    vms = options.vms
     cobblerproviders = options.cobblerproviders
     foremanproviders = options.foremanproviders
     physicalproviders = options.physicalproviders
     virtualproviders = options.virtualproviders
+    virtualprovider = options.virtualprovider
     switchclient = options.switchclient
     console = options.console
-    startvm = options.startvm
-    createvm = options.createvm
-    killvm = options.killvm
-    deletevm = options.deletevm
-    stopvm = options.stopvm
+    start = options.start
+    create = options.create
+    kill = options.kill
+    delete = options.delete
+    stop = options.stop
+    ip1 = options.ip1
+    ip2 = options.ip2
+    ip3 = options.ip3
+    ip4 = options.ip4
+    hostgroup = options.hostgroup
+    iso = options.iso
+    parameters = options.parameters
+    puppetclasses = options.puppetclasses
     nuageconffile = "%s/nuages.ini" % (os.environ['HOME'])
     #parse nuage client auth file
     if not os.path.exists(nuageconffile):
@@ -227,9 +292,13 @@ if __name__ == '__main__':
         os._exit(1)
 
     n  = Nuage(host, port, user, password)
-    if listprofiles:
-        for profile in sorted(n.profiles()):
-            print profile
+    if profiles:
+        for profile in sorted(n.profiles(), key=lambda profile: profile['name']):
+            print profile['name']
+        sys.exit(0)
+    if storages:
+        for storage in sorted(n.storages(), key=lambda storage: storage['name']):
+            print storage['name']
         sys.exit(0)
     if cobblerproviders:
         for cp in sorted(n.cobblerproviders()):
@@ -247,30 +316,73 @@ if __name__ == '__main__':
         for vp in sorted(n.virtualproviders()):
             print vp
         sys.exit(0)
-    if listvms:
-        for vm in sorted(n.allvms()):
+    if vms:
+        for vm in sorted(n.vms()):
             print vm
+        sys.exit(0)
+    if profile:
+        profiles = []
+        for prof in sorted(n.profiles(), key=lambda profile: profile['name']):
+            profiles.append(prof['name'])
+        if not profile in profiles:
+            print "Profile %s not found" % profile
+            sys.exit(0)
+        results = n.profile(profile)
+        for attribute in sorted(results):
+            if attribute in ['resource_uri'] or results[attribute]=='' or results[attribute]==None:
+                continue
+            print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
+        sys.exit(0)
+    if virtualprovider:
+        virtualproviders = n.virtualproviders()
+        if not virtualprovider in virtualproviders:
+            print "VirtualProvider %s not found" % virtualprovider
+            sys.exit(0)
+        results = n.virtualprovider(virtualprovider)
+        for attribute in sorted(results):
+            if attribute in ['resource_uri'] or results[attribute]=='' or results[attribute]==None:
+                continue
+            print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
+        results = n.storage(virtualprovider)
+        print "SD\tAvailable\tUsed"
+        for result in results:
+            print "%s\t%sGB\t\t%sGB" % (result, results[result][1], results[result][0])
         sys.exit(0)
     if len(args) != 1:
         print 'Name required'
         sys.exit(0)
     name = args[0]
-    if startvm:
-        results = n.startvm(name)
+    if start:
+        results = n.start(name)
         print results
-    if stopvm:
-        results = n.stopvm(name)
+    if stop:
+        results = n.stop(name)
         print results
-    if deletevm:
-        results = n.deletevm(name)
+    if delete:
+        results = n.delete(name)
         print results
-    if killvm:
-        results = n.killvm(name)
+    if kill:
+        results = n.kill(name)
         print results
     if console:
         results = n.console(name)
         baseurl = "http://%s:%s" % (host, port)
         print "%s%s" % (baseurl, results)
-    if createvm and profile:
-        results = n.createvm(name,profile)
+    if create and profile:
+        profiles = []
+        for prof in sorted(n.profiles(), key=lambda profile: profile['name']):
+            profiles.append(prof['name'])
+        if not profile in profiles:
+            print "Profile %s not found" % profile
+            sys.exit(0)
+        details = n.profile(profile)
+        if not details.autostorage and not storage:
+            print "This profile requires a storagedomain to be set"
+            sys.exit(0)
+        results = n.create(name=name, profile=profile, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
         print results
+    results = n.vm(name)
+    for attribute in sorted(results):
+        if attribute in ['create','iso','resource_uri','status'] or results[attribute]=='' or results[attribute]==None:
+            continue
+        print "%s: %s" % (attribute, str(results[attribute]).replace("/nuages/api/v1/%s/" % attribute,''))
