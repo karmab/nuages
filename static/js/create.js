@@ -4,12 +4,6 @@ $( document ).ready(function() {
   if ( path.length == 4 ) {
           baseurl = '/'+location.pathname.split('/')[1];
   }
- var virtualprovider = $('#id_virtualprovider');
- var virtualproviderlabel = $('label[for="id_virtualprovider"]');
- var cobblerprovider = $('#id_cobblerprovider');
- var cobblerproviderlabel = $('label[for="id_cobblerprovider"]');
- var foremanprovider = $('#id_foremanprovider');
- var foremanproviderlabel = $('label[for="id_foremanprovider"]');
  var ip1 = $('#id_ip1');
  var mac1 = $('#id_mac1');
  var mac1label = $('label[for="id_mac1"]');
@@ -68,12 +62,6 @@ $( document ).ready(function() {
  hostgrouplabel.hide();
  storagedomain.hide();
  storagedomainlabel.hide();
- virtualprovider.hide();
- virtualproviderlabel.hide();
- cobblerprovider.hide();
- cobblerproviderlabel.hide();
- foremanprovider.hide();
- foremanproviderlabel.hide();
 
  $('#numvms').change(function(){
 	$("#result").hide();
@@ -161,12 +149,6 @@ $( document ).ready(function() {
   var ipilo = $('#id_ipilo');
   var isolabel = $('label[for="id_iso"]');
   var profile = $('#id_profile').val();
-  var virtualprovider = $('#id_virtualprovider');
-  var virtualproviderlabel = $('label[for="id_virtualprovider"]');
-  var cobblerprovider = $('#id_cobblerprovider');
-  var cobblerproviderlabel = $('label[for="id_cobblerprovider"]');
-  var foremanprovider = $('#id_foremanprovider');
-  var foremanproviderlabel = $('label[for="id_foremanprovider"]');
   var hostgroup = $('#id_hostgroup');
   var hostgrouplabel = $('label[for="id_hostgroup"]');
   var puppetclasseslabel = $('label[for="id_puppetclasses"]');
@@ -185,12 +167,6 @@ $( document ).ready(function() {
   puppetclasses.hide(300) ;
   parameterslabel.hide(300) ;
   parameters.hide(300) ;
-  cobblerprovider.hide(300) ;
-  cobblerproviderlabel.hide(300) ;
-  foremanprovider.hide(300) ;
-  foremanproviderlabel.hide(300) ;
-  virtualprovider.hide(300) ;
-  virtualproviderlabel.hide(300) ;
   ip2.hide(300);
   ip2label.hide(300);
   ip3.hide(300);
@@ -224,20 +200,6 @@ $( document ).ready(function() {
 	}
     if ( ( index == 1 ) && ( parameter == true ) )  {
 	hide = true;
-	}
-    if ( index == 2 ) {
-	$('#id_virtualprovider').replaceWith('<select name="virtualprovider" id="id_virtualprovider">');
- 	providerid = parameter.split(',')[0];
-        providername= parameter.split(',')[1];
-	newprovider = '<option value="' + providerid +'">'+providername+'</option>';
-	$('#id_virtualprovider').html(newprovider);
-	$('#id_virtualprovider').append('</select><p>');
-	virtualproviderlabel.show(400);
-	$('#id_virtualprovider').show(400) ;
-	if ( hide == true ) {
-		virtualproviderlabel.hide();
-		$('#id_virtualprovider').hide() ;
-			    }
 	}
     if ( index == 3 ) {
 	switch (profiletype){
@@ -328,35 +290,6 @@ $( document ).ready(function() {
 		$('#id_storagedomain').hide();
 			    }
 	}
-    if ( ( index == 8 ) && ( cobbler == true ) )  {	
-	$('#id_cobblerprovider').replaceWith('<select name="cobblerprovider" id="id_cobblerprovider">');
- 	providerid = parameter.split(',')[0];
-        providername= parameter.split(',')[1];
-	newprovider = '<option value="' + providerid +'">'+providername+'</option>';
-	$('#id_cobblerprovider').html(newprovider);
-	$('#id_cobblerprovider').append('</select><p>');
-	cobblerproviderlabel.show(400);
-	$('#id_cobblerprovider').show(400) ;
-	if ( hide == true ) {
-		cobblerproviderlabel.hide();
-		$('#id_cobblerprovider').hide();
-			    }
-	}
-    if ( ( index == 9 ) && ( foreman == true ) )  {	
-	$('#id_foremanprovider').replaceWith('<select name="foremanprovider" id="id_foremanprovider">');
- 	providerid = parameter.split(',')[0];
-        providername= parameter.split(',')[1];
-	newprovider = '<option value="' + providerid +'">'+providername+'</option>';
-	$('#id_foremanprovider').html(newprovider);
-	$('#id_foremanprovider').append('</select><p>');
-	foremanproviderlabel.show(400);
-	$('#id_foremanprovider').show(400) ;
-	if ( hide == true ) {
-		foremanproviderlabel.hide();
-		$('#id_foremanprovider').hide() ;
-			    }
-	}
-
     if ( ( index == 10 ) && ( foreman == true ) )  {	
  	$('#id_hostgroup').replaceWith('<select name="hostgroup" id="id_hostgroup"><option value="" selected="selected">---------</option>');
  	var hostgroupslist = '';
@@ -473,10 +406,6 @@ function createvm(){
   var cobblerparameters = $('#id_cobblerparameters').val();
   var name              = $('#id_name').val();
   var physical          = $('#id_physical').prop('checked');
-  var physicalprovider  = $('#id_physicalprovider').val();
-  var virtualprovider   = $('#id_virtualprovider').val();
-  var cobblerprovider   = $('#id_cobblerprovider').val();
-  var foremanprovider   = $('#id_foremanprovider').val();
   var profile           = $('#id_profile').val();
   var ip1               = $('#id_ip1').val();
   var mac1              = $('#id_mac1').val();
@@ -571,7 +500,7 @@ function createvm(){
   				}
 	}
  }	
-  var details = { 'name' : name , 'physicalprovider' : physicalprovider, 'virtualprovider' : virtualprovider , 'physical' : physical , 'cobblerprovider' : cobblerprovider , 'foremanprovider' : foremanprovider ,  'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'ipoa' : ipoa , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain , 'type' : type , 'create' : create };
+  var details = { 'name' : name , 'physical' : physical , 'profile' : profile , 'ip1' : ip1 , 'mac1' : mac1 , 'ip2' : ip2 , 'mac2' : mac2 ,'ip3' : ip3 , 'ip4' : ip4 , 'iso' : iso , 'hostgroup' : hostgroup , 'puppetclasses' : puppetclasses , 'parameters' : parameters , 'ipilo' : ipilo , 'ipoa' : ipoa , 'name_2': name_2 , 'ip1_2' : ip1_2 ,'ip2_2' : ip2_2  , 'ip3_2' : ip3_2 , 'ip4_2' : ip4_2  , 'name_3': name_3 , 'ip1_3' : ip1_3 ,'ip2_3' : ip2_3  , 'ip3_3' : ip3_3 , 'ip4_3' : ip4_3  ,'name_4': name_4 , 'ip1_4' : ip1_4 ,'ip2_4' : ip2_4  , 'ip3_4' : ip3_4 , 'ip4_4' : ip4_4  ,'name_5': name_5 , 'ip1_5' : ip1_5 ,'ip2_5' : ip2_5  , 'ip3_5' : ip3_5 , 'ip4_5' : ip4_5  ,'name_6': name_6 , 'ip1_6' : ip1_6 ,'ip2_6' : ip2_6  , 'ip3_6' : ip3_6 , 'ip4_6' : ip4_6  ,'name_7': name_7 , 'ip1_7' : ip1_7 ,'ip2_7' : ip2_7  , 'ip3_7' : ip3_7 , 'ip4_7' : ip4_7  ,'name_8': name_8 , 'ip1_8' : ip1_8 ,'ip2_8' : ip2_8  , 'ip3_8' : ip3_8 , 'ip4_8' : ip4_8  ,'name_9': name_9 , 'ip1_9' : ip1_9 ,'ip2_9' : ip2_9  , 'ip3_9' : ip3_9 , 'ip4_9' : ip4_9  ,'name_10': name_10 , 'ip1_10' : ip1_10 ,'ip2_10' : ip2_10  , 'ip3_10' : ip3_10 , 'ip4_10' : ip4_10  , 'numvms' : numvms , 'storagedomain': storagedomain , 'type' : type , 'create' : create };
   	$.ajax({  
 		type: 'POST',
 		url: baseurl+'/vms/',

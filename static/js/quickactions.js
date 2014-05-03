@@ -48,7 +48,7 @@ function stop(vm,provider){
 	});
 }
 
-function kill(vm,provider){
+function kill(vm,profile){
 baseurl = '';
 path = location.pathname.split('/');
 if ( path.length == 4 ) {
@@ -58,7 +58,7 @@ $("#quickresults").replaceWith('<div id="quickresults"></div>');
 sure = confirm(vm+" will be deleted!!!Sure?");
 if (sure) {
  $("#actionwheel").show();
- data = { 'name': vm , 'provider' : provider } ;
+ data = { 'name': vm , 'profile' : profile } ;
  $.ajax({  
   type: "POST",
   url: baseurl+'/vms/kill',

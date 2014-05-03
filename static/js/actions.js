@@ -76,7 +76,7 @@ function console(){
         });
 }
 
-function kill(vm,provider){
+function kill(vm,profile){
 baseurl = '';
 path = location.pathname.split('/');
 if ( path.length == 4 ) {
@@ -88,7 +88,7 @@ if (sure) {
  $("#actionwheel").show();
  var actionpending = $("#actionpending");
  actionpending.html('1');
- data = { 'name': vm , 'provider' : provider } ;
+ data = { 'name': vm , 'profile' : profile } ;
  $.ajax({  
   type: "POST",
   url: baseurl+'/vms/kill',

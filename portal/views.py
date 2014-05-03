@@ -106,11 +106,7 @@ def create(request):
     if request.method == 'POST':
         name              = request.POST.get('name')
         storagedomain     = request.POST.get('storagedomain')
-        physicalprovider  = request.POST.get('physicalprovider')
-        virtualprovider   = request.POST.get('virtualprovider')
         physical          = request.POST.get('physical')
-        cobblerprovider   = request.POST.get('cobblerprovider')
-        foremanprovider   = request.POST.get('foremanprovider')
         profile           = request.POST.get('profile')
         ip1               = request.POST.get('ip1')
         mac1              = request.POST.get('mac1')
@@ -145,32 +141,18 @@ def create(request):
         if storagedomain == '' and not physical:
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>Storage Domain is needed<p</div>")
         disksize1, disksize2, numinterfaces, requireip, cobbler, foreman = profile.disksize1, profile.disksize2, profile.numinterfaces, profile.requireip, profile.cobbler, profile.foreman
-        if physical:
-            virtualprovider = None
-        else:
-            virtualprovider = VirtualProvider.objects.get(id=virtualprovider)
-            physicalprovider = None
-        if cobbler and request.POST.get('cobblerprovider') != '':
-            cobblerprovider=CobblerProvider.objects.get(id=cobblerprovider)
-        else:
-            cobblerprovider=None
-        if foreman and request.POST.get('foremanprovider') != '':
-            foremanprovider=ForemanProvider.objects.get(id=foremanprovider)
-        else:
-            foremanprovider=None
         if type:
             parameters = "type=%s %s" % (type, parameters)
-        #CHECK SECTION
-        #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
-        vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
+        #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME PROFILE
+        vms = VM.objects.filter(name=name).filter(profile=profile)
         if len(vms) > 0:
             return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM %s allready exists</div>" % name)
-        if not physical and not virtualprovider.type == 'fake' and not profile.autostorage:
-            storageresult=checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain)
+        if not physical and not profile.virtualprovider.type == 'fake' and not profile.autostorage:
+            storageresult=checkstorage(numvms,profile.virtualprovider,disksize1,disksize2,storagedomain)
             if storageresult != 'OK':
                 return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
         #VM CREATION IN DB
-        newvm = VM(name=name, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=ip1, mac1=mac1, ip2=ip2, mac2=mac2, ip3=ip3, mac3=mac3, ip4=ip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup, create=create)
+        newvm = VM(name=name, storagedomain=storagedomain, physical=physical, profile=profile, ip1=ip1, mac1=mac1, ip2=ip2, mac2=mac2, ip3=ip3, mac3=mac3, ip4=ip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup, create=create)
         success = newvm.save()
         name  = newvm.name
         if success != 'OK':
@@ -184,7 +166,7 @@ def create(request):
                 newip2  = request.POST.get("ip2_%s" % num)
                 newip3  = request.POST.get("ip3_%s" % num)
                 newip4  = request.POST.get("ip4_%s" % num)
-                newvm = VM(name=newname, storagedomain=storagedomain, physicalprovider=physicalprovider, virtualprovider=virtualprovider, physical=physical, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, ip1=newip1, mac1=newmac1, ip2=newip2, mac2=mac2, ip3=newip3, mac3=mac3, ip4=newip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
+                newvm = VM(name=newname, storagedomain=storagedomain, physical=physical, profile=profile, ip1=newip1, mac1=newmac1, ip2=newip2, mac2=mac2, ip3=newip3, mac3=mac3, ip4=newip4, mac4=mac4, puppetclasses=puppetclasses, parameters=parameters, createdby=username, iso=iso, ipilo=ipilo, ipoa=ipoa, hostgroup=hostgroup)
                 success = newvm.save()
                 newname = newvm.name
                 if success == 'OK':
@@ -483,7 +465,6 @@ def virtualprovidertype(request):
                 ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                 isos = ovirt.getisos()
                 ovirt.close()
-                isoslist=[]
                 results=['iso']
                 for iso in isos:
                     results.append(iso)
@@ -494,7 +475,6 @@ def virtualprovidertype(request):
                 kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
                 isos = kvirt.getisos()
                 kvirt.close()
-                isoslist=[]
                 results=['iso']
                 for iso in isos:
                     results.append(iso)
@@ -534,7 +514,7 @@ def yourvms(request):
             continue
         #handle physical machines
         if vm.physical:
-            physicalprovider=vm.physicalprovider
+            physicalprovider=vm.profile.physicalprovider
             if physicalprovider in inactives:
                 vm.status = 'N/A'
                 resultvms.append(vm)
@@ -562,7 +542,7 @@ def yourvms(request):
                 vm.status = 'N/A'
                 resultvms.append(vm)
                 continue
-        virtualprovider = vm.virtualprovider
+        virtualprovider = vm.profile.virtualprovider
         if virtualprovider in inactives:
             vm.status = 'N/A'
             resultvms.append(vm)
@@ -630,25 +610,21 @@ def allvms(request):
             ovirt.close()
             for vm in vms:
                 resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
-            return render(request, 'allvms2.html', { 'vms': resultvms , 'console' : True , 'username': username } )
         if virtualprovider.type == 'kvirt':
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
             vms = kvirt.allvms()
             kvirt.close()
             for vm in vms:
                 resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
-            return render(request, 'allvms2.html', { 'vms': resultvms , 'console' : True , 'username': username } )
         if virtualprovider.type == 'vsphere':
-            pwd = settings.PWD
             allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
             results = os.popen(allvmscommand).read()
             vms= ast.literal_eval(results)
             for vm in vms:
                 resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
-            return render(request, 'allvms2.html', { 'vms': resultvms, 'console' : True , 'username': username } )
+        return render(request, 'allvms2.html', { 'vms': resultvms, 'console' : True , 'username': username } )
     else:
         vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
-        form = StorageForm()
         return render(request, 'allvms.html', { 'vproviders' : vproviders , 'username': username } )
 
 
@@ -663,7 +639,7 @@ def console(request):
             vmid = request.GET.get('id')
             vm = VM.objects.get(id=vmid)
             vmname = vm.name
-            virtualprovidername = vm.virtualprovider
+            virtualprovidername = vm.profile.virtualprovider
             vmcreatedby = vm.createdby.username
             if vmcreatedby !=username.username:
                 vmgroups = vm.createdby.groups
@@ -673,7 +649,6 @@ def console(request):
                         commongroup = True
                         break
                 if not commongroup:
-                #return redirect('portal.views.yourvms')
                     information = { 'title':'Console not authorized' , 'details':'Your user is not authorized to access this VM' }
                     return render(request, 'information.html', { 'information' : information } )
         if request.GET.has_key('name') and request.GET.has_key('virtualprovider') and username.is_staff:
@@ -777,16 +752,12 @@ def stop(request):
 
 @login_required
 def kill(request):
+    logging.debug('prout')
     if request.method == 'POST':
         name     = request.POST.get('name')
-        provider = request.POST.get('provider')
-        if provider =='':
-            virtualprovider = None
-            vm              = VM.objects.filter(name=name).filter(physical=True)[0]
-        else:
-            virtualprovider = VirtualProvider.objects.get(name=provider)
-            vm              = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)[0]
-        profile = vm.profile
+        profile  = request.POST.get('profile')
+        profile  = Profile.objects.get(name=profile)
+        vm       = VM.objects.filter(name=name).filter(profile=profile)[0]
         vm.kill()
         vm.unmanaged = True
         vm.save()
@@ -1085,13 +1056,12 @@ def invoicepdf(request):
         now      = datetime.now()
         nowday   = now.strftime("%d")
         nowmonth = now.strftime("%Y-%m")
-        details = []
         default = getdefault()
         currency = default.currency
         vmid = request.GET.get('id')
         vm = VM.objects.get(id=vmid)
         price = vm.price
-        virtualprovider = vm.virtualprovider.name
+        virtualprovider = vm.profile.virtualprovider.name
         name = vm.name
         createdwhen = vm.createdwhen
         month    = createdwhen.strftime("%Y-%m")
@@ -1164,7 +1134,6 @@ def invoice(request):
         details = []
         vmid = request.GET.get('id')
         vm = VM.objects.get(id=vmid)
-        virtualprovider = vm.virtualprovider.name
         price = vm.price
         if not price:
             information = { 'title':'Missing information' , 'details':'no invoice available for this VM' }
@@ -1362,7 +1331,7 @@ def afterbuild(request,name):
         afterbuild = vm.profile.hookafterbuild
         if afterbuild:
             env = os.environ
-            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = vm.name, nonone(vm.storagedomain), nonone(vm.physicalprovider), nonone(vm.virtualprovider), nonone(vm.physical), nonone(vm.cobblerprovider), nonone(vm.foremanprovider), nonone(vm.profile), nonone(vm.ip1), nonone(vm.mac1), nonone(vm.ip2), nonone(vm.mac2), nonone(vm.ip3), nonone(vm.mac3), nonone(vm.ip4), nonone(vm.mac4), nonone(vm.ipilo), nonone(vm.ipoa), nonone(vm.iso), nonone(vm.hostgroup), nonone(vm.puppetclasses), nonone(vm.parameters), nonone(vm.createdby), nonone(vm.createdwhen), nonone(vm.price), nonone(vm.unmanaged), nonone(vm.status), nonone(vm.create)
+            env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = vm.name, nonone(vm.storagedomain), nonone(vm.profile.physicalprovider), nonone(vm.profile.virtualprovider), nonone(vm.physical), nonone(vm.profile.cobblerprovider), nonone(vm.profile.foremanprovider), nonone(vm.profile), nonone(vm.ip1), nonone(vm.mac1), nonone(vm.ip2), nonone(vm.mac2), nonone(vm.ip3), nonone(vm.mac3), nonone(vm.ip4), nonone(vm.mac4), nonone(vm.ipilo), nonone(vm.ipoa), nonone(vm.iso), nonone(vm.hostgroup), nonone(vm.puppetclasses), nonone(vm.parameters), nonone(vm.createdby), nonone(vm.createdwhen), nonone(vm.price), nonone(vm.unmanaged), nonone(vm.status), nonone(vm.create)
             env['vm_mail'] = vm.createdby.email
             scriptpath  = "%s/%s" % (hooks, afterbuild.name)
             interpreter = afterbuild.type
@@ -1591,7 +1560,7 @@ def stacks(request):
             if name == '' and not ipamprovider:
                     failure   = True
             #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER
-            vms = VM.objects.filter(name=name).filter(virtualprovider=virtualprovider)
+            vms = VM.objects.filter(name=name).filter(profile=profile)
             if len(vms) > 0:
                 return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>VM %s allready exists</div>" % name)
             if not virtualprovider.type == 'fake' and not profile.autostorage:
@@ -1600,8 +1569,7 @@ def stacks(request):
                     return HttpResponse("<div class='alert alert-error' ><button type='button' class='close' data-dismiss='alert'>&times;</button>%s</div>" % storageresult )
             puppetclasses = None
             parameters = None
-            #newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, puppetclasses=puppetclasses, parameters=parameters, createdby=username, hostgroup=hostgroup)
-            newvm = VM(name=name, storagedomain=storagedomain, virtualprovider=virtualprovider, cobblerprovider=cobblerprovider, foremanprovider=foremanprovider, profile=profile, createdby=username, hostgroup=hostgroup)
+            newvm = VM(name=name, storagedomain=storagedomain, profile=profile, createdby=username, hostgroup=hostgroup)
             success = newvm.save()
             if success == 'OK':
                 stack.vms.add(newvm)

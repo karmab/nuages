@@ -13,15 +13,11 @@
 {{ vm.name}}</a></td>
 <td>
 {% if not vm.physical %}
-<img src="{% static "img/start.png" %}" onclick="start('{{vm.name}}','{{vm.virtualprovider}}');" />
-<img src="{% static "img/down.png" %}" onclick="stop('{{vm.name}}','{{vm.virtualprovider}}');" />
+<img src="{% static "img/start.png" %}" onclick="start('{{vm.name}}','{{vm.profile.virtualprovider}}');" />
+<img src="{% static "img/down.png" %}" onclick="stop('{{vm.name}}','{{vm.profile.virtualprovider}}');" />
 {% endif %}
 {% if vm.profile.deletable  %}
-    {% if vm.physical %}
-        <img src="{% static "img/kill.png" %}" onclick="kill('{{vm.name}}','');" />
-    {% else  %}
-        <img src="{% static "img/kill.png" %}" onclick="kill('{{vm.name}}','{{vm.virtualprovider}}');" />
-    {% endif %}
+        <img src="{% static "img/kill.png" %}" onclick="kill('{{vm.name}}','{{vm.profile.name}}');" />
 {% if vm.unmanaged %}
     <img src="{% static "img/unmanaged.png"  %}" onclick="dbremove('{{vm.id}}','{{vm.name}}');" />
 {% endif %}

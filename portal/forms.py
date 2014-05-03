@@ -25,7 +25,7 @@ class VMForm(ModelForm):
         self.fields['profile'].queryset = query.order_by('cobblerprofile')
     class Meta:
         model = VM
-        fields = ['name', 'profile', 'physical', 'ipilo', 'ipoa', 'ip1','mac1', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'virtualprovider' ,'cobblerprovider', 'foremanprovider', 'hostgroup' , 'puppetclasses', 'parameters']
+        fields = ['name', 'profile', 'physical', 'ipilo', 'ipoa', 'ip1','mac1', 'ip2', 'mac2', 'ip3', 'mac3', 'ip4', 'mac4', 'iso', 'hostgroup' , 'puppetclasses', 'parameters']
 
 
 class StorageForm(ModelForm):

@@ -10,7 +10,7 @@
 <tr>
 <td>
 {% if console and vm.status != 'down' %}
-<a href="{% url 'console' %}?name={{ vm.name }}&virtualprovider={{vm.virtualprovider}}"><img src="{% static "img/console.png" %}">{{ vm.name}}</a>
+<a href="{% url 'console' %}?name={{ vm.name }}&virtualprovider={{vm.profile.virtualprovider}}"><img src="{% static "img/console.png" %}">{{ vm.name}}</a>
 {% else %}
 {{ vm.name}}
 {% endif %}
