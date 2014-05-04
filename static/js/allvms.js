@@ -24,7 +24,7 @@ setInterval(function(){
 
   $.ajax({  
         type: "POST",
-        url:  baseurl+'/allvms',
+        url:  baseurl+'/allvms/',
         data: data,
         success: function(data) {
             $("#allvms").html(data);

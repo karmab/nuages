@@ -9,7 +9,7 @@ from portal.models import *
 from django.conf import settings
 
 #profile = 'vsphere6'
-name1 = 'portal'
+name1 = 'kfailure'
 name2 = 'prout'
 
 #profile = Profile.objects.get(name=profile)
@@ -27,7 +27,12 @@ isoscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settin
 #isosinfo = ast.literal_eval(isosinfo)
 #print isosinfo
 
-allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
-allvmsinfo = os.popen(allvmscommand).read()
-allvmsinfo = ast.literal_eval(allvmsinfo)
-print allvmsinfo
+allvmscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s " % (settings.PWD, 'allvms', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu )
+#allvmsinfo = os.popen(allvmscommand).read()
+#allvmsinfo = ast.literal_eval(allvmsinfo)
+#print allvmsinfo
+
+html5command = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (settings.PWD, 'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu, name1, virtualprovider.fqdn, virtualprovider.sha1  )
+html5info = os.popen(html5command).read()
+html5info = ast.literal_eval(html5info)
+print html5info

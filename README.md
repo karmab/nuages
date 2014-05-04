@@ -107,7 +107,8 @@ VMware VI (vSphere) Java API Installation
         sudo cp dom4j-1.6.1.jar $JAVA_HOME/ext/lib/ext
         sudo cp vijava$version.jar $JAVA_HOME/lib/ext
 
-
+        WARNING: latest vijava55b20130927.zip seems to be giving problem with vpshere5.5 so you rather wanna use vijava5120121125.zip
+        
 Basic Postgresql setup (Optional)
 ---------
     
