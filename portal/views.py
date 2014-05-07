@@ -702,7 +702,7 @@ def console(request):
             consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
             consoledetails = os.popen(consolecommand).read()
             host,port = ast.literal_eval(consoledetails)
-            if host != None:
+            if host != None and  checkconn(host,int(port)):
                 pwd = settings.PWD
                 websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
                 os.popen(websockifycommand)
@@ -713,13 +713,13 @@ def console(request):
                 if not virtualprovider.sha1 or not virtualprovider.fqdn:
                     virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
                     if fqdn == None or sha1 == None:
-                        information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to sysadmin" }
+                        information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to admin" }
                         return render(request, 'information.html', { 'information' : information , 'default' : default } )
                     virtualprovider.save()
                 fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
                 pwd = settings.PWD
                 consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (settings.PWD,'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
-                consoleurl = os.popen(consolecommand).read()
+                consoleurl = os.popen(consolecommand).read().strip()
                 print consoleurl
                 return redirect(consoleurl)
     else:
