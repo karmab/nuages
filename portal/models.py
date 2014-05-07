@@ -10,8 +10,6 @@ import requests
 import subprocess
 import time
 import django.utils.simplejson as json
-import datetime
-from datetime import datetime
 from django.utils import timezone
 from django.conf import settings
 from nuages.settings import LOGIN_REDIRECT_URL as baseurl
@@ -188,13 +186,29 @@ def internalip(profile,index):
     last = last+1
     return "%s.%d" % (netrange, last)
 
+def filename(profile):
+    ipamprovider  = profile.ipamprovider
+    filepath      = ipamprovider.path
+    names         = open(filepath).readlines()
+    names = [name.strip() for name in names]
+    vms           = VM.objects.all()
+    for vm in vms:
+        if vm.name in names:
+            names.remove(vm.name)
+    if len(names) != 0:
+        return random.choice(names)
+    else:
+        return ''
+
+
 class IpamProvider(models.Model):
     name                = models.CharField(max_length=80)
-    type                = models.CharField(max_length=20, default='internal',choices=( ('internal', 'internal'),('marvel', 'marvel') ))
+    type                = models.CharField(max_length=20, default='internal',choices=( ('internal', 'internal'),('file','file'),('marvel', 'marvel') ))
     #host                = models.CharField(max_length=60, blank=True, null=True)
     #port                = models.IntegerField(default=80, blank=True, null=True)
     #user                = models.CharField(max_length=60, blank=True, null=True)
     #password            = models.CharField(max_length=20, blank=True, null=True)
+    path                 = models.CharField(max_length=80, blank=True, null=True)
     privkey             = models.CharField(max_length=100, blank=True, null=True)
     pubkey              = models.CharField(max_length=100, blank=True, null=True)
     naming              = models.CharField(max_length=80, blank=True, null=True)
@@ -214,6 +228,10 @@ class IpamProvider(models.Model):
                 raise ValidationError("Marvel needs pub key")
         if self.type == 'internal'  and not self.naming:
                 raise ValidationError("Internal needs naming to be set")
+        if self.type == 'file'  and not self.path:
+                raise ValidationError("File needs a path")
+        if self.path and not os.path.isfile(self.path):
+                raise ValidationError("Incorrect path ")
 
 class LdapProvider(models.Model):
     name                = models.CharField(max_length=80)
@@ -518,6 +536,8 @@ class VM(models.Model):
                 return "Setting a name is required!"
             elif ipamprovider.type == 'internal':
                 self.name = internalname(profile)
+            elif ipamprovider.type == 'file':
+                self.name = filename(profile)
             elif ipamprovider.type == 'marvel':
                 new = False
                 while not new:
