@@ -349,7 +349,6 @@ def profileinfo(request):
         datacenter = profile.datacenter
         specific=[]
         storages=[]
-        vlist=[]
         virtualprovider=profile.virtualprovider
         type=virtualprovider.type
         if type != "fake":
@@ -365,7 +364,6 @@ def profileinfo(request):
                     storages = [kvirt.beststorage()]
                     kvirt.close()
                 elif type == 'vsphere':
-                    pwd = settings.PWD
                     beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                     bestds = os.popen(beststoragecommand).read()
                     storages=[bestds.strip()]
@@ -384,7 +382,6 @@ def profileinfo(request):
             ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
             isos = ovirt.getisos()
             ovirt.close()
-            isoslist=[]
             for iso in isos:
                 specific.append(iso)
         if type =='kvirt' and profile.iso:
@@ -393,7 +390,6 @@ def profileinfo(request):
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
             isos = kvirt.getisos()
             kvirt.close()
-            isoslist=[]
             for iso in isos:
                 specific.append(iso)
         if type =='vsphere' and profile.iso:
@@ -780,8 +776,6 @@ def dbremove(request):
 @login_required
 def hostgroups(request):
     if request.method == 'POST':
-        #foremanprovider=request.POST.get('foremanprovider')
-        #foremanprovider = ForemanProvider.objects.filter(id=foremanprovider)[0]
         profile=request.POST.get('profile')
         profile = Profile.objects.get(name=profile)
         foreman = profile.foreman
@@ -792,7 +786,8 @@ def hostgroups(request):
         foreman=Foreman(host=foremanhost,port=foremanport,user=foremanuser, password=foremanpassword, secure=foremansecure)
         if profile.foremanenv:
             foremanenv = profile.foremanenv
-        hostgroups= foreman.hostgroups(foremanenv)
+        hostgroups = ['']
+        hostgroups.extend(foreman.hostgroups(foremanenv))
         hostgroups = json.dumps(hostgroups)
         return HttpResponse(hostgroups, mimetype='application/json')
 
