@@ -163,7 +163,7 @@ def marvelname(profile):
     name          = data['data']['results'][0]['name'].strip().split(' ')[0]
     return name
 
-def internalip(profile,index):
+def getip(profile,index):
     netranges = { 1: profile.ipamprovider.range1, 2: profile.ipamprovider.range2, 3 : profile.ipamprovider.range3 , 4: profile.ipamprovider.range4 }
     netrange = netranges[index]
     if netrange == '':
@@ -548,20 +548,16 @@ class VM(models.Model):
                 self.name = newname
         name      = self.name
         if ip1 == '' and ipamprovider:
-            if ipamprovider.type == 'internal':
-                self.ip1 = internalip(profile, 1)
+                self.ip1 = getip(profile, 1)
                 ip1      = self.ip1
         if ip2 == '' and ipamprovider and numinterfaces >1:
-            if ipamprovider.type == 'internal':
-                self.ip2 = internalip(profile, 2)
+                self.ip2 = getip(profile, 2)
                 ip2      = self.ip2
         if ip3 == '' and ipamprovider and numinterfaces >2:
-            if ipamprovider.type == 'internal':
-                self.ip3 = internalip(profile, 3)
+                self.ip3 = getlip(profile, 3)
                 ip3      = self.ip3
         if ip4 == '' and ipamprovider and numinterfaces >3:
-            if ipamprovider.type == 'internal':
-                self.ip4 = internalip(profile, 4)
+                self.ip4 = getip(profile, 4)
                 ip4      = self.ip4
         if requireip and ip1 == '':
                 return "Setting ip1 is required!"
