@@ -77,19 +77,22 @@ def nonone(variable):
         return str(variable)
 
 def vmstart(name,virtualprovider):
-    if virtualprovider.type == 'ovirt':
-        ovirt   = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-        results = ovirt.start(name)
-        ovirt.close()
-    elif virtualprovider.type == 'kvirt':
-        kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-        results = kvirt.start(name)
-        kvirt.close()
-    elif virtualprovider.type == 'vsphere':
-        startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
-        startinfo    = os.popen(startcommand).read()
-        results      = json.dumps(startinfo)
-    return results
+    try:
+        if virtualprovider.type == 'ovirt':
+            ovirt   = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+            results = ovirt.start(name)
+            ovirt.close()
+        elif virtualprovider.type == 'kvirt':
+            kvirt   = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+            results = kvirt.start(name)
+            kvirt.close()
+        elif virtualprovider.type == 'vsphere':
+            startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+            startinfo    = os.popen(startcommand).read()
+            results      = json.dumps(startinfo)
+        return results
+    except:
+        return "VM could not be started"
 
 def vmstop(name,virtualprovider):
     if virtualprovider.type == 'ovirt':
@@ -554,7 +557,7 @@ class VM(models.Model):
                 self.ip2 = getip(profile, 2)
                 ip2      = self.ip2
         if ip3 == '' and ipamprovider and numinterfaces >2:
-                self.ip3 = getlip(profile, 3)
+                self.ip3 = getip(profile, 3)
                 ip3      = self.ip3
         if ip4 == '' and ipamprovider and numinterfaces >3:
                 self.ip4 = getip(profile, 4)
@@ -711,32 +714,35 @@ class VM(models.Model):
                 f.write(content)
                 f.close()
             subprocess.Popen("%s %s" % (interpreter, scriptpath), stdout=subprocess.PIPE, shell=True, env=env).stdout.read()
-        if physical and physicalprovider.type == 'ilo':
-            ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
-            ilo.pxe()
-            ilo.reset()
-        if physical and physicalprovider.type == 'oa':
-            oa=Oa(ipoa,physicalprovider.user,physicalprovider.password)
-            bladeid = oa.getid(name)
-            status = oa.status(bladeid)
-            if status == 'up':
-                oa.rebootpxe(bladeid)
-            else:
-                oa.startpxe(bladeid)
-        if not physical and create and virtualprovider.type == 'ovirt':
-            ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            if cloudinit:
-                ovirt.cloudinit(name, numinterfaces=numinterfaces, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, gateway=gateway, rootpw=rootpw, dns=dns1, dns1=dns1)
-            else:
-                ovirt.start(name)
-            ovirt.close()
-        if not physical and create and virtualprovider.type == 'kvirt':
-            kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            kvirt.start(name)
-            kvirt.close()
-        if not physical and create and virtualprovider.type == 'vsphere':
-            startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
-            os.popen(startcommand).read()
+        try:
+            if physical and physicalprovider.type == 'ilo':
+                ilo=Ilo(ipilo,physicalprovider.user,physicalprovider.password)
+                ilo.pxe()
+                ilo.reset()
+            if physical and physicalprovider.type == 'oa':
+                oa=Oa(ipoa,physicalprovider.user,physicalprovider.password)
+                bladeid = oa.getid(name)
+                status = oa.status(bladeid)
+                if status == 'up':
+                    oa.rebootpxe(bladeid)
+                else:
+                    oa.startpxe(bladeid)
+            if not physical and create and virtualprovider.type == 'ovirt':
+                ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+                if cloudinit:
+                    ovirt.cloudinit(name, numinterfaces=numinterfaces, ip1=ip1, subnet1=subnet1, ip2=ip2, subnet2=subnet2, ip3=ip3, subnet3=subnet3, ip4=ip4, subnet4=subnet4, gateway=gateway, rootpw=rootpw, dns=dns1, dns1=dns1)
+                else:
+                    ovirt.start(name)
+                ovirt.close()
+            if not physical and create and virtualprovider.type == 'kvirt':
+                kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                kvirt.start(name)
+                kvirt.close()
+            if not physical and create and virtualprovider.type == 'vsphere':
+                startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+                os.popen(startcommand).read()
+        except:
+            return 'VM created but they were some issues starting it. try it manually'
         if afterstart:
             env = os.environ
             env['vm_name'], env['vm_storagedomain'], env['vm_physicalprovider'], env['vm_virtualprovider'], env['vm_physical'], env['vm_cobblerprovider'], env['vm_foremanprovider'], env['vm_profile'], env['vm_ip1'], env['vm_mac1'], env['vm_ip2'], env['vm_mac2'], env['vm_ip3'], env['vm_mac3'], env['vm_ip4'], env['vm_mac4'], env['vm_ipilo'], env['vm_ipoa'], env['vm_iso'], env['vm_hostgroup'], env['vm_puppetclasses'], env['vm_parameters'], env['vm_createdby'], env['vm_createdwhen'], env['vm_price'], env['vm_unmanaged'], env['vm_status'], env['vm_create'] = name, nonone(storagedomain), nonone(physicalprovider), nonone(virtualprovider), nonone(physical), nonone(cobblerprovider), nonone(foremanprovider), nonone(profile), nonone(ip1), nonone(mac1), nonone(ip2), nonone(mac2), nonone(ip3), nonone(mac3), nonone(ip4), nonone(mac4), nonone(ipilo), nonone(ipoa), nonone(iso), nonone(hostgroup), nonone(puppetclasses), nonone(parameters), nonone(createdby), nonone(createdwhen), nonone(price), nonone(unmanaged), nonone(status), nonone(create)
