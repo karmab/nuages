@@ -3,7 +3,6 @@
 wrapper around the nuages REST api
 """
 
-import ast
 import ConfigParser
 import optparse
 import os
@@ -42,10 +41,12 @@ class Nuage:
             self.protocol = 'https'
         else:
             self.protocol = 'http'
-    def create(self, name, profile, storage=None, ip1=None, ip2=None, ip3=None, ip4=None, hostgroup=None, iso=None):
+    def create(self, profile, name=None, storage=None, ip1=None, ip2=None, ip3=None, ip4=None, hostgroup=None, iso=None):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
-        data = { "profile" : "/nuages/api/v1/profile/%s" % profile , "name" : name }
+        data = { "profile" : "/nuages/api/v1/profile/%s" % profile }
+        if name:
+            data['name']= name
         if ip1:
             data['ip1']= ip1
         if ip2:
@@ -477,7 +478,9 @@ if __name__ == '__main__':
         print "%s%s" % (baseurl, results)
         sys.exit(0)
     if create and profile:
-        name = checkargs(args)
+        name = None
+        if len(args) == 1:
+            name = args[0]
         profiles = []
         for prof in sorted(n.profiles(), key=lambda profile: profile['name']):
             profiles.append(prof['name'])
@@ -488,7 +491,10 @@ if __name__ == '__main__':
         if not details.autostorage and not storage:
             print "This profile requires a storagedomain to be set"
             sys.exit(0)
-        results = n.create(name=name, profile=profile, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
+        if not details.ipamprovider and not name:
+            print "This profile requires a name to be set"
+            sys.exit(0)
+        results = n.create(profile=profile, name=name, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
         print "VM %s created" % name
 
     if len(args) == 1:
