@@ -531,8 +531,8 @@ class VM(models.Model):
                 beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                 bestds = os.popen(beststoragecommand).read()
                 beststorage=bestds.strip()
-                self.storagedomain = beststorage
-                storagedomain = self.storagedomain
+            self.storagedomain = beststorage
+            storagedomain = self.storagedomain
         beforecreate, aftercreate, beforestart, afterstart, afterbuild = profile.hookbeforecreate, profile.hookaftercreate, profile.hookbeforestart, profile.hookafterstart, profile.hookafterbuild
         if name == '':
             if not ipamprovider:

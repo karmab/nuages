@@ -41,7 +41,7 @@ class Nuage:
             self.protocol = 'https'
         else:
             self.protocol = 'http'
-    def create(self, profile, name=None, storage=None, ip1=None, ip2=None, ip3=None, ip4=None, hostgroup=None, iso=None):
+    def create(self, profile, name=None, storage=None, ip1=None, ip2=None, ip3=None, ip4=None, hostgroup=None, iso=None, parameters=None, puppetclasses=None):
         host, port, user , password, protocol, headers = self.host, self.port, self.user, self.password, self.protocol, self.headers
         url = "%s://%s:%s/nuages/api/v1/vm" % (protocol, host, port)
         data = { "profile" : "/nuages/api/v1/profile/%s" % profile }
@@ -234,17 +234,18 @@ if __name__ == '__main__':
     creationgroup.add_option("-I", "--iso", dest="iso", type="string", help="Specify iso")
     creationgroup.add_option("-x", "--parameters", dest="parameters", type="string", help="Specify parameters, by spaces")
     creationgroup.add_option("-y", "--puppetclasses", dest="puppetclasses", type="string", help="Specify puppetclasses, separated by commas")
+    creationgroup.add_option("-z", "--storage", dest="storage", type="string", help="Specify storage, used when creating VM")
     parser.add_option_group(creationgroup)
     listinggroup = optparse.OptionGroup(parser, "Creation options")
     listinggroup.add_option('-L', '--listclients', dest="listclients", action='store_true', help='list available clients')
     listinggroup.add_option('-c', '--cobblerproviders', dest='cobblerproviders', action='store_true', help='list cobblerproviders')
     listinggroup.add_option('-f', '--foremanproviders', dest='foremanproviders', action='store_true', help='list foremanproviders')
     listinggroup.add_option('-l', '--profiles', dest='profiles', action='store_true', help='list available profiles')
-    listinggroup.add_option('-S', '--storage', dest='storages', action='store_true', help='list available storage')
+    listinggroup.add_option('-S', '--storages', dest='storages', action='store_true', help='list available storage')
     listinggroup.add_option('-v', '--virtualproviders', dest='virtualproviders', action='store_true', help='list virtual providers')
     listinggroup.add_option('-Q', '--physicalproviders', dest='physicalproviders', action='store_true', help='list physical providers')
     listinggroup.add_option('-V', '--vms', dest='vms', action='store_true', help='list all vms')
-    listinggroup.add_option("-z", "--virtualprovider", dest="virtualprovider", type="string", help="Specify virtualprovider")
+    listinggroup.add_option("-Z", "--virtualprovider", dest="virtualprovider", type="string", help="Specify virtualprovider")
     parser.add_option_group(listinggroup)
     stackgroup = optparse.OptionGroup(parser, "Stack options")
     stackgroup.add_option("-q", "--stack", dest="stack",type="string", help="specify Stack")
@@ -285,6 +286,7 @@ if __name__ == '__main__':
     iso = options.iso
     parameters = options.parameters
     puppetclasses = options.puppetclasses
+    storage = options.storage
     startstack = options.startstack
     stopstack = options.stopstack
     showstack = options.showstack
@@ -358,7 +360,7 @@ if __name__ == '__main__':
         sys.exit(0)
     if storages:
         for storage in sorted(n.storages(), key=lambda storage: storage['name']):
-            print storage['name']
+            print "name: %s provider: %s" % ( storage['name'], storage['provider'].replace("/nuages/api/v1/virtualprovider/",'') )
         sys.exit(0)
     if cobblerproviders:
         for cp in sorted(n.cobblerproviders()):
@@ -392,7 +394,7 @@ if __name__ == '__main__':
         for stack in sorted(allstacks):
             print stack
         sys.exit(0)
-    if profile:
+    if profile and not create:
         profiles = []
         for prof in sorted(n.profiles(), key=lambda profile: profile['name']):
             profiles.append(prof['name'])
@@ -488,15 +490,20 @@ if __name__ == '__main__':
             print "Profile %s not found" % profile
             sys.exit(0)
         details = n.profile(profile)
-        if not details.autostorage and not storage:
+        if not details['autostorage'] and not storage:
             print "This profile requires a storagedomain to be set"
             sys.exit(0)
-        if not details.ipamprovider and not name:
+        if details['autostorage'] and storage:
+            print "This profile will calculate the best storagedomain"
+        if not details['ipamprovider'] and not name:
             print "This profile requires a name to be set"
             sys.exit(0)
         results = n.create(profile=profile, name=name, storage=storage, ip1=ip1, ip2=ip2, ip3=ip3, ip4=ip4, hostgroup=hostgroup, iso=iso, parameters=parameters, puppetclasses=puppetclasses)
-        print "VM %s created" % name
-
+        if name:
+            print "VM %s created" % name
+        else:
+            lastvm = sorted(n.vms(),key=lambda vm: int(vm['id']))[-1]
+            print "VM %s created" % lastvm['name']
     if len(args) == 1:
         name =  args[0]
         results = n.vm(name)
