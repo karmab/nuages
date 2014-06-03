@@ -678,8 +678,8 @@ class VM(models.Model):
             #check if there is allready a system with this MAC
             if not cobblerduplicate and cobbler.macexists(macaddr):
                 if cobblerforce: 
-                    "delete all duplicates"
-                    print "prout"
+                    #"delete all duplicates"
+                    cobbler.removemacs(macaddr)
                 else:
                     #delete system from virtualization
                     if not physical and virtualprovider.type == 'ovirt':

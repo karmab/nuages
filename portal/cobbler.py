@@ -161,7 +161,7 @@ class Cobbler:
                 return True
         return False
 
-    def removemac(self,macs):
+    def removemacs(self,macs):
         s = self.s
         token = self.token
         for mac in macs:
