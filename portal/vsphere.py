@@ -222,6 +222,13 @@ class Vsphere:
 #       host = bestesx[min(bestesx.keys())]
 #       self.best = host
 
+    def exists(self, name):
+        rootFolder = self.rootFolder
+        vm = InventoryNavigator(rootFolder).searchManagedEntity("VirtualMachine", name)
+        if vm:
+            return True
+        else:
+            return False
 
     def create(self, name, numcpu, numinterfaces, diskmode1,disksize1, ds, memory, guestid, net1, net2=None, net3=None, net4=None, thin=False,distributed=False,disksize2=None,diskmode2=None,vnc=False,iso=None):
         memory = int(memory)
@@ -480,12 +487,6 @@ class Vsphere:
         return vms
 
     def getstorage(self):
-        dclist = {}
-        hostlist = {}
-        dslist = {}
-        clusterlist = {}
-        networklist = {}
-        guestlist = []
         rootFolder = self.rootFolder
         dc = self.dc
         clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
@@ -499,14 +500,7 @@ class Vsphere:
 
 
     def beststorage(self):
-        dclist = {}
-        hostlist = {}
-        dslist = {}
-        clusterlist = {}
-        networklist = {}
-        guestlist = []
         rootFolder = self.rootFolder
-        dc = self.dc
         clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
         bestds = ''
         bestsize = 0
@@ -520,7 +514,6 @@ class Vsphere:
 
     def getisos(self):
         rootFolder = self.rootFolder
-        dc = self.dc
         clu = InventoryNavigator(rootFolder).searchManagedEntity("ComputeResource",self.clu)
         isos=[]
         results = {}
@@ -601,6 +594,9 @@ if __name__ == '__main__':
     elif action == 'remove':
         name = sys.argv[7]
         print vsphere.remove(name)
+    elif action == 'exists':
+        name = sys.argv[7]
+        print vsphere.exists(name)
     elif action == 'getmacs':
         name = sys.argv[7]
         print vsphere.getmacs(name)

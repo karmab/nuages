@@ -58,6 +58,13 @@ class Ovirt:
         api.disconnect()
         self.api=None
 
+    def exists(self, name):
+        api=self.api
+        vm = api.vms.get(name=name)
+        if vm:
+            return True
+        return False
+
     def create(self, name, clu, numcpu, numinterfaces, netinterface, diskthin1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskthin2=None, disksize2=None,vnc=False):
         boot1,boot2='hd','network'
         if iso in ["","xx","yy"]:

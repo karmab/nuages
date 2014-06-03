@@ -46,6 +46,13 @@ class Kvirt:
         conn.close()
         self.conn=None
 
+    def exists(self,name):
+        conn = self.conn
+        try:
+            vm = conn.lookupByName(name)
+            return True
+        except:
+            return False
 
     def create(self, name, clu, numcpu, numinterfaces, netinterface, diskthin1, disksize1, diskinterface,memory, storagedomain, guestid, net1, net2=None, net3=None, net4=None, mac1=None, mac2=None,launched=True, iso=None, diskthin2=None, disksize2=None,vnc=False):
         if vnc:
@@ -347,7 +354,6 @@ class Kvirt:
         conn = self.conn
         vm = conn.lookupByName(name)
         status = {0:'down',1:'up'}
-        vm = conn.lookupByName(name)
         vmxml = vm.XMLDesc(0)
         root = ET.fromstring(vmxml)
         disks=[]
@@ -362,7 +368,6 @@ class Kvirt:
         vm.undefine()
         for storage in conn.listStoragePools():
             deleted = False
-            storagename = storage
             storage = conn.storagePoolLookupByName(storage)
             for stor in storage.listVolumes():
                 for disk in disks:

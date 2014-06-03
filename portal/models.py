@@ -625,6 +625,8 @@ class VM(models.Model):
         #VM CREATION
         if not physical and create and virtualprovider.type == 'ovirt':
             ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+            if ovirt.exists(name):
+                return "Machine %s allready exists within ovirt!" % (name)
             if template:
                 ovirt.createfromtemplate(name,template)
                 ovirt.macaddr = ovirt.getmacs(name)
@@ -633,9 +635,16 @@ class VM(models.Model):
             ovirt.close()
         if not physical and create and virtualprovider.type == 'kvirt':
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+            if kvirt.exists(name):
+                return "Machine %s allready exists within kvirt!" % (name)
             kvirt.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numinterfaces, netinterface=netinterface, disksize1=disksize1,diskthin1=diskthin1, disksize2=disksize2,diskthin2=diskthin2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
             kvirt.close()
         if not physical and create and virtualprovider.type == 'vsphere':
+            existscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'exists', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name)
+            existscommand = os.popen(existscommand).read()
+            exists = ast.literal_eval(existscommand)
+            if exists:
+                return "Machine %s allready exists within vsphere!" % (name)
             if template:
                 createfromtemplatecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s" % (settings.PWD,'createfromtemplate', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, template)
                 createfromtemplatecommand = os.popen(createfromtemplatecommand).read()
