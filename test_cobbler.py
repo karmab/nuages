@@ -15,5 +15,6 @@ cobblerprovider = profile.cobblerprovider
 cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
 c = Cobbler(cobblerhost,cobbleruser, cobblerpassword)
 #print c.checkprofile(profile)
-print c.classes()
+print c.removemac(['00:1a:4a:a8:01:3a'])
+#print c.classes()
 sys.exit(0)

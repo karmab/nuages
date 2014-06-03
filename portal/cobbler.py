@@ -1,13 +1,6 @@
 #-*- coding: utf-8 -*-
 
-import datetime
-import pycurl
-import os
-import simplejson
-import sys
-import time
 import xmlrpclib
-import StringIO
 
 #VM CREATION IN COBBLER
 
@@ -150,7 +143,6 @@ class Cobbler:
 
     def checkprofile(self,name):
         s = self.s
-        token = self.token
         for prof in s.get_profiles():
             if prof['name'] == name:
                 return True
@@ -158,17 +150,29 @@ class Cobbler:
 
     def exists(self,name):
         s = self.s
-        token = self.token
-        system = s.find_system({"name":name})
-        if system !=[]:
+        if s.find_system({"name":name}) !=[]:
             return True
         return False
+
+    def macexists(self,macs):
+        s = self.s
+        for mac in macs:
+            if s.find_system({"mac_address":mac}) !=[]:
+                return True
+        return False
+
+    def removemac(self,macs):
+        s = self.s
+        token = self.token
+        for mac in macs:
+            for name in s.find_system({"mac_address":mac}):
+                s.remove_system(name,token)
+        s.sync(token)
 
     def remove(self,name):
         s = self.s
         token = self.token
-        system = s.find_system({"name":name})
-        if system ==[]:
+        if s.find_system({"name":name}) ==[]:
             print "%s not found in Cobbler" % (name)
         else:
             s.remove_system(name,token)

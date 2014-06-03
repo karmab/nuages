@@ -395,6 +395,8 @@ class Profile(models.Model):
     foremanenv        = models.CharField(max_length=40, blank=True)
     cobbler           = models.BooleanField(default=False)
     cobblerparameters = models.BooleanField(default=False)
+    cobblerduplicate  = models.BooleanField(default=False)
+    cobblerforce      = models.BooleanField(default=False)
     iso               = models.BooleanField(default=False)
     hide              = models.BooleanField(default=True)
     console           = models.BooleanField(default=False)
@@ -516,7 +518,7 @@ class VM(models.Model):
         self.createdwhen = timezone.now()
         name, storagedomain, physical, profile, ip1, mac1, ip2, mac2, ip3, mac3, ip4, mac4, puppetclasses, parameters, createdby, iso, ipilo, ipoa, hostgroup, createdwhen, price, unmanaged, status, create = self.name, self.storagedomain, self.physical, self.profile, self.ip1, self.mac1, self.ip2, self.mac2, self.ip3, self.mac3, self.ip4, self.mac4, self.puppetclasses, self.parameters, self.createdby, self.iso, self.ipilo, self.ipoa, self.hostgroup, self.createdwhen, self.price, self.unmanaged, self.status, self.create
         physicalprovider, virtualprovider, cobblerprovider, foremanprovider, ipamprovider = profile.physicalprovider, profile.virtualprovider, profile.cobblerprovider, profile.foremanprovider, profile.ipamprovider
-        clu, guestid, memory, numcpu, disksize1, diskthin1, disksize2, diskthin2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, gateway, netinterface, dns, foreman, cobbler, foremanparameters, cobblerparameters, vnc , nextserver, template, cloudinit, rootpw, dns1, requireip = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskthin1, profile.disksize2, profile.diskthin2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.gateway, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template, profile.cloudinit, profile.rootpw, profile.dns1, profile.requireip
+        clu, guestid, memory, numcpu, disksize1, diskthin1, disksize2, diskthin2, diskinterface, numinterfaces, net1, subnet1, net2, subnet2, net3, subnet3, net4, subnet4, gateway, netinterface, dns, foreman, cobbler, cobblerduplicate, cobblerforce, foremanparameters, cobblerparameters, vnc , nextserver, template, cloudinit, rootpw, dns1, requireip = profile.clu, profile.guestid, profile.memory, profile.numcpu, profile.disksize1, profile.diskthin1, profile.disksize2, profile.diskthin2, profile.diskinterface, profile.numinterfaces, profile.net1, profile.subnet1, profile.net2, profile.subnet2, profile.net3, profile.subnet3, profile.net4, profile.subnet4, profile.gateway, profile.netinterface, profile.dns, profile.foreman, profile.cobbler, profile.cobblerduplicate, profile.cobblerforce, profile.foremanparameters, profile.cobblerparameters, profile.vnc, profile.nextserver, profile.template, profile.cloudinit, profile.rootpw, profile.dns1, profile.requireip
         if storagedomain == None and profile.autostorage:
             #RETRIEVE BEST STORAGE DOMAIN
             if virtualprovider.type == 'ovirt':
@@ -673,6 +675,25 @@ class VM(models.Model):
                 cobblerprofile=profile.cobblerprofile
             cobblerhost, cobbleruser, cobblerpassword = cobblerprovider.host, cobblerprovider.user, cobblerprovider.password
             cobbler=Cobbler(cobblerhost, cobbleruser, cobblerpassword)
+            #check if there is allready a system with this MAC
+            if not cobblerduplicate and cobbler.macexists(macaddr):
+                if cobblerforce: 
+                    "delete all duplicates"
+                    print "prout"
+                else:
+                    #delete system from virtualization
+                    if not physical and virtualprovider.type == 'ovirt':
+                        ovirt=Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
+                        ovirt.remove(name)
+                        ovirt.close()
+                    if not physical and virtualprovider.type == 'kvirt':
+                        kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
+                        kvirt.remove(name)
+                        kvirt.close()
+                    if not physical and virtualprovider.type == 'vsphere':
+                        removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
+                        os.popen(removecommand).read()
+                    return 'VM not created because of MAC duplicates on cobbler s side'
             if cobblerparameters:
                 cobblerparameters = parameters
             if ip1:

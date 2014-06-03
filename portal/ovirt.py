@@ -1,12 +1,9 @@
 #-*- coding: utf-8 -*-
 
-import datetime
-import os
 import sys
 import time
 from ovirtsdk.api import API
 from ovirtsdk.xml import params
-import StringIO
 
 MB = 1024*1024
 GB = 1024*MB
