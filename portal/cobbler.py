@@ -167,6 +167,7 @@ class Cobbler:
         for mac in macs:
             for name in s.find_system({"mac_address":mac}):
                 s.remove_system(name,token)
+                print "%s sucessfully killed in Cobbler as duplicate" % (name)
         s.sync(token)
 
     def remove(self,name):
