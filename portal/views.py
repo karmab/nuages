@@ -92,6 +92,15 @@ def checkstorage(numvms,virtualprovider,disksize1,disksize2,storagedomain):
             return "Not enough space on storagedomain %s.%s GB needed !"  % (storagedomain,size)
         else:
             return 'OK'
+    elif virtualprovider.type =='vsphere2':
+	vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+        storageinfo = vsphere.getstorage()
+        vsphere.close()
+        remaining = int(storageinfo[storagedomain][1]) - size
+        if remaining <=0:
+            return "Not enough space on storagedomain %s.%s GB needed !"  % (storagedomain,size)
+        else:
+            return 'OK'
 
 def customlogin(request, *args, **kwargs):
     if request.method == "POST":
@@ -241,6 +250,7 @@ def profiles(request):
 
 #@login_required
 def storage(request):
+    logging.debug('prout')
     username          = request.user.username
     username          = User.objects.filter(username=username)[0]
     if request.is_ajax() and request.method == 'POST':
@@ -287,9 +297,21 @@ def storage(request):
                     storage.save()
             storageinfo = json.dumps(storageinfo)
             return HttpResponse(storageinfo,mimetype='application/json')
+        elif virtualprovider.type == 'vsphere2':
+	    vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+            storageinfo = vsphere.getstorage()
+            vsphere.close()
+            #add storage domains to DB if they dont exist
+            for stor in storageinfo.keys():
+                if not Storage.objects.filter(name=stor).exists():
+                    datacenter = storageinfo[stor][2]
+                    storage=Storage(name=stor,type=virtualprovider.type,provider=virtualprovider,datacenter=datacenter)
+                    storage.save()
+            storageinfo = json.dumps(storageinfo)
+            return HttpResponse(storageinfo,mimetype='application/json')
     else:
         if username.is_staff:
-            vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+            vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt')|Q(type='vsphere2'))
         else:
             usergroups = []
             groups            = username.groups
@@ -312,7 +334,7 @@ def storage(request):
             vquery = Q(name=vproviderslist[0])
             for provider in vproviderslist:
                 vquery = vquery|Q(name=provider)
-            vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+            vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt')|Q(type='vsphere2'))
             vproviders=vproviders.filter(vquery)
         if not vproviders:
             information = { 'title':'Missing elements' , 'details':'Create Virtual providers first...' }
@@ -367,6 +389,10 @@ def profileinfo(request):
                     beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                     bestds = os.popen(beststoragecommand).read()
                     storages=[bestds.strip()]
+                elif type == 'vsphere2':
+ 		    vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                    storages = [vsphere.beststorage()]
+                    vsphere.close()
                 else:
                     storages=["N/A"]
             else:
@@ -380,7 +406,7 @@ def profileinfo(request):
             type = 'iso'
             specific=[]
             ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
-            isos = ovirt.getisos()
+            isos  = ovirt.getisos()
             ovirt.close()
             for iso in isos:
                 specific.append(iso)
@@ -388,7 +414,7 @@ def profileinfo(request):
             type = 'iso'
             specific=[]
             kvirt = Kvirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,protocol='ssh')
-            isos = kvirt.getisos()
+            isos  = kvirt.getisos()
             kvirt.close()
             for iso in isos:
                 specific.append(iso)
@@ -396,7 +422,15 @@ def profileinfo(request):
             type = 'iso'
             isocommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'getisos', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
             isocommand = os.popen(isocommand).read()
-            isos = ast.literal_eval(isocommand)
+            isos       = ast.literal_eval(isocommand)
+            for iso in isos:
+                specific.append(iso)
+        if type =='vsphere2' and profile.iso:
+            type      = 'iso'
+            specific  = []
+	    vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+            isos      = vsphere.getisos()
+            vsphere.close()
             for iso in isos:
                 specific.append(iso)
         results = [type,profile.hide ,provider,specific,profile.foreman, profile.cobbler,profile.numinterfaces,storages]
@@ -581,6 +615,15 @@ def yourvms(request):
                 status = allvms[virtualprovider.name][name]
             else:
                 status = 'NotFound'
+        if not vm.physical and virtualprovider.type == 'vsphere2':
+            if not allvms.has_key(virtualprovider.name):
+                vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                allvms[virtualprovider.name] = vsphere.allvms()
+                vsphere.close()
+            if allvms[virtualprovider.name].has_key(name):
+                status = allvms[virtualprovider.name][name]
+            else:
+                status = 'NotFound'
         if not vm.physical and virtualprovider.type == 'fake':
             status = "N/A"
         vm.status = status
@@ -619,9 +662,15 @@ def allvms(request):
             vms= ast.literal_eval(results)
             for vm in vms:
                 resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
+        if virtualprovider.type == 'vsphere2':
+	    vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+            vms       = vsphere.allvms()
+            vsphere.close()
+            for vm in vms:
+                resultvms.append( {'name':vm, 'status':vms[vm],'virtualprovider':virtualprovidername } )
         return render(request, 'allvms2.html', { 'vms': resultvms, 'console' : True , 'username': username } )
     else:
-        vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+        vproviders=VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt')|Q(type='vsphere2'))
         return render(request, 'allvms.html', { 'vproviders' : vproviders , 'username': username } )
 
 
@@ -660,7 +709,7 @@ def console(request):
         else:
             sockprotocol = 'ws'
         pwd = settings.PWD
-        if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt' :
+        if virtualprovider.type == 'ovirt' or virtualprovider.type == 'kvirt':
             if virtualprovider.type == 'ovirt':
                 ovirt = Ovirt(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.ssl)
                 host, port, ticket, protocol = ovirt.console(vmname)
@@ -675,6 +724,29 @@ def console(request):
                 if not host:
                     information = { 'title':'Console not configured' , 'details':'No display found' }
                     return render(request, 'information.html', { 'information' : information , 'default' : default } )
+            if virtualprovider.type == 'vsphere2':
+		vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                host, port = vsphere.console(vmname)
+                #vsphere.close()
+            	if host != None and  checkconn(host,int(port)):
+                	pwd = settings.PWD
+                	websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
+                	os.popen(websockifycommand)
+                	information = { 'host' : sockhost , 'port' : sockport  }
+                	vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
+                	return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default  } )
+		else:
+			if not virtualprovider.sha1 or not virtualprovider.fqdn:
+				virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
+				if fqdn == None or sha1 == None:
+					information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to admin" }
+					return render(request, 'information.html', { 'information' : information , 'default' : default } )
+				virtualprovider.save()
+			fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
+			consoleurl = vsphere.html5console(vmname,fqdn,sha1)
+			print consoleurl
+			return redirect(consoleurl)
+
             information = { 'host' : sockhost , 'port' : sockport , 'protocol': sockprotocol, 'ticket' : ticket , 'keyboard' : keyboard }
             vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
             if protocol =="spice" and virtualprovider.type == 'ovirt':
@@ -695,29 +767,51 @@ def console(request):
                 os.popen(websockifycommand)
                 return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default } )
         elif virtualprovider.type == 'vsphere':
-            consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
-            consoledetails = os.popen(consolecommand).read()
-            host,port = ast.literal_eval(consoledetails)
-            if host != None and  checkconn(host,int(port)):
-                pwd = settings.PWD
-                websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
-                os.popen(websockifycommand)
-                information = { 'host' : sockhost , 'port' : sockport  }
-                vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
-                return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default  } )
-            else:
-                if not virtualprovider.sha1 or not virtualprovider.fqdn:
-                    virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
-                    if fqdn == None or sha1 == None:
-                        information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to admin" }
-                        return render(request, 'information.html', { 'information' : information , 'default' : default } )
-                    virtualprovider.save()
-                fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
-                pwd = settings.PWD
-                consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (settings.PWD,'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
-                consoleurl = os.popen(consolecommand).read().strip()
-                print consoleurl
-                return redirect(consoleurl)
+		consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname )
+		consoledetails = os.popen(consolecommand).read()
+		host,port = ast.literal_eval(consoledetails)
+		if host != None and  checkconn(host,int(port)):
+                	pwd = settings.PWD
+                	websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
+                	os.popen(websockifycommand)
+                	information = { 'host' : sockhost , 'port' : sockport  }
+                	vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
+                	return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default  } )
+            	else:
+			if not virtualprovider.sha1 or not virtualprovider.fqdn:
+                    		virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
+                    		if fqdn == None or sha1 == None:
+                        		information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to admin" }
+                        		return render(request, 'information.html', { 'information' : information , 'default' : default } )
+                    		virtualprovider.save()
+                		fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
+                		pwd = settings.PWD
+                		consolecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s" % (settings.PWD,'html5console', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , vmname, fqdn, sha1 )
+                		consoleurl = os.popen(consolecommand).read().strip()
+                		print consoleurl
+                		return redirect(consoleurl)
+	elif virtualprovider.type == 'vsphere2':
+		vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                host, port = vsphere.console(vmname)
+                vsphere.close()
+            	if host != None and  checkconn(host,int(port)):
+                	pwd = settings.PWD
+                	websockifycommand = "websockify %s -D --timeout=30 %s:%s" % (sockport,host,port)
+                	os.popen(websockifycommand)
+                	information = { 'host' : sockhost , 'port' : sockport  }
+                	vm = {'name': vmname , 'virtualprovider' : virtualprovider , 'status' : 'up' }
+                	return render(request, 'vnc.html', { 'information' : information ,  'vm' : vm , 'username': username , 'default' : default  } )
+		else:
+			if not virtualprovider.sha1 or not virtualprovider.fqdn:
+				virtualprovider.fqdn, virtualprovider.sha1 = getvspherecert(virtualprovider.host)
+				if fqdn == None or sha1 == None:
+					information = { 'title':'Wrong Console' , 'details':"Missing python-ssl and python-crypto modules. Report to admin" }
+					return render(request, 'information.html', { 'information' : information , 'default' : default } )
+				virtualprovider.save()
+			fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
+			consoleurl = vsphere.html5console(vmname,fqdn,sha1)
+			print consoleurl
+			return redirect(consoleurl)
     else:
         information = { 'title':'Wrong Console' , 'details':"something went wrong. Report to sysadmin" }
         return render(request, 'information.html', { 'information' : information  } )
@@ -1252,6 +1346,10 @@ def findvm(request):
                 macscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'getmacs', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu, name)
                 macscommand = os.popen(macscommand).read()
                 macs = ast.literal_eval(macscommand)
+            if virtualprovider.type =='vsphere2':
+		vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                macs = vsphere.getmacs(name)
+                vsphere.close()
         results.append(macs)
         if physical:
             physicalprovider = profile.physicalprovider
@@ -1273,7 +1371,7 @@ def quickvms(request):
 @login_required
 def templateprofile(request):
     username          = User.objects.get(username=request.user.username)
-    #vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+    #vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt')|Q(type='vsphere2'))
     #return render(request, 'profiletemplate.html', { 'vproviders' : vproviders, 'username': username } )
     if not username.is_staff:
         information = { 'title':'Nuages Restricted Information' , 'details':'Restricted access,sorry....' }
@@ -1282,7 +1380,7 @@ def templateprofile(request):
         templates = ['aa', 'bb', 'cc']
         return render(request, 'templateprofile.html', { 'templates': templates, 'username': username  } )
     else:
-        vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt'))
+        vproviders = VirtualProvider.objects.filter(Q(type='ovirt')|Q(type='vsphere')|Q(type='kvirt')|Q(type='vsphere2'))
         return render(request, 'templateprofile.html', { 'vproviders' : vproviders, 'username': username } )
 
 @login_required
@@ -1306,6 +1404,12 @@ def templateslist(request):
         gettemplatescommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'gettemplates', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
         gettemplatescommand = os.popen(gettemplatescommand).read()
         results = ast.literal_eval(gettemplatescommand)
+        results = json.dumps(results)
+        return HttpResponse(results, mimetype='application/json')
+    elif virtualprovider.type == 'vsphere2':
+	vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+        results = vsphere.gettemplates()
+        vsphere.close()
         results = json.dumps(results)
         return HttpResponse(results, mimetype='application/json')
 
@@ -1557,6 +1661,10 @@ def stacks(request):
                 beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                 bestds = os.popen(beststoragecommand).read()
                 storagedomain = bestds.strip()
+            elif virtualprovider.type == 'vsphere2':
+		vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                storagedomain = vsphere.beststorage()
+                vsphere.close()
             if name == '' and not ipamprovider:
                     failure   = True
             #MAKE SURE VM DOESNT ALLREADY EXISTS IN DB WITH THIS SAME VIRTUALPROVIDER

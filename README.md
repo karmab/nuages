@@ -51,6 +51,7 @@ Requisites
     python-lxml            from epel ( provides XML support for REST api, if you re crazy enough)
     ovirt-engine-sdk package from epel (only if you will connect to ovirt/rhev)
     jython and vsphere api libraries ( only if you will connect to vcenter/esx)
+    pyvmomi api rpm ( only if you will connect to vcenter/esx, as an alternative to jython )
     libvirt-python and python-lxml ( only if you will connect to libvirt hosts)
     python websockify from epel
     paramiko ( to connect to ILO through ssh)
@@ -108,6 +109,12 @@ VMware VI (vSphere) Java API Installation
         sudo cp vijava$version.jar $JAVA_HOME/lib/ext
 
         WARNING: latest vijava55b20130927.zip seems to be giving problem with vpshere5.5 so you rather wanna use vijava5120121125.zip
+
+VMware VI (vSphere) Python API Installation
+------------
+
+    	from skynet:
+    	yum -y localinstall python-pyvmomi-5.5.0.2014.1.1-3.el6.noarch.rpm
         
 Basic Postgresql setup (Optional)
 ---------

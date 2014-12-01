@@ -39,6 +39,10 @@ try:
     from portal.oa import Oa
 except:
     print "Missing python-paramiko package for oa support"
+try:
+    from portal.vsphere2 import Vsphere
+except:
+    print "Missing vsphere package for vsphere support"
 import socket
 
 
@@ -90,6 +94,10 @@ def vmstart(name,virtualprovider):
             startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
             startinfo    = os.popen(startcommand).read()
             results      = json.dumps(startinfo)
+        elif virtualprovider.type == 'vsphere2':
+            vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+            results = vsphere.start(name)
+            vsphere.close()
         return results
     except:
         return "VM could not be started"
@@ -107,6 +115,10 @@ def vmstop(name,virtualprovider):
         stopcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'stop', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
         stopinfo    = os.popen(stopcommand).read()
         results     = json.dumps(stopinfo)
+    elif virtualprovider.type == 'vsphere2':
+	vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+	results = vsphere.stop(name)
+	vsphere.close()
     return results
 
 def vmremove(name,virtualprovider):
@@ -121,6 +133,10 @@ def vmremove(name,virtualprovider):
     elif virtualprovider and virtualprovider.type == 'vsphere':
         removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name )
         os.popen(removecommand).read()
+    elif virtualprovider and virtualprovider.type == 'vsphere2':
+	vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+        vsphere.remove(name)
+        vsphere.close()
 
 def vmstatus(name,virtualprovider):
     if virtualprovider.type == 'ovirt':
@@ -135,6 +151,10 @@ def vmstatus(name,virtualprovider):
         statuscommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'status', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
         statusinfo    = os.popen(statuscommand).read()
         results      = json.dumps(statusinfo)
+    elif virtualprovider and virtualprovider.type == 'vsphere2':
+	vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+	results   =  vsphere.status(name)
+        vsphere.close()
     return results
 
 def internalname(profile):
@@ -277,7 +297,7 @@ class VirtualProvider(models.Model):
     port                = models.IntegerField(default=VIRTUALPORT)
     user                = models.CharField(max_length=60)
     password            = models.CharField(max_length=20)
-    type                = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere'),('kvirt', 'libvirt'),('fake', 'fake') ))
+    type                = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere'),('vsphere2', 'vsphere2'),('kvirt', 'libvirt'),('fake', 'fake') ))
     ssl                 = models.BooleanField(default=True)
     clu                 = models.CharField(max_length=50,blank=True)
     datacenter          = models.CharField(max_length=50, blank=True)
@@ -301,6 +321,10 @@ class VirtualProvider(models.Model):
         elif self.type == 'vsphere':
             jythoncommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'getstorage', self.host, self.user, self.password , self.datacenter, self.clu )
             storageinfo = os.popen(jythoncommand).read()
+        elif self.type == 'vsphere2':
+            vsphere   = Vsphere(virtualprovider.host,virtualprovider.port,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+            storageinfo = vsphere.getstorage()
+            vsphere.close()
         return storageinfo
     
 class ForemanProvider(models.Model):
@@ -335,7 +359,7 @@ class CobblerProvider(models.Model):
 
 class Storage(models.Model):
     name              = models.CharField(max_length=80)
-    type              = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere' )))
+    type              = models.CharField(max_length=20, default='ovirt',choices=( ('ovirt', 'ovirt'),('vsphere', 'vsphere' ), ('vsphere2', 'vsphere2' )))
     provider          = models.ForeignKey(VirtualProvider)
     datacenter        = models.CharField(max_length=50,blank=True)
     def __unicode__(self):
@@ -467,9 +491,15 @@ class Profile(models.Model):
                         raise ValidationError("Invalid template. Use of the following ones:%s" % (','.join(templates) ) )
             if virtualprovider.type == 'vsphere':
                 if self.template != '':
-                    gettemplatescommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'gettemplates', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
+		    gettemplatescommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD, 'gettemplates', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                     gettemplatescommand = os.popen(gettemplatescommand).read()
                     templates = ast.literal_eval(gettemplatescommand)
+                    if self.template not in templates:
+                        raise ValidationError("Invalid template. Use of the following ones:%s" % (','.join(templates) ) )
+            if virtualprovider.type == 'vsphere2':
+                if self.template != '':
+		    vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+		    templates = vsphere.gettemplates()
                     if self.template not in templates:
                         raise ValidationError("Invalid template. Use of the following ones:%s" % (','.join(templates) ) )
         if self.fulldelete and not self.deletable:
@@ -532,6 +562,10 @@ class VM(models.Model):
                 beststoragecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s" % (settings.PWD,'beststorage', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu)
                 bestds = os.popen(beststoragecommand).read()
                 beststorage=bestds.strip()
+            elif virtualprovider.type == 'vsphere2':
+		vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                beststorage = vsphere.beststorage()
+                vsphere.close()
             self.storagedomain = beststorage
             storagedomain = self.storagedomain
         beforecreate, aftercreate, beforestart, afterstart, afterbuild = profile.hookbeforecreate, profile.hookaftercreate, profile.hookbeforestart, profile.hookafterstart, profile.hookafterbuild
@@ -654,6 +688,16 @@ class VM(models.Model):
                 createcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s %s %s %s %s %s %s %s \'%s' '%s' '%s' '%s' '%s' '%s' '%s' '%s'" % (settings.PWD,'create', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu , name, numcpu, numinterfaces,  disksize1 , diskthin1, disksize2 , diskthin2, storagedomain, memory, guestid, vnc, iso, net1, net2, net3, net4)
                 vspheremacaddr = os.popen(createcommand).read()
                 vspheremacaddr = ast.literal_eval(vspheremacaddr)
+        if not physical and create and virtualprovider.type == 'vsphere2':
+	    vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+            if vsphere.exists(name):
+                return "Machine %s allready exists within vsphere!" % (name)
+            if template:
+                vsphere.createfromtemplate(name,template)
+                vsphere.macaddr = vsphere.getmacs(name)
+            else:
+                vsphere.create(name=name, clu=clu, numcpu=numcpu, numinterfaces=numintrfaces, netinterface=netinterface, disksize1=disksize1,diskthin1=diskthin1, disksize2=disksize2,diskthin2=diskthin2, diskinterface=diskinterface, memory=memory, storagedomain=storagedomain, guestid=guestid, net1=net1, net2=net2, net3=net3, net4=net4, mac1=mac1, mac2=mac2, iso=iso, vnc=vnc)
+            vsphere.close()
         if cobbler and cobblerprovider:
             if not physical and create and virtualprovider.type == 'ovirt':
                 macaddr=ovirt.macaddr
@@ -661,6 +705,8 @@ class VM(models.Model):
                 macaddr=kvirt.macaddr
             if not physical and create and virtualprovider.type == 'vsphere':
                 macaddr=vspheremacaddr
+            if not physical and create and virtualprovider.type == 'vsphere2':
+                macaddr=vsphere.macaddr
             if not physical and virtualprovider.type == 'fake':
                 if mac1:
                     macaddr=[mac1]
@@ -701,6 +747,10 @@ class VM(models.Model):
                     if not physical and virtualprovider.type == 'vsphere':
                         removecommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'remove', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                         os.popen(removecommand).read()
+                    if not physical and virtualprovider.type == 'vsphere2':
+			vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                        vsphere.remove(name)
+                        vsphere.close()
                     return 'VM not created because of MAC duplicates on cobbler s side'
             if cobblerparameters:
                 cobblerparameters = parameters
@@ -770,6 +820,10 @@ class VM(models.Model):
             if not physical and create and virtualprovider.type == 'vsphere':
                 startcommand = "/usr/bin/jython %s/portal/vsphere.py %s %s %s %s %s %s %s" % (settings.PWD,'start', virtualprovider.host, virtualprovider.user, virtualprovider.password , virtualprovider.datacenter, virtualprovider.clu ,name )
                 os.popen(startcommand).read()
+            if not physical and create and virtualprovider.type == 'vsphere2':
+		vsphere   = Vsphere(virtualprovider.host,virtualprovider.user,virtualprovider.password,virtualprovider.datacenter, virtualprovider.clu)
+                vsphere.start(name)
+                vsphere.close()
         except:
             return 'VM created but they were some issues starting it. try it manually'
         if afterstart:

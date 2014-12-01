@@ -478,7 +478,7 @@ class Vsphere:
         return vmurl
 
     def allvms(self):
-        translation = {'poweredOff':'down', 'poweredOn':'up'}
+        translation = {'poweredOff':'down', 'poweredOn':'up', 'suspended' : 'suspended'}
         rootFolder = self.rootFolder
         vms = {}
         vmlist= InventoryNavigator(rootFolder).searchManagedEntities("VirtualMachine")
