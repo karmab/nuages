@@ -744,7 +744,6 @@ def console(request):
 				virtualprovider.save()
 			fqdn, sha1 = virtualprovider.fqdn, virtualprovider.sha1
 			consoleurl = vsphere.html5console(vmname,fqdn,sha1)
-			print consoleurl
 			return redirect(consoleurl)
 
             information = { 'host' : sockhost , 'port' : sockport , 'protocol': sockprotocol, 'ticket' : ticket , 'keyboard' : keyboard }
